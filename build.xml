@@ -279,9 +279,9 @@
    description="Create binary distribution">
 
     <!-- Copy documentation subdirectory -->
-    <copy    todir="${dist.home}/docs">
+    <!-- copy    todir="${dist.home}/docs">
       <fileset dir="${distv.home}/docs"/>
-    </copy>
+    </copy -->
 
     <!-- Copy stuff into dist-version -->
     <copy file="${build.home}/lib/${app.name}.jar" todir="${distv.home}" />
@@ -290,12 +290,12 @@
     <copy file="${oaicatnewton.jar}" todir="${distv.home}" />
     <copy file="${oaicatnewton.jar}" todir="${dist.home}" />
 -->
-    <copy    todir="${distv.home}">
+    <!-- copy    todir="${distv.home}">
       <fileset dir="docs"/>
-    </copy>
-    <copy    todir="${dist.home}">
+    </copy -->
+    <!-- copy    todir="${dist.home}">
       <fileset dir="docs"/>
-    </copy>
+    </copy -->
     <copy    todir="${distv.home}/src">
       <fileset dir="src" excludes="test/**,**/*.BAK"/>
     </copy>
