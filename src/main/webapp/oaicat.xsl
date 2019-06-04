@@ -14,7 +14,7 @@
   <xsl:template match="/oai:OAI-PMH">
     <html>
       <head>
-        <title><xsl:value-of select="oai:request/@verb"/> Response [OAICat]</title>
+        <title><xsl:value-of select="oai:request/@verb"/> Response ´FIZ-OAI-Provider</title>
         <style type="text/css">
           <xsl:comment>
             ADDRESS {
@@ -77,14 +77,14 @@
             <td bgcolor="#669933">
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
-                  <td width="50%"><a href="/oaicat/index.html"><img src="/oaicat/banner01.gif" alt="OAICat - OAI Repository Framework" width="388" height="120" border="0"/></a></td>
-                  <td width="50%" align="right"><a href="http://www.oclc.org/research/"><img src="/oaicat/banner02.gif" alt="A Project of OCLC Research" width="202" height="120" border="0"/></a></td>
+                  <td width="50%"><a href="/fiz-oai-provider/index.html"><img src="/fiz-oai-provider/banner01.gif" alt="OAICat - OAI Repository Framework" width="388" height="120" border="0"/></a></td>
+                  <td width="50%" align="right"><a href="http://www.oclc.org/research/"><img src="/fiz-oai-provider/banner02.gif" alt="A Project of OCLC Research" width="202" height="120" border="0"/></a></td>
                 </tr>
               </table>
             </td>
           </tr>
           <tr valign="top">
-            <td><a href="/oaicat/identify.html">Identify</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/oaicat/getRecord.html">GetRecord</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/oaicat/listIdentifiers.html">ListIdentifiers</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text>(<a href="/oaicat/listIdentifiersResumption.html">Resumption</a>)<xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/oaicat/listMetadataFormats.html">ListMetadataFormats</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/oaicat/listRecords.html">ListRecords</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text>(<a href="/oaicat/listRecordsResumption.html">Resumption</a>)<xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/oaicat/listSets.html">ListSets</a></td>
+            <td><a href="/fiz-oai-provider/identify.html">Identify</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/getRecord.html">GetRecord</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listIdentifiers.html">ListIdentifiers</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text>(<a href="/fiz-oai-provider/listIdentifiersResumption.html">Resumption</a>)<xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listMetadataFormats.html">ListMetadataFormats</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listRecords.html">ListRecords</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text>(<a href="/fiz-oai-provider/listRecordsResumption.html">Resumption</a>)<xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listSets.html">ListSets</a></td>
           </tr>
           <tr valign="top">
             <td bgcolor="#cccccc">
@@ -100,10 +100,10 @@
             <td bgcolor="#F9DD50" height="10"></td>
           </tr>
           <tr valign="top">
-            <td><a href="http://www.oclc.org/research/software/oai/cat.shtm"><img border="0" src="http://alcme.oclc.org/oaicat/oaicat_icon.gif" alt="OAICat - An OAI-PMH v2 Repository Framework" width="120" height="60"/></a>&#160;&#160;&#160;&#160;<a href="http://www.openarchives.org"><img border="0" src="http://www.openarchives.org/images/OA100.gif"/></a></td>
+            <td><a href="http://www.oclc.org/research/software/oai/cat.shtm"><img border="0" src="/fiz-oai-provider/oaicat_icon.gif" alt="OAICat - An OAI-PMH v2 Repository Framework" width="120" height="60"/></a>&#160;&#160;&#160;&#160;<a href="http://www.openarchives.org"><img border="0" src="http://www.openarchives.org/images/OA100.gif"/></a></td>
           </tr>
           <tr valign="top">
-            <td><address><a href="mailto:jyoung@oclc.org">Jeff Young</a></address></td>
+            <td><address><a href="mailto:stefan.hofmann@fiz-karlsruhe.de">Stefan Hofmann</a></address></td>
           </tr>
         </table>
       </body>
@@ -190,7 +190,7 @@
   </xsl:template>
 
   <xsl:template match="oai:setSpec">
-    <td width="150"><strong><a><xsl:attribute name="href">/oaicat/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></strong></td>
+    <td width="150"><strong><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></strong></td>
   </xsl:template>
 
   <xsl:template match="oai:setName">
@@ -227,14 +227,14 @@
 
   <xsl:template match="oai:resumptionToken">
     <tr valign="top">
-      <td>ResumptionToken: <a><xsl:attribute name="href">/oaicat/OAIHandler?verb=<xsl:value-of select="//oai:OAI-PMH/oai:request/@verb"/>&amp;resumptionToken=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+      <td>ResumptionToken: <a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=<xsl:value-of select="//oai:OAI-PMH/oai:request/@verb"/>&amp;resumptionToken=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:identifier">
     <tr valign="top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
-      <td><a><xsl:attribute name="href">/oaicat/OAIHandler?verb=GetRecord&amp;metadataPrefix=<xsl:choose><xsl:when test="/oai:OAI-PMH/oai:request/@metadataPrefix"><xsl:value-of select="/oai:OAI-PMH/oai:request/@metadataPrefix"/></xsl:when><xsl:otherwise>oai_dc</xsl:otherwise></xsl:choose>&amp;identifier=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+      <td><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=GetRecord&amp;metadataPrefix=<xsl:choose><xsl:when test="/oai:OAI-PMH/oai:request/@metadataPrefix"><xsl:value-of select="/oai:OAI-PMH/oai:request/@metadataPrefix"/></xsl:when><xsl:otherwise>oai_dc</xsl:otherwise></xsl:choose>&amp;identifier=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
@@ -314,7 +314,7 @@
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td>
         <!--
-        <a href="/oaicat/index.html"><img src="/oaicat/oaicat_icon.gif" alt="Testing"/></a>
+        <a href="/fiz-oai-provider/index.html"><img src="/fiz-oai-provider/oaicat_icon.gif" alt="Testing"/></a>
         -->
         <a>
           <xsl:attribute name="href">
@@ -348,7 +348,7 @@
 
   <xsl:template match="oai:metadataFormat">
     <table width="100%" border="0" cellspacing="0" cellpadding="4">
-      <tr valign="top"><td width="150"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href">/oaicat/OAIHandler?verb=ListRecords&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
+      <tr valign="top"><td width="150"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
         <tr valign="top"><td width="150"><strong>schema</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:schema"/></xsl:attribute><xsl:value-of select="oai:schema"/></a></td></tr>
         <tr valign="top"><td width="150"><strong>metadataNamespace</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:metadataNamespace"/></xsl:attribute><xsl:value-of select="oai:metadataNamespace"/></a></td></tr>
     </table>
