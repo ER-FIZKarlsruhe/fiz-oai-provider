@@ -10,6 +10,9 @@
  */
 package ORG.oclc.oai.server.catalog;
 
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +28,10 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import org.mockserver.client.MockServerClient;
+import org.mockserver.configuration.ConfigurationProperties;
+import org.mockserver.integration.ClientAndServer;
 
 import ORG.oclc.oai.server.verb.BadResumptionTokenException;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
@@ -52,8 +59,9 @@ public class FizOAICatalog extends AbstractCatalog {
   private HashMap resumptionResults = new HashMap();
   private int maxListSize;
   private boolean hideExtension = false;
-
+  private ClientAndServer mockServer;
   public FizOAICatalog(Properties properties) {
+    initMockServer();
     String temp;
 
     dateFormatter.applyPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -82,6 +90,23 @@ public class FizOAICatalog extends AbstractCatalog {
 // 	}
   }
 
+  private void initMockServer() {
+    System.out.println("initMockServer");
+    ConfigurationProperties.httpProxy("proxy.fiz-karlsruhe.de:8888");
+    new MockServerClient("localhost", 8080, "mockserver")
+    .when(
+        request()
+            .withMethod("GET")
+            .withPath("/item/123")
+    )
+    .respond(
+        response()
+            .withStatusCode(200)
+            .withBody("Response from fiz-oai-backend")
+    );
+  }
+  
+  
   private void loadFileMap(int homeDirLen, File currentDir) {
     String[] list = currentDir.list();
     for (int i = 0; i < list.length; ++i) {

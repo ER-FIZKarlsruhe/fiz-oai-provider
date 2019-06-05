@@ -45,6 +45,11 @@
       <artifactId>commons-logging</artifactId>
       <version>1.2</version>
     </dependency>
+    <dependency>
+     <groupId>org.mock-server</groupId>
+     <artifactId>mockserver-netty</artifactId>
+     <version>5.5.4</version>
+    </dependency>
   </dependencies>
 
   <build>
