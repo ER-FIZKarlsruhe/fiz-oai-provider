@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
  * @author Jeffrey A. Young
  */
 public class Crosswalks {
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     // map of metadataPrefix/CrosswalkItem
     private Map crosswalksMap = new HashMap();
