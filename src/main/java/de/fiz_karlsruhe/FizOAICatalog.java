@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +30,11 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
@@ -53,7 +59,6 @@ public class FizOAICatalog extends AbstractCatalog {
   static final boolean debug = false;
 
   private SimpleDateFormat dateFormatter = new SimpleDateFormat();
-  protected String homeDir;
   private HashMap fileDateMap = new HashMap();
   private HashMap resumptionResults = new HashMap();
   private int maxListSize;
@@ -74,38 +79,12 @@ public class FizOAICatalog extends AbstractCatalog {
 
     hideExtension = "true".equalsIgnoreCase(properties.getProperty("FizOAICatalog.hideExtension"));
 
-    homeDir = properties.getProperty("FizOAICatalog.homeDir");
-    if (homeDir == null)
-      throw new IllegalArgumentException("FizOAICatalog." + "homeDir is missing from the properties file");
-    if (debug)
-      System.out.println("in FizOAICatalog(): homeDir=" + homeDir);
 
-    File homeFile = new File(homeDir);
-    int homeDirLen = homeFile.getPath().length() + 1;
-    loadFileMap(homeDirLen, homeFile);
-// 	Iterator iterator = fileDateMap.entrySet().iterator();
-// 	while (iterator.hasNext()) {
-// 	    Map.Entry entry = (Map.Entry)iterator.next();
-// 	    System.out.println(entry.getKey() + ":" + entry.getValue());
-// 	}
   }
 
 
   
   
-  private void loadFileMap(int homeDirLen, File currentDir) {
-    String[] list = currentDir.list();
-    for (int i = 0; i < list.length; ++i) {
-      File child = new File(currentDir, list[i]);
-      if (child.isDirectory()) {
-        loadFileMap(homeDirLen, child);
-      } else if (isMetadataFile(child)) {
-        String localIdentifier = file2LocalIdentifier(homeDirLen, child);
-        String datestamp = date2OAIDatestamp(new Date(child.lastModified()));
-        fileDateMap.put(localIdentifier, datestamp);
-      }
-    }
-  }
 
   /**
    * Override this method if some files exist in the filesystem that aren't
@@ -118,34 +97,6 @@ public class FizOAICatalog extends AbstractCatalog {
     return true;
   }
 
-  /**
-   * Override this method if you don't like the default localIdentifiers.
-   * 
-   * @param homeDirLen the length of the home directory path
-   * @param file       the File object containing the native record
-   * @return localIdentifier
-   */
-  protected String file2LocalIdentifier(int homeDirLen, File file) {
-    String fileName = file.getPath().substring(homeDirLen).replace(File.separatorChar, '/');
-    if (hideExtension && fileName.endsWith(".xml")) {
-      fileName = fileName.substring(0, fileName.lastIndexOf(".xml"));
-    }
-    return fileName;
-  }
-
-  /**
-   * Override this method if you don't like the default localIdentifiers.
-   * 
-   * @param localIdentifier the localIdentifier as parsed from the OAI identifier
-   * @return the File object containing the native record
-   */
-  protected File localIdentifier2File(String localIdentifier) {
-    String fileName = localIdentifier.replace('/', File.separatorChar);
-    if (hideExtension) {
-      fileName = fileName + ".xml";
-    }
-    return new File(homeDir, fileName);
-  }
 
   private String date2OAIDatestamp(Date date) {
     return dateFormatter.format(date);
@@ -153,12 +104,11 @@ public class FizOAICatalog extends AbstractCatalog {
 
   private HashMap getNativeHeader(String localIdentifier) {
     HashMap recordMap = null;
-    if (fileDateMap.containsKey(localIdentifier)) {
-      recordMap = new HashMap();
-      recordMap.put("localIdentifier", localIdentifier);
-      recordMap.put("lastModified", fileDateMap.get(localIdentifier));
-      return recordMap;
-    }
+
+    recordMap = new HashMap();
+    recordMap.put("localIdentifier", localIdentifier);
+    recordMap.put("lastModified", "2019-05-22");
+    
     return recordMap;
   }
 
@@ -167,17 +117,15 @@ public class FizOAICatalog extends AbstractCatalog {
     if (recordMap == null) {
       return null;
     } else {
-      File file = localIdentifier2File(localIdentifier);
-      try {
-        FileInputStream fis = new FileInputStream(file);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        byte[] buffer = new byte[(int) file.length()];
-        bis.read(buffer, 0, (int) file.length());
-        recordMap.put("recordBytes", buffer);
-        return recordMap;
-      } catch (FileNotFoundException e) {
-        return null;
-      }
+      String url = "http://localhost:8080/mockserver/item/" + localIdentifier;
+      System.out.println(url);
+      CloseableHttpClient client = HttpClientBuilder.create().build();
+      CloseableHttpResponse response = client.execute(new HttpGet(url));
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      
+      recordMap.put("recordBytes", bodyAsString.getBytes());
+      
+      return recordMap;
     }
   }
 
@@ -199,8 +147,10 @@ public class FizOAICatalog extends AbstractCatalog {
     HashMap nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
-
+      System.out.println(localIdentifier);
+      
       nativeItem = getNativeRecord(localIdentifier);
+      System.out.println(nativeItem);
       if (nativeItem == null)
         throw new IdDoesNotExistException(oaiIdentifier);
       return constructRecord(nativeItem, metadataPrefix);

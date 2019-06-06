@@ -31,7 +31,7 @@ import ORG.oclc.oai.util.OAIUtil;
  * native records.
  */
 public abstract class RecordFactory {
-    public static final boolean debug=false;
+    public static final boolean debug=true;
 //     private boolean encodeSetSpec = true;
     
     /**

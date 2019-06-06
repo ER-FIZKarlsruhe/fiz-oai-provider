@@ -31,6 +31,7 @@ import ORG.oclc.oai.server.catalog.RecordFactory;
 import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.crosswalk.CrosswalkItem;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
+import ORG.oclc.oai.server.verb.OAIInternalServerError;
 
 /**
  * FileRecordFactory converts native XML "items" to "record" Strings. This
@@ -41,6 +42,7 @@ import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 public class FizRecordFactory extends RecordFactory {
   private String repositoryIdentifier = null;
 
+  
   
   /**
    * Construct an FileRecordFactory capable of producing the Crosswalk(s)
@@ -61,9 +63,9 @@ public class FizRecordFactory extends RecordFactory {
   }
 
   
-  private static HashMap initCrosswalks() throws IOException, JSONException, ParseException {
+  private static HashMap<String, CrosswalkItem> initCrosswalks() throws IOException, JSONException, ParseException, OAIInternalServerError {
     System.out.println("initCrosswalks");
-    HashMap crosswalksMap = new HashMap();
+    HashMap<String, CrosswalkItem> crosswalksMap = new HashMap<String, CrosswalkItem>();
     
     CloseableHttpClient client = HttpClientBuilder.create().build();
     CloseableHttpResponse response = client.execute(new HttpGet("http://localhost:8080/mockserver/format"));
@@ -77,6 +79,7 @@ public class FizRecordFactory extends RecordFactory {
     while (iterator.hasNext()) {
       JSONObject format = (JSONObject) iterator.next();
       
+      
       String metadataPrefix = (String) format.get("metadataPrefix");
       System.out.println(metadataPrefix);
       
@@ -89,11 +92,17 @@ public class FizRecordFactory extends RecordFactory {
       String crosswalkStyleSheet = (String) format.get("crosswalkStyleSheet");
       System.out.println(crosswalkStyleSheet);
       
+      if (crosswalkStyleSheet.isEmpty()) {
+        System.err.println("Skip crosswalk, as no xslt is available!");
+        continue;
+      }
+      
+      
       String identifierXpath = (String) format.get("identifierXpath");
       System.out.println(identifierXpath);
       System.out.println();
       
-      Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(schemaLocation);
+      Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(schemaLocation, crosswalkStyleSheet);
       
       CrosswalkItem crosswalkItem = new CrosswalkItem(metadataPrefix,schemaLocation, schemaNamespace, fizOaiBackendCrosswalk);
       crosswalksMap.put(metadataPrefix, crosswalkItem);
