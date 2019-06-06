@@ -8,7 +8,7 @@
  * or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ORG.oclc.oai.server.catalog;
+package de.fiz_karlsruhe;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -33,6 +33,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
 
+import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.server.verb.BadResumptionTokenException;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import ORG.oclc.oai.server.verb.IdDoesNotExistException;
@@ -40,8 +41,6 @@ import ORG.oclc.oai.server.verb.NoItemsMatchException;
 import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
-// import ORG.oclc.oai.util.*;
-// import org.xml.sax.*;
 
 /**
  * FileSystemOAICatalog is an implementation of AbstractCatalog interface with
@@ -59,9 +58,10 @@ public class FizOAICatalog extends AbstractCatalog {
   private HashMap resumptionResults = new HashMap();
   private int maxListSize;
   private boolean hideExtension = false;
-  private ClientAndServer mockServer;
   public FizOAICatalog(Properties properties) {
-    initMockServer();
+    
+    MockServerUtil.initMockServer();
+    
     String temp;
 
     dateFormatter.applyPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -90,21 +90,7 @@ public class FizOAICatalog extends AbstractCatalog {
 // 	}
   }
 
-  private void initMockServer() {
-    System.out.println("initMockServer");
-    ConfigurationProperties.httpProxy("proxy.fiz-karlsruhe.de:8888");
-    new MockServerClient("localhost", 8080, "mockserver")
-    .when(
-        request()
-            .withMethod("GET")
-            .withPath("/item/123")
-    )
-    .respond(
-        response()
-            .withStatusCode(200)
-            .withBody("Response from fiz-oai-backend")
-    );
-  }
+
   
   
   private void loadFileMap(int homeDirLen, File currentDir) {

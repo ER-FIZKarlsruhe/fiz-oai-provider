@@ -8,12 +8,29 @@
  * or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ORG.oclc.oai.server.catalog;
+package de.fiz_karlsruhe;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import ORG.oclc.oai.server.catalog.RecordFactory;
+import ORG.oclc.oai.server.crosswalk.Crosswalk;
+import ORG.oclc.oai.server.crosswalk.CrosswalkItem;
+import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 
 /**
  * FileRecordFactory converts native XML "items" to "record" Strings. This
@@ -24,6 +41,7 @@ import java.util.StringTokenizer;
 public class FizRecordFactory extends RecordFactory {
   private String repositoryIdentifier = null;
 
+  
   /**
    * Construct an FileRecordFactory capable of producing the Crosswalk(s)
    * specified in the properties file.
@@ -31,15 +49,60 @@ public class FizRecordFactory extends RecordFactory {
    * @param properties Contains information to configure the factory:
    *                   specifically, the names of the crosswalk(s) supported
    * @exception IllegalArgumentException Something is wrong with the argument.
+   * @throws IOException 
    */
-  public FizRecordFactory(Properties properties) throws IllegalArgumentException {
-    super(properties);
+  public FizRecordFactory(Properties properties) throws IllegalArgumentException, Exception {
+    super(initCrosswalks());
+    
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
     if (repositoryIdentifier == null) {
       throw new IllegalArgumentException("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
   }
 
+  
+  private static HashMap initCrosswalks() throws IOException, JSONException, ParseException {
+    System.out.println("initCrosswalks");
+    HashMap crosswalksMap = new HashMap();
+    
+    CloseableHttpClient client = HttpClientBuilder.create().build();
+    CloseableHttpResponse response = client.execute(new HttpGet("http://localhost:8080/mockserver/format"));
+    String bodyAsString = EntityUtils.toString(response.getEntity());
+    
+    JSONParser parser = new JSONParser();
+    JSONArray formats = (JSONArray) parser.parse(bodyAsString);
+    
+    // loop array
+    Iterator<JSONObject> iterator = formats.iterator();
+    while (iterator.hasNext()) {
+      JSONObject format = (JSONObject) iterator.next();
+      
+      String metadataPrefix = (String) format.get("metadataPrefix");
+      System.out.println(metadataPrefix);
+      
+      String schemaLocation = (String) format.get("schemaLocation");
+      System.out.println(schemaLocation);
+
+      String schemaNamespace = (String) format.get("schemaNamespace");
+      System.out.println(schemaNamespace);
+      
+      String crosswalkStyleSheet = (String) format.get("crosswalkStyleSheet");
+      System.out.println(crosswalkStyleSheet);
+      
+      String identifierXpath = (String) format.get("identifierXpath");
+      System.out.println(identifierXpath);
+      System.out.println();
+      
+      Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(schemaLocation);
+      
+      CrosswalkItem crosswalkItem = new CrosswalkItem(metadataPrefix,schemaLocation, schemaNamespace, fizOaiBackendCrosswalk);
+      crosswalksMap.put(metadataPrefix, crosswalkItem);
+    }
+    
+    
+    return crosswalksMap;
+  }
+  
   /**
    * Utility method to parse the 'local identifier' from the OAI identifier
    *
