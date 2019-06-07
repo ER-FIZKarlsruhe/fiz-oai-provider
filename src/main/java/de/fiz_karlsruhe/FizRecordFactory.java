@@ -74,45 +74,46 @@ public class FizRecordFactory extends RecordFactory {
     
     HashMap<String, CrosswalkItem> crosswalksMap = new HashMap<String, CrosswalkItem>();
     
-    CloseableHttpClient client = HttpClientBuilder.create().build();
-    CloseableHttpResponse response = client.execute(new HttpGet(backendBaseUrl + "/format"));
-    String bodyAsString = EntityUtils.toString(response.getEntity());
-    
-    JSONParser parser = new JSONParser();
-    JSONArray formats = (JSONArray) parser.parse(bodyAsString);
-    
-    // loop array
-    Iterator<JSONObject> iterator = formats.iterator();
-    while (iterator.hasNext()) {
-      JSONObject format = (JSONObject) iterator.next();
-      
-      
-      String metadataPrefix = (String) format.get("metadataPrefix");
-      System.out.println(metadataPrefix);
-      
-      String schemaLocation = (String) format.get("schemaLocation");
-      System.out.println(schemaLocation);
+    String url = backendBaseUrl + "/format";
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
 
-      String schemaNamespace = (String) format.get("schemaNamespace");
-      System.out.println(schemaNamespace);
-      
-      String crosswalkStyleSheet = (String) format.get("crosswalkStyleSheet");
-      System.out.println(crosswalkStyleSheet);
-      
-      if (crosswalkStyleSheet.isEmpty()) {
-        System.err.println("Skip crosswalk, as no xslt is available!");
-        continue;
+      JSONParser parser = new JSONParser();
+      JSONArray formats = (JSONArray) parser.parse(bodyAsString);
+
+      // loop array
+      Iterator<JSONObject> iterator = formats.iterator();
+      while (iterator.hasNext()) {
+        JSONObject format = (JSONObject) iterator.next();
+
+        String metadataPrefix = (String) format.get("metadataPrefix");
+        System.out.println(metadataPrefix);
+
+        String schemaLocation = (String) format.get("schemaLocation");
+        System.out.println(schemaLocation);
+
+        String schemaNamespace = (String) format.get("schemaNamespace");
+        System.out.println(schemaNamespace);
+
+        String crosswalkStyleSheet = (String) format.get("crosswalkStyleSheet");
+        System.out.println(crosswalkStyleSheet);
+
+        if (crosswalkStyleSheet.isEmpty()) {
+          System.err.println("Skip crosswalk, as no xslt is available!");
+          continue;
+        }
+
+        String identifierXpath = (String) format.get("identifierXpath");
+        System.out.println(identifierXpath);
+        System.out.println();
+
+        Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(schemaLocation, crosswalkStyleSheet);
+
+        CrosswalkItem crosswalkItem = new CrosswalkItem(metadataPrefix, schemaLocation, schemaNamespace,
+            fizOaiBackendCrosswalk);
+        crosswalksMap.put(metadataPrefix, crosswalkItem);
       }
-      
-      
-      String identifierXpath = (String) format.get("identifierXpath");
-      System.out.println(identifierXpath);
-      System.out.println();
-      
-      Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(schemaLocation, crosswalkStyleSheet);
-      
-      CrosswalkItem crosswalkItem = new CrosswalkItem(metadataPrefix,schemaLocation, schemaNamespace, fizOaiBackendCrosswalk);
-      crosswalksMap.put(metadataPrefix, crosswalkItem);
     }
     
     

@@ -7,6 +7,12 @@
   <version>0.1-SNAPSHOT</version>
   <name>fiz-oai-provider</name>
   <url>http://maven.apache.org</url>
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -72,19 +78,22 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.2.3</version>
+        <configuration>
+          <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
+        </configuration>
       </plugin>
-      
-      
-<!--       <plugin> -->
-<!--         <groupId>org.apache.tomcat.maven</groupId> -->
-<!--         <artifactId>tomcat7-maven-plugin</artifactId> -->
-<!--         <version>2.2</version> -->
-<!--         <configuration> -->
-<!--           <url>http://localhost:8080/manager/text</url> -->
-<!--           <server>TomcatServer</server> -->
-<!--           <path>/fiz-oai-provider</path> -->
-<!--         </configuration> -->
-<!--       </plugin> -->
+
+
+      <!-- <plugin> -->
+      <!-- <groupId>org.apache.tomcat.maven</groupId> -->
+      <!-- <artifactId>tomcat7-maven-plugin</artifactId> -->
+      <!-- <version>2.2</version> -->
+      <!-- <configuration> -->
+      <!-- <url>http://localhost:8080/manager/text</url> -->
+      <!-- <server>TomcatServer</server> -->
+      <!-- <path>/fiz-oai-provider</path> -->
+      <!-- </configuration> -->
+      <!-- </plugin> -->
 
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
@@ -106,7 +115,7 @@
         <configuration>
           <serverPort>1080</serverPort>
           <proxyPort>1090</proxyPort>
-          <logLevel>INFO</logLevel>
+          <logLevel>WARN</logLevel>
           <initializationClass>de.fiz_karlsruhe.MockServerUtil</initializationClass>
         </configuration>
         <executions>
@@ -140,6 +149,7 @@
           <stopPort>9000</stopPort>
           <webApp>
             <contextPath>/fiz-oai-provider</contextPath>
+            <descriptor>${project.build.directory}/fiz-oai-provider/WEB-INF/web.xml</descriptor>
           </webApp>
         </configuration>
         <executions>
@@ -164,4 +174,21 @@
 
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>default</id>
+      <properties> <context-params>
+        <![CDATA[ -->
+          <context-param>
+              <param-name>properties</param-name>
+              <param-value>${project.build.directory}/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
+          </context-param>
+    <!-- ]]></context-params>
+      </properties>
+  <activation>
+    <activeByDefault>true</activeByDefault>
+  </activation>
+    </profile>
+  </profiles>
 </project>

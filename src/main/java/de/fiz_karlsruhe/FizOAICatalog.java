@@ -101,12 +101,12 @@ public class FizOAICatalog extends AbstractCatalog {
       return null;
     } else {
       String url = backendBaseUrl + "/item/" + localIdentifier;
-      System.out.println(url);
-      CloseableHttpClient client = HttpClientBuilder.create().build();
-      CloseableHttpResponse response = client.execute(new HttpGet(url));
-      String bodyAsString = EntityUtils.toString(response.getEntity());
-
-      recordMap.put("recordBytes", bodyAsString.getBytes());
+      try (CloseableHttpClient client = HttpClientBuilder.create().build();
+          CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+        
+        String bodyAsString = EntityUtils.toString(response.getEntity());
+        recordMap.put("recordBytes", bodyAsString.getBytes());
+      }
 
       return recordMap;
     }

@@ -16,24 +16,21 @@ import junit.framework.TestCase;
 
 public class OaiHandlerIT extends TestCase {
 
-  
-  
   public void testGetIdentifier() throws Exception {
     System.out.println("testGetIdentifier");
-    CloseableHttpClient client = HttpClientBuilder.create().build();
-    CloseableHttpResponse response = client.execute(new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler?verb=Identify"));
-    String bodyAsString = EntityUtils.toString(response.getEntity());
-    System.out.println(bodyAsString);
-    assertNotNull(bodyAsString);
-    assertEquals(200, response.getStatusLine().getStatusCode());
+    String url = "http://localhost:8999/fiz-oai-provider/OAIHandler?verb=Identify";
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpPost(url))) {
+
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println(bodyAsString);
+      assertNotNull(bodyAsString);
+      assertEquals(200, response.getStatusLine().getStatusCode());
+    }
   }
 
-  
-  
   public void testGetRecord() throws Exception {
     System.out.println("testGetRecord");
-    CloseableHttpClient client = HttpClientBuilder.create().build();
-
     HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
@@ -41,11 +38,13 @@ public class OaiHandlerIT extends TestCase {
     params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
-    CloseableHttpResponse response = client.execute(httpPost);
-    String bodyAsString = EntityUtils.toString(response.getEntity());
-    System.out.println(bodyAsString);
-    assertEquals(200, response.getStatusLine().getStatusCode());
-    assertNotNull(bodyAsString);
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println(bodyAsString);
+      assertEquals(200, response.getStatusLine().getStatusCode());
+      assertNotNull(bodyAsString);
+    }
   }
 
 }

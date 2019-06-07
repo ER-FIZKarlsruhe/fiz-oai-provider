@@ -35,14 +35,7 @@
          parameters, including zero.
     -->
 
-    <context-param>
-      <param-name>properties</param-name>
-      <param-value>C:/eprojects/fiz-oai-provider/src/main/webapp/WEB-INF/oaicat.properties</param-value>
-      <description>
-        The location of the oaicat.properties file containing
-        datapairs used to initialize the OAI repository software.
-      </description>
-    </context-param>
+<!-- ${context-params} -->
 
 
     <!-- Servlet definitions for the servlets that make up
