@@ -37,7 +37,7 @@
 
     <context-param>
       <param-name>properties</param-name>
-      <param-value>C:/eprojects/java/tomcat/apache-tomcat-8.5.37/webapps/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
+      <param-value>C:/eprojects/fiz-oai-provider/src/main/webapp/WEB-INF/oaicat.properties</param-value>
       <description>
         The location of the oaicat.properties file containing
         datapairs used to initialize the OAI repository software.

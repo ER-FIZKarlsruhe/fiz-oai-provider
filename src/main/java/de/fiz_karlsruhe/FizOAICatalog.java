@@ -62,11 +62,10 @@ public class FizOAICatalog extends AbstractCatalog {
   private HashMap fileDateMap = new HashMap();
   private HashMap resumptionResults = new HashMap();
   private int maxListSize;
-  private boolean hideExtension = false;
+
+  private String backendBaseUrl;
+  
   public FizOAICatalog(Properties properties) {
-    
-    MockServerUtil.initMockServer();
-    
     String temp;
 
     dateFormatter.applyPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -76,30 +75,14 @@ public class FizOAICatalog extends AbstractCatalog {
     maxListSize = Integer.parseInt(temp);
     if (debug)
       System.out.println("in FizOAICatalog(): maxListSize=" + maxListSize);
-
-    hideExtension = "true".equalsIgnoreCase(properties.getProperty("FizOAICatalog.hideExtension"));
-
-
-  }
-
-
-  
-  
-
-  /**
-   * Override this method if some files exist in the filesystem that aren't
-   * metadata records.
-   *
-   * @param child the File to be investigated
-   * @return true if it contains metadata, false otherwise
-   */
-  protected boolean isMetadataFile(File child) {
-    return true;
-  }
-
-
-  private String date2OAIDatestamp(Date date) {
-    return dateFormatter.format(date);
+    
+    backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
+    if (backendBaseUrl == null) {
+      throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
+    }
+    
+    if (debug)
+      System.out.println("FizOaiBackend.baseURL: " + backendBaseUrl);
   }
 
   private HashMap getNativeHeader(String localIdentifier) {
@@ -108,7 +91,7 @@ public class FizOAICatalog extends AbstractCatalog {
     recordMap = new HashMap();
     recordMap.put("localIdentifier", localIdentifier);
     recordMap.put("lastModified", "2019-05-22");
-    
+
     return recordMap;
   }
 
@@ -117,14 +100,14 @@ public class FizOAICatalog extends AbstractCatalog {
     if (recordMap == null) {
       return null;
     } else {
-      String url = "http://localhost:8080/mockserver/item/" + localIdentifier;
+      String url = backendBaseUrl + "/item/" + localIdentifier;
       System.out.println(url);
       CloseableHttpClient client = HttpClientBuilder.create().build();
       CloseableHttpResponse response = client.execute(new HttpGet(url));
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      
+
       recordMap.put("recordBytes", bodyAsString.getBytes());
-      
+
       return recordMap;
     }
   }
@@ -148,7 +131,7 @@ public class FizOAICatalog extends AbstractCatalog {
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
       System.out.println(localIdentifier);
-      
+
       nativeItem = getNativeRecord(localIdentifier);
       System.out.println(nativeItem);
       if (nativeItem == null)

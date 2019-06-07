@@ -24,7 +24,7 @@ import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.util.OAIUtil;
 
 public class FizOaiBackendCrosswalk extends Crosswalk {
-  private boolean debug = false;
+  private boolean debug = true;
   protected Transformer transformer = null;
 
   public FizOaiBackendCrosswalk(String schemaLocation, String xsltUrl) throws OAIInternalServerError {
@@ -55,7 +55,6 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
 
     if (xsltUrl != null) {
 
-      debug = true;
       try {
         URL url = new URL(xsltUrl);
         BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -74,10 +73,10 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
   }
 
   /**
-   * Can this nativeItem be represented in DC format?
+   * Can this nativeItem be represented in other formats?
    * 
    * @param nativeItem a record in native format
-   * @return true if DC format is possible, false otherwise.
+   * @return true if other formats are possible, false otherwise.
    */
   public boolean isAvailableFor(Object nativeItem) {
     return true;

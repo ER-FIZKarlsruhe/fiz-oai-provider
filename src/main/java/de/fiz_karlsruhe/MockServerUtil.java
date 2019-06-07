@@ -4,25 +4,24 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import org.mockserver.client.MockServerClient;
+import org.mockserver.client.initialize.ExpectationInitializer;
 import org.mockserver.configuration.ConfigurationProperties;
 
-public class MockServerUtil {
+public class MockServerUtil  implements ExpectationInitializer {
 
-  public static void initMockServer() {
-    System.out.println("initMockServer");
+  @Override
+  public void initializeExpectations(MockServerClient mockServerClient) {
+    System.out.println("initializeExpectations");
     ConfigurationProperties.httpProxy("proxy.fiz-karlsruhe.de:8888");
     
-    MockServerClient serverClient = new MockServerClient("localhost", 8080, "mockserver");
-    initGetSpecificFormat(serverClient);
-    initGetAllFormats(serverClient);
-    initGetItem(serverClient);
-    initGetXslt(serverClient);
+    initGetSpecificFormat(mockServerClient);
+    initGetAllFormats(mockServerClient);
+    initGetItem(mockServerClient);
+    initGetXslt(mockServerClient);
     
   }
 
-
-  
-  private static void initGetItem(MockServerClient serverClient) {
+  private void initGetItem(MockServerClient serverClient) {
     serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*"))
         .respond(response().withStatusCode(200)
             .withBody("<ns2:radarDataset xmlns=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-elements\" xmlns:ns2=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-dataset\">\n" + 
@@ -55,30 +54,31 @@ public class MockServerUtil {
   }
   
   
-  private static void initGetSpecificFormat(MockServerClient serverClient) {
+  private void initGetSpecificFormat(MockServerClient serverClient) {
     serverClient.when(request().withMethod("GET").withPath("/oaiDc"))
         .respond(response().withStatusCode(200)
             .withBody("{\n" + "  \"metadataPrefix\":\"oaiDc\",\n"
                 + "  \"schemaLocation\":\"http://www.openarchives.org/OAI/2.0/oai_dc.xsd\",\n"
-                + "  \"crosswalkStyleSheet\":\"http://localhost:8080/mockserver/xslt/radar2oai\",\n" + "  \"identifierXpath\":\"/dc/identifier\"\n" + "}"));
+                + "  \"crosswalkStyleSheet\":\"http://localhost:1080/xslt/radar2oai\",\n" 
+                + "  \"identifierXpath\":\"/dc/identifier\"\n" + "}"));
   }
   
   
-  private static void initGetAllFormats(MockServerClient serverClient) {
+  private void initGetAllFormats(MockServerClient serverClient) {
     serverClient.when(request().withMethod("GET").withPath("/format"))
         .respond(response().withStatusCode(200)
             .withBody("[{\n" + 
                 "  \"metadataPrefix\":\"oaiDc\",\n" + 
                 "  \"schemaLocation\":\"http://www.openarchives.org/OAI/2.0/oai_dc.xsd\",\n" + 
                 "  \"schemaNamespace\":\"http://www.openarchives.org/OAI/2.0\",\n" + 
-                "  \"crosswalkStyleSheet\":\"http://localhost:8080/mockserver/xslt/radar2oai\", \n" + 
+                "  \"crosswalkStyleSheet\":\"http://localhost:1080/xslt/radar2oai\", \n" + 
                 "  \"identifierXpath\":\"/dc/identifier\"\n" + 
                 "},\n" +
                 "{\n" + 
                 "  \"metadataPrefix\":\"datacite\",\n" + 
                 "  \"schemaLocation\":\"http://schema.datacite.org/meta/kernel-4/metadata.xsd\",\n" + 
                 "  \"schemaNamespace\":\"http://datacite.org/schema/kernel-4\",\n" + 
-                "  \"crosswalkStyleSheet\":\"http://localhost:8080/mockserver/xslt/radar2datacite\", \n" + 
+                "  \"crosswalkStyleSheet\":\"http://localhost:1080/xslt/radar2datacite\", \n" + 
                 "  \"identifierXpath\":\"/resource/identifier\"\n" + 
                 "},\n" + 
                 "{\n" + 
@@ -92,7 +92,7 @@ public class MockServerUtil {
   }
   
   
-  private static void initGetXslt(MockServerClient serverClient) {
+  private void initGetXslt(MockServerClient serverClient) {
     
     serverClient.when(request().withMethod("GET").withPath("/xslt/radar2datacite"))
     .respond(response().withStatusCode(200)

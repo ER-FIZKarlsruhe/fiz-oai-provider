@@ -11,7 +11,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -72,18 +72,96 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.2.3</version>
+      </plugin>
+      
+      
+<!--       <plugin> -->
+<!--         <groupId>org.apache.tomcat.maven</groupId> -->
+<!--         <artifactId>tomcat7-maven-plugin</artifactId> -->
+<!--         <version>2.2</version> -->
+<!--         <configuration> -->
+<!--           <url>http://localhost:8080/manager/text</url> -->
+<!--           <server>TomcatServer</server> -->
+<!--           <path>/fiz-oai-provider</path> -->
+<!--         </configuration> -->
+<!--       </plugin> -->
 
-      </plugin>
       <plugin>
-        <groupId>org.apache.tomcat.maven</groupId>
-        <artifactId>tomcat7-maven-plugin</artifactId>
-        <version>2.2</version>
-        <configuration>
-          <url>http://localhost:8080/manager/text</url>
-          <server>TomcatServer</server>
-          <path>/fiz-oai-provider</path>
-        </configuration>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.mock-server</groupId>
+        <artifactId>mockserver-maven-plugin</artifactId>
+        <version>5.5.4</version>
+        <configuration>
+          <serverPort>1080</serverPort>
+          <proxyPort>1090</proxyPort>
+          <logLevel>INFO</logLevel>
+          <initializationClass>de.fiz_karlsruhe.MockServerUtil</initializationClass>
+        </configuration>
+        <executions>
+          <execution>
+            <id>process-test-classes</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.4.11.v20180605</version>
+        <configuration>
+          <httpConnector>
+            <port>8999</port>
+          </httpConnector>
+          <stopKey>quit</stopKey>
+          <stopPort>9000</stopPort>
+          <webApp>
+            <contextPath>/fiz-oai-provider</contextPath>
+          </webApp>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-jetty</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>stop-jetty</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
+
     </plugins>
   </build>
 </project>

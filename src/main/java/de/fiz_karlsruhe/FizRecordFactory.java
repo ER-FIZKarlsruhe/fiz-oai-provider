@@ -40,8 +40,8 @@ import ORG.oclc.oai.server.verb.OAIInternalServerError;
  * element contains multiple metadataFormats from which to choose.
  */
 public class FizRecordFactory extends RecordFactory {
+  
   private String repositoryIdentifier = null;
-
   
   
   /**
@@ -54,7 +54,7 @@ public class FizRecordFactory extends RecordFactory {
    * @throws IOException 
    */
   public FizRecordFactory(Properties properties) throws IllegalArgumentException, Exception {
-    super(initCrosswalks());
+    super(initCrosswalks(properties));
     
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
     if (repositoryIdentifier == null) {
@@ -63,12 +63,19 @@ public class FizRecordFactory extends RecordFactory {
   }
 
   
-  private static HashMap<String, CrosswalkItem> initCrosswalks() throws IOException, JSONException, ParseException, OAIInternalServerError {
+  private static HashMap<String, CrosswalkItem> initCrosswalks(Properties properties) throws IOException, JSONException, ParseException, OAIInternalServerError {
     System.out.println("initCrosswalks");
+    
+    String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
+    System.out.println("backendBaseUrl: " + backendBaseUrl);
+    if (backendBaseUrl == null) {
+      throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
+    }
+    
     HashMap<String, CrosswalkItem> crosswalksMap = new HashMap<String, CrosswalkItem>();
     
     CloseableHttpClient client = HttpClientBuilder.create().build();
-    CloseableHttpResponse response = client.execute(new HttpGet("http://localhost:8080/mockserver/format"));
+    CloseableHttpResponse response = client.execute(new HttpGet(backendBaseUrl + "/format"));
     String bodyAsString = EntityUtils.toString(response.getEntity());
     
     JSONParser parser = new JSONParser();
