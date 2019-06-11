@@ -1,14 +1,14 @@
 package de.fiz_karlsruhe;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Properties;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -23,7 +23,12 @@ import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.util.OAIUtil;
 
+
+
 public class FizOaiBackendCrosswalk extends Crosswalk {
+
+  final static Logger logger = LogManager.getLogger(FizOaiBackendCrosswalk.class);
+  
   private boolean debug = true;
   protected Transformer transformer = null;
 
@@ -53,6 +58,8 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
     // http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
     super(schemaLocation, contentType, docType, encoding);
 
+    logger.info("Initializing FizOaiBackendCrosswalk");
+    
     if (xsltUrl != null) {
 
       try {
@@ -66,7 +73,8 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
         this.transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.error("Error during init of FizOaiBackendCrosswalk", e);
+        
         throw new OAIInternalServerError(e.getMessage());
       }
     }
@@ -112,16 +120,17 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
         throw new Exception("Unrecognized nativeItem");
       }
 
-      if (debug) {
-        System.out.println("XSLTCrosswalk.createMetadata: xmlRec=" + xmlRec);
-      }
+      logger.debug("XSLTCrosswalk.createMetadata: xmlRec=" + xmlRec);
+
       if (xmlRec.startsWith("<?")) {
         int offset = xmlRec.indexOf("?>");
         xmlRec = xmlRec.substring(offset + 2);
       }
-      if (debug) {
-        System.out.println("XSLTCrosswalk.createMetadata: transformer=" + transformer);
-      }
+      
+      
+      logger.debug("XSLTCrosswalk.createMetadata: transformer=" + transformer);
+
+      
       if (transformer != null) {
         StringReader stringReader = new StringReader(xmlRec);
         StreamSource streamSource = new StreamSource(stringReader);
@@ -129,9 +138,9 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
         synchronized (this) {
           transformer.transform(streamSource, new StreamResult(stringWriter));
         }
-        if (debug) {
-          System.out.println("XSLTCrosswalk.createMetadata: return=" + stringWriter.toString());
-        }
+        
+        logger.debug("XSLTCrosswalk.createMetadata: return=" + stringWriter.toString());
+        
         return stringWriter.toString();
       } else {
         return xmlRec;

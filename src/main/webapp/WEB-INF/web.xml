@@ -35,6 +35,15 @@
          parameters, including zero.
     -->
 
+    <context-param>
+        <param-name>log4j-config-location</param-name>
+        <param-value>WEB-INF/log4j.properties</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>de.fiz_karlsruhe.ContextListener</listener-class>
+    </listener>
+
 <!-- ${context-params} -->
 
 

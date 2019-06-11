@@ -69,6 +69,12 @@
       <artifactId>mockserver-netty</artifactId>
       <version>5.5.4</version>
     </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -178,7 +184,8 @@
   <profiles>
     <profile>
       <id>test</id>
-      <properties> <context-params>
+      <properties>
+        <context-params>
         <![CDATA[ -->
           <context-param>
               <param-name>properties</param-name>
@@ -186,24 +193,25 @@
           </context-param>
     <!-- ]]></context-params>
       </properties>
-  <activation>
-    <activeByDefault>true</activeByDefault>
-  </activation>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
     </profile>
-    
+
     <profile>
       <id>prod</id>
-      <properties> <context-params>
+      <properties>
+        <context-params>
         <![CDATA[ -->
           <context-param>
               <param-name>properties</param-name>
-              <param-value>/usr/local/tomcat/webapps/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
+              <param-value>/usr/local/tomcat/conf/oaicat.properties</param-value>
           </context-param>
     <!-- ]]></context-params>
       </properties>
-  <activation>
-    <activeByDefault>true</activeByDefault>
-  </activation>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
     </profile>
   </profiles>
 </project>

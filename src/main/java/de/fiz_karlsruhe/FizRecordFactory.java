@@ -21,6 +21,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -43,6 +45,7 @@ public class FizRecordFactory extends RecordFactory {
   
   private String repositoryIdentifier = null;
   
+  final static Logger logger = LogManager.getLogger(FizRecordFactory.class);
   
   /**
    * Construct an FileRecordFactory capable of producing the Crosswalk(s)
@@ -64,10 +67,10 @@ public class FizRecordFactory extends RecordFactory {
 
   
   private static HashMap<String, CrosswalkItem> initCrosswalks(Properties properties) throws IOException, JSONException, ParseException, OAIInternalServerError {
-    System.out.println("initCrosswalks");
+    logger.info("initCrosswalks");
     
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
-    System.out.println("backendBaseUrl: " + backendBaseUrl);
+    logger.info("backendBaseUrl: " + backendBaseUrl);
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
@@ -88,25 +91,25 @@ public class FizRecordFactory extends RecordFactory {
         JSONObject format = (JSONObject) iterator.next();
 
         String metadataPrefix = (String) format.get("metadataPrefix");
-        System.out.println(metadataPrefix);
+        logger.info(metadataPrefix);
 
         String schemaLocation = (String) format.get("schemaLocation");
-        System.out.println(schemaLocation);
+        logger.info(schemaLocation);
 
         String schemaNamespace = (String) format.get("schemaNamespace");
-        System.out.println(schemaNamespace);
+        logger.info(schemaNamespace);
 
         String crosswalkStyleSheet = (String) format.get("crosswalkStyleSheet");
-        System.out.println(crosswalkStyleSheet);
+        logger.info(crosswalkStyleSheet);
 
         if (crosswalkStyleSheet.isEmpty()) {
-          System.err.println("Skip crosswalk, as no xslt is available!");
+          logger.warn("Skip crosswalk, as no xslt is available!");
           continue;
         }
 
         String identifierXpath = (String) format.get("identifierXpath");
-        System.out.println(identifierXpath);
-        System.out.println();
+        logger.info(identifierXpath);
+        logger.info("");
 
         Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(schemaLocation, crosswalkStyleSheet);
 

@@ -3,15 +3,19 @@ package de.fiz_karlsruhe;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.client.initialize.ExpectationInitializer;
 import org.mockserver.configuration.ConfigurationProperties;
 
 public class MockServerUtil  implements ExpectationInitializer {
 
+  final static Logger logger = LogManager.getLogger(MockServerUtil.class);
+  
   @Override
   public void initializeExpectations(MockServerClient mockServerClient) {
-    System.out.println("initializeExpectations");
+    logger.info("MockServer initializeExpectations");
     ConfigurationProperties.httpProxy("proxy.fiz-karlsruhe.de:8888");
     
     initGetSpecificFormat(mockServerClient);

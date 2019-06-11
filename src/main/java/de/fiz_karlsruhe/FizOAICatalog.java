@@ -10,15 +10,7 @@
  */
 package de.fiz_karlsruhe;
 
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,9 +27,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.configuration.ConfigurationProperties;
-import org.mockserver.integration.ClientAndServer;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.server.verb.BadResumptionTokenException;
@@ -56,6 +47,10 @@ import ORG.oclc.oai.server.verb.OAIInternalServerError;
  */
 
 public class FizOAICatalog extends AbstractCatalog {
+  
+  
+  final static Logger logger = LogManager.getLogger(FizOAICatalog.class);
+  
   static final boolean debug = false;
 
   private SimpleDateFormat dateFormatter = new SimpleDateFormat();
@@ -66,23 +61,28 @@ public class FizOAICatalog extends AbstractCatalog {
   private String backendBaseUrl;
   
   public FizOAICatalog(Properties properties) {
+    
+    logger.info("Initializing FizOAICatalog...");
+    
     String temp;
 
     dateFormatter.applyPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
     temp = properties.getProperty("FizOAICatalog.maxListSize");
-    if (temp == null)
-      throw new IllegalArgumentException("FizOAICatalog." + "maxListSize is missing from the properties file");
-    maxListSize = Integer.parseInt(temp);
-    if (debug)
-      System.out.println("in FizOAICatalog(): maxListSize=" + maxListSize);
     
+    if (temp == null) {
+      throw new IllegalArgumentException("FizOAICatalog." + "maxListSize is missing from the properties file");
+    }
+    maxListSize = Integer.parseInt(temp);
+    
+    logger.info("in FizOAICatalog(): maxListSize=" + maxListSize);
+
     backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
     
-    if (debug)
-      System.out.println("FizOaiBackend.baseURL: " + backendBaseUrl);
+    logger.info("FizOaiBackend.baseURL: " + backendBaseUrl);
+
   }
 
   private HashMap getNativeHeader(String localIdentifier) {
@@ -130,12 +130,15 @@ public class FizOAICatalog extends AbstractCatalog {
     HashMap nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
-      System.out.println(localIdentifier);
+      logger.info("local identifier: " + localIdentifier);
 
       nativeItem = getNativeRecord(localIdentifier);
-      System.out.println(nativeItem);
-      if (nativeItem == null)
+      logger.debug(nativeItem);
+      
+      if (nativeItem == null) {
         throw new IdDoesNotExistException(oaiIdentifier);
+      }
+      
       return constructRecord(nativeItem, metadataPrefix);
     } catch (IOException e) {
       e.printStackTrace();
@@ -283,7 +286,7 @@ public class FizOAICatalog extends AbstractCatalog {
     /* Get some more records from your database */
     Iterator iterator = (Iterator) resumptionResults.remove(resumptionId);
     if (iterator == null) {
-      System.out.println("FileSystemOAICatalog.listIdentifiers: reuse of old resumptionToken?");
+      logger.info("FileSystemOAICatalog.listIdentifiers: reuse of old resumptionToken?");
       iterator = fileDateMap.entrySet().iterator();
       for (int i = 0; i < oldCount; ++i)
         iterator.next();
@@ -482,7 +485,7 @@ public class FizOAICatalog extends AbstractCatalog {
     /* Get some more records from your database */
     Iterator iterator = (Iterator) resumptionResults.remove(resumptionId);
     if (iterator == null) {
-      System.out.println("FileSystemOAICatalog.listRecords: reuse of old resumptionToken?");
+      logger.info("FileSystemOAICatalog.listRecords: reuse of old resumptionToken?");
       iterator = fileDateMap.entrySet().iterator();
       for (int i = 0; i < oldCount; ++i)
         iterator.next();
