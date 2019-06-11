@@ -197,7 +197,7 @@
         <![CDATA[ -->
           <context-param>
               <param-name>properties</param-name>
-              <param-value>/usr/local/tomcat/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
+              <param-value>/usr/local/tomcat/webapps/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
           </context-param>
     <!-- ]]></context-params>
       </properties>
