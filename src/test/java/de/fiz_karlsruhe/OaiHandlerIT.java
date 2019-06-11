@@ -1,7 +1,15 @@
 package de.fiz_karlsruhe;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.XMLConstants;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -24,8 +32,9 @@ public class OaiHandlerIT extends TestCase {
 
       String bodyAsString = EntityUtils.toString(response.getEntity());
       System.out.println(bodyAsString);
-      assertNotNull(bodyAsString);
+      System.out.println("bodyAsString" + bodyAsString);
       assertEquals(200, response.getStatusLine().getStatusCode());
+      assertTrue(validateAgainstOaiXsd(bodyAsString));
     }
   }
 
@@ -41,9 +50,35 @@ public class OaiHandlerIT extends TestCase {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println(bodyAsString);
+      System.out.println("bodyAsString" + bodyAsString);
       assertEquals(200, response.getStatusLine().getStatusCode());
       assertNotNull(bodyAsString);
+      assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }
+
+  static boolean validateAgainstOaiXsd(String xml) {
+    try {
+      ClassLoader classLoader = new OaiHandlerIT().getClass().getClassLoader();
+
+      InputStream oaiPmhXsd = classLoader.getResourceAsStream("OAI-PMH.xsd");
+      InputStream oaiIdentifierXsd = classLoader.getResourceAsStream("oai-identifier.xsd");
+      InputStream oaiDcXsd = classLoader.getResourceAsStream("oai_dc.xsd");
+      InputStream simpleDcXsd = classLoader.getResourceAsStream("simpledc20021212.xsd");
+      
+      InputStream xmlStream = new ByteArrayInputStream(xml.getBytes());
+      
+      SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      
+      StreamSource[] schemas = {new StreamSource(oaiPmhXsd), new StreamSource(oaiIdentifierXsd), new StreamSource(oaiDcXsd), new StreamSource(simpleDcXsd)};
+      Schema schema = factory.newSchema(schemas);
+      Validator validator = schema.newValidator();
+      validator.validate(new StreamSource(xmlStream));
+      return true;
+    } catch (Exception ex) {
+      System.err.println(ex.getMessage());
+      ex.printStackTrace();
+      return false;
     }
   }
 
