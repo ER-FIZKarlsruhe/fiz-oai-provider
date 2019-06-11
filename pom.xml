@@ -177,12 +177,27 @@
 
   <profiles>
     <profile>
-      <id>default</id>
+      <id>test</id>
       <properties> <context-params>
         <![CDATA[ -->
           <context-param>
               <param-name>properties</param-name>
               <param-value>${project.build.directory}/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
+          </context-param>
+    <!-- ]]></context-params>
+      </properties>
+  <activation>
+    <activeByDefault>true</activeByDefault>
+  </activation>
+    </profile>
+    
+    <profile>
+      <id>prod</id>
+      <properties> <context-params>
+        <![CDATA[ -->
+          <context-param>
+              <param-name>properties</param-name>
+              <param-value>/usr/local/tomcat/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
           </context-param>
     <!-- ]]></context-params>
       </properties>
