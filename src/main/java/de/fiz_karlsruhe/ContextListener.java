@@ -1,6 +1,8 @@
 package de.fiz_karlsruhe;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -20,7 +22,12 @@ public class ContextListener implements ServletContextListener {
         // initialize log4j here
         ServletContext context = event.getServletContext();
         String log4jConfigFile = context.getInitParameter("fiz-oai-provider-log4j-config-location");
-        PropertyConfigurator.configure(log4jConfigFile);
+        try {
+          PropertyConfigurator.configure(new URL(log4jConfigFile));
+        } catch (MalformedURLException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
          
     }
      
