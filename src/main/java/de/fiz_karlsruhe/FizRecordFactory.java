@@ -68,7 +68,7 @@ public class FizRecordFactory extends RecordFactory {
   private static HashMap<String, CrosswalkItem> initCrosswalks(Properties properties)
       throws IOException, JSONException, ParseException, OAIInternalServerError {
     logger.info("initCrosswalks");
-    HashMap<String, CrosswalkItem> crosswalksMap = null;
+    HashMap<String, CrosswalkItem> crosswalksMap = new HashMap<String, CrosswalkItem>();
 
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
     logger.info("backendBaseUrl: " + backendBaseUrl);
@@ -79,8 +79,6 @@ public class FizRecordFactory extends RecordFactory {
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-
-      crosswalksMap = new HashMap<String, CrosswalkItem>();
 
       String bodyAsString = EntityUtils.toString(response.getEntity());
 
