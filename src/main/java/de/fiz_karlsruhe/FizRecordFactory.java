@@ -42,11 +42,11 @@ import ORG.oclc.oai.server.verb.OAIInternalServerError;
  * element contains multiple metadataFormats from which to choose.
  */
 public class FizRecordFactory extends RecordFactory {
-  
+
   private String repositoryIdentifier = null;
-  
+
   final static Logger logger = LogManager.getLogger(FizRecordFactory.class);
-  
+
   /**
    * Construct an FileRecordFactory capable of producing the Crosswalk(s)
    * specified in the properties file.
@@ -54,32 +54,34 @@ public class FizRecordFactory extends RecordFactory {
    * @param properties Contains information to configure the factory:
    *                   specifically, the names of the crosswalk(s) supported
    * @exception IllegalArgumentException Something is wrong with the argument.
-   * @throws IOException 
+   * @throws IOException
    */
   public FizRecordFactory(Properties properties) throws IllegalArgumentException, Exception {
     super(initCrosswalks(properties));
-    
+
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
     if (repositoryIdentifier == null) {
       throw new IllegalArgumentException("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
   }
 
-  
-  private static HashMap<String, CrosswalkItem> initCrosswalks(Properties properties) throws IOException, JSONException, ParseException, OAIInternalServerError {
+  private static HashMap<String, CrosswalkItem> initCrosswalks(Properties properties)
+      throws IOException, JSONException, ParseException, OAIInternalServerError {
     logger.info("initCrosswalks");
-    
+    HashMap<String, CrosswalkItem> crosswalksMap = null;
+
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
     logger.info("backendBaseUrl: " + backendBaseUrl);
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
-    
-    HashMap<String, CrosswalkItem> crosswalksMap = new HashMap<String, CrosswalkItem>();
-    
     String url = backendBaseUrl + "/format";
+
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+
+      crosswalksMap = new HashMap<String, CrosswalkItem>();
+
       String bodyAsString = EntityUtils.toString(response.getEntity());
 
       JSONParser parser = new JSONParser();
@@ -117,12 +119,13 @@ public class FizRecordFactory extends RecordFactory {
             fizOaiBackendCrosswalk);
         crosswalksMap.put(metadataPrefix, crosswalkItem);
       }
+    } catch (Exception e) {
+      logger.error("An error occured during initializing the crosswalks", e);
     }
-    
-    
+
     return crosswalksMap;
   }
-  
+
   /**
    * Utility method to parse the 'local identifier' from the OAI identifier
    *

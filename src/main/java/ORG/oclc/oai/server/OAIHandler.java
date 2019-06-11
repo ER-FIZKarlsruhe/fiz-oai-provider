@@ -126,19 +126,19 @@ public class OAIHandler extends HttpServlet {
             log.debug("Store global properties");
             attributesMap.put("global", attributes);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new ServletException(e.getMessage());
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new ServletException(e.getMessage());
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new ServletException(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new ServletException(e.getMessage());
         } catch (Throwable e) {
-            e.printStackTrace();
+            log.error(e);
             throw new ServletException(e.getMessage());
         }
     }
