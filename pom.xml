@@ -191,6 +191,10 @@
               <param-name>properties</param-name>
               <param-value>${project.build.directory}/fiz-oai-provider/WEB-INF/oaicat.properties</param-value>
           </context-param>
+          <context-param>
+              <param-name>fiz-oai-provider-log4j-config-location</param-name>
+              <param-value>/WEB-INF/fiz-oai-provider-log4j.properties</param-value>
+          </context-param>
     <!-- ]]></context-params>
       </properties>
       <activation>
@@ -206,6 +210,10 @@
           <context-param>
               <param-name>properties</param-name>
               <param-value>/usr/local/tomcat/conf/oaicat.properties</param-value>
+          </context-param>
+          <context-param>
+              <param-name>fiz-oai-provider-log4j-config-location</param-name>
+              <param-value>/usr/local/tomcat/conf/fiz-oai-provider-log4j.properties</param-value>
           </context-param>
     <!-- ]]></context-params>
       </properties>
