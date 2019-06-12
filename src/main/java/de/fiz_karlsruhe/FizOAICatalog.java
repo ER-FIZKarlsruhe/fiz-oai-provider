@@ -64,6 +64,7 @@ public class FizOAICatalog extends AbstractCatalog {
 
   private String backendBaseUrl;
 
+  private HashMap setMap = new HashMap();
   private String setSpecItemLabel = null;
   private String setSpecListLabel = null;
   private String setNameLabel = null;
@@ -117,24 +118,38 @@ public class FizOAICatalog extends AbstractCatalog {
     recordMap.put("localIdentifier", localIdentifier);
     recordMap.put("lastModified", "2019-05-22");
 
+    //TODO Load sets for item
+//    ArrayList setSpecs = new ArrayList();
+//    Iterator keySet = setMap.keySet().iterator();
+//    while (keySet.hasNext()) {
+//        String key = (String)keySet.next();
+//        ArrayList identifierList = (ArrayList)setMap.get(key);
+//        if (identifierList.contains(path)) {
+//            setSpecs.add(key);
+//        }
+//    }
+//    recordMap.put("setSpecs", setSpecs.iterator());
+
     return recordMap;
   }
 
   private HashMap getNativeRecord(String localIdentifier) throws IOException {
     HashMap recordMap = getNativeHeader(localIdentifier);
-    if (recordMap == null) {
-      return null;
-    } else {
-      String url = backendBaseUrl + "/item/" + localIdentifier;
-      try (CloseableHttpClient client = HttpClientBuilder.create().build();
-          CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 
+    String url = backendBaseUrl + "/item/" + localIdentifier;
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+      if (response.getStatusLine().getStatusCode() == 200) {
         String bodyAsString = EntityUtils.toString(response.getEntity());
         recordMap.put("recordBytes", bodyAsString.getBytes());
+      } else {
+        recordMap = null;
       }
-
-      return recordMap;
+    } catch (Exception e) {
+      recordMap = null;
     }
+
+    return recordMap;
   }
 
   /**

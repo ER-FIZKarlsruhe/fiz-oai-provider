@@ -113,7 +113,7 @@ public class MockServerUtil  implements ExpectationInitializer {
             .withBody("[\n" + 
                 "{\n" + 
                 "  \"name\":\"Deutsche Fotothek\",\n" +
-                "  \"spec\":\"Deutsche_Fotothek_Spec\",\n" +
+                "  \"spec\":\"institution\",\n" +
                 "  \"description\":\"Description for Deutsche Fotothek\",\n" +
                 "  \"searchUrl\":\"https://www.deutsche-digitale-bibliothek.de/searchresults?isThumbnailFiltered=true&query=&facetValues%5B%5D=provider_fct%3DDeutsche+Fotothek&offset=0\",\n" + 
                 "  \"identifierCssSelector\":\"\"\n" + 
@@ -121,7 +121,7 @@ public class MockServerUtil  implements ExpectationInitializer {
                 ",\n" + 
                 "{\n" + 
                 "  \"name\":\"TIB\",\n" +
-                "  \"spec\":\"TIB_Spec\",\n" +
+                "  \"spec\":\"institution:hannover\",\n" +
                 "  \"description\":\"Description for TIB\",\n" +
                 "  \"searchUrl\":\"https://www.radar-service.eu/radar/de/search?query=&searchBy=metadata&facetValues=descriptiveMetadata.publishers.publisher%3DTechnische+Informationsbibliothek+(TIB)&offset=0\",\n" + 
                 "  \"identifierCssSelector\":\"\"\n" + 

@@ -112,6 +112,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+        <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+        </configuration>
       </plugin>
 
       <plugin>
