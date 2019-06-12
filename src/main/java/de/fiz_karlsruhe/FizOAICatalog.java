@@ -61,7 +61,7 @@ public class FizOAICatalog extends AbstractCatalog {
   private String backendBaseUrl;
   
   public FizOAICatalog(Properties properties) {
-    
+    showBanner();
     logger.info("Initializing FizOAICatalog...");
     
     String temp;
@@ -85,6 +85,17 @@ public class FizOAICatalog extends AbstractCatalog {
 
   }
 
+  
+  private void showBanner() {
+    logger.info("#######                #######    #    ###       ######                                              ");
+    logger.info("#       # ######       #     #   # #    #        #     # #####   ####  #    # # #####  ###### #####  ");
+    logger.info("#       #     #        #     #  #   #   #        #     # #    # #    # #    # # #    # #      #    # ");
+    logger.info("#####   #    #   ##### #     # #     #  #  ##### ######  #    # #    # #    # # #    # #####  #    # ");
+    logger.info("#       #   #          #     # #######  #        #       #####  #    # #    # # #    # #      #####  ");
+    logger.info("#       #  #           #     # #     #  #        #       #   #  #    #  #  #  # #    # #      #   #  ");
+    logger.info("#       # ######       ####### #     # ###       #       #    #  ####    ##   # #####  ###### #    # ");
+  }
+  
   private HashMap getNativeHeader(String localIdentifier) {
     HashMap recordMap = null;
 
