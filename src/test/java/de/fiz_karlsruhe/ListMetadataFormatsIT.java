@@ -58,4 +58,42 @@ public class ListMetadataFormatsIT extends BaseIT {
   }
   
 
+  public void testListMetadataFormatsInvalidIdentifier() throws Exception {
+    logger.info("testListMetadataFormatsInvalidIdentifier");
+    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListMetadataFormats"));
+    params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:1010000386"));//invalid id
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.debug("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("idDoesNotExist"));
+      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }
+
+  public void testListMetadataFormatsBadArguments() throws Exception {
+    logger.info("testListMetadataFormatsBadArguments");
+    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListMetadataFormats"));
+    params.add(new BasicNameValuePair("identifiereeeee", "oai:fiz-karlsruhe.de:1010000386"));//Bad argument
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.debug("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }  
+  
 }
