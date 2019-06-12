@@ -565,7 +565,7 @@ public class FizOAICatalog extends AbstractCatalog {
     return listRecordsMap;
   }
 
-  public Map listSets() throws NoSetHierarchyException {
+  public Map listSets() throws NoSetHierarchyException, OAIInternalServerError {
     logger.info("listSets");
     purge(); // clean out old resumptionTokens
 
@@ -592,6 +592,7 @@ public class FizOAICatalog extends AbstractCatalog {
 
     } catch (IOException | ParseException e) {
       logger.error("Error while getting sets", e);
+      throw new OAIInternalServerError(e.getMessage());
     }
 
     listSetsMap.put("sets", sets.iterator());
