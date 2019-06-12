@@ -19,26 +19,31 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import junit.framework.TestCase;
 
 public class OaiHandlerIT extends TestCase {
 
-  public void testGetIdentifier() throws Exception {
+  
+  final static Logger logger = LogManager.getLogger(OaiHandlerIT.class);
+  
+  public void testGetIdentify() throws Exception {
     System.out.println("testGetIdentifier");
     String url = "http://localhost:8999/fiz-oai-provider/OAIHandler?verb=Identify";
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpPost(url))) {
 
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println(bodyAsString);
-      System.out.println("bodyAsString" + bodyAsString);
+
+      logger.info("response: " + bodyAsString);
       assertEquals(200, response.getStatusLine().getStatusCode());
       assertTrue(validateAgainstOaiXsd(bodyAsString));
     }
   }
 
-  public void testGetRecord() throws Exception {
+  public void testGetSingleRecord() throws Exception {
     System.out.println("testGetRecord");
     HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
     List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -50,13 +55,34 @@ public class OaiHandlerIT extends TestCase {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("bodyAsString" + bodyAsString);
+      logger.info("response: " + bodyAsString);
       assertEquals(200, response.getStatusLine().getStatusCode());
       assertNotNull(bodyAsString);
       assertTrue(validateAgainstOaiXsd(bodyAsString));
     }
   }
 
+  
+  public void testListSets() throws Exception {
+    System.out.println("testGetRecord");
+    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListSets"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("response: " + bodyAsString);
+      assertEquals(200, response.getStatusLine().getStatusCode());
+      assertNotNull(bodyAsString);
+      assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }
+  
+  
+  
+  
   static boolean validateAgainstOaiXsd(String xml) {
     try {
       ClassLoader classLoader = new OaiHandlerIT().getClass().getClassLoader();

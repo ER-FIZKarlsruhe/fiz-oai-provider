@@ -29,6 +29,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.server.verb.BadResumptionTokenException;
@@ -38,6 +42,7 @@ import ORG.oclc.oai.server.verb.NoItemsMatchException;
 import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
+import ORG.oclc.oai.util.OAIUtil;
 
 /**
  * FileSystemOAICatalog is an implementation of AbstractCatalog interface with
@@ -47,10 +52,9 @@ import ORG.oclc.oai.server.verb.OAIInternalServerError;
  */
 
 public class FizOAICatalog extends AbstractCatalog {
-  
-  
+
   final static Logger logger = LogManager.getLogger(FizOAICatalog.class);
-  
+
   static final boolean debug = false;
 
   private SimpleDateFormat dateFormatter = new SimpleDateFormat();
@@ -59,43 +63,53 @@ public class FizOAICatalog extends AbstractCatalog {
   private int maxListSize;
 
   private String backendBaseUrl;
-  
+
+  private String setSpecItemLabel = null;
+  private String setSpecListLabel = null;
+  private String setNameLabel = null;
+  private String setDescriptionLabel = null;
+
   public FizOAICatalog(Properties properties) {
     showBanner();
     logger.info("Initializing FizOAICatalog...");
-    
+
     String temp;
 
     dateFormatter.applyPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
     temp = properties.getProperty("FizOAICatalog.maxListSize");
-    
+
     if (temp == null) {
       throw new IllegalArgumentException("FizOAICatalog." + "maxListSize is missing from the properties file");
     }
     maxListSize = Integer.parseInt(temp);
-    
+
     logger.info("in FizOAICatalog(): maxListSize=" + maxListSize);
 
     backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
-    
     logger.info("FizOaiBackend.baseURL: " + backendBaseUrl);
 
   }
 
-  
   private void showBanner() {
-    logger.info("#######                #######    #    ###       ######                                              ");
-    logger.info("#       # ######       #     #   # #    #        #     # #####   ####  #    # # #####  ###### #####  ");
-    logger.info("#       #     #        #     #  #   #   #        #     # #    # #    # #    # # #    # #      #    # ");
-    logger.info("#####   #    #   ##### #     # #     #  #  ##### ######  #    # #    # #    # # #    # #####  #    # ");
-    logger.info("#       #   #          #     # #######  #        #       #####  #    # #    # # #    # #      #####  ");
-    logger.info("#       #  #           #     # #     #  #        #       #   #  #    #  #  #  # #    # #      #   #  ");
-    logger.info("#       # ######       ####### #     # ###       #       #    #  ####    ##   # #####  ###### #    # ");
+    logger
+        .info("#######                #######    #    ###       ######                                              ");
+    logger
+        .info("#       # ######       #     #   # #    #        #     # #####   ####  #    # # #####  ###### #####  ");
+    logger
+        .info("#       #     #        #     #  #   #   #        #     # #    # #    # #    # # #    # #      #    # ");
+    logger
+        .info("#####   #    #   ##### #     # #     #  #  ##### ######  #    # #    # #    # # #    # #####  #    # ");
+    logger
+        .info("#       #   #          #     # #######  #        #       #####  #    # #    # # #    # #      #####  ");
+    logger
+        .info("#       #  #           #     # #     #  #        #       #   #  #    #  #  #  # #    # #      #   #  ");
+    logger
+        .info("#       # ######       ####### #     # ###       #       #    #  ####    ##   # #####  ###### #    # ");
   }
-  
+
   private HashMap getNativeHeader(String localIdentifier) {
     HashMap recordMap = null;
 
@@ -114,7 +128,7 @@ public class FizOAICatalog extends AbstractCatalog {
       String url = backendBaseUrl + "/item/" + localIdentifier;
       try (CloseableHttpClient client = HttpClientBuilder.create().build();
           CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-        
+
         String bodyAsString = EntityUtils.toString(response.getEntity());
         recordMap.put("recordBytes", bodyAsString.getBytes());
       }
@@ -145,11 +159,11 @@ public class FizOAICatalog extends AbstractCatalog {
 
       nativeItem = getNativeRecord(localIdentifier);
       logger.debug(nativeItem);
-      
+
       if (nativeItem == null) {
         throw new IdDoesNotExistException(oaiIdentifier);
       }
-      
+
       return constructRecord(nativeItem, metadataPrefix);
     } catch (IOException e) {
       e.printStackTrace();
@@ -552,10 +566,67 @@ public class FizOAICatalog extends AbstractCatalog {
   }
 
   public Map listSets() throws NoSetHierarchyException {
-    throw new NoSetHierarchyException();
-//         Map listSetsMap = new HashMap();
-//         listSetsMap.put("sets", setsList.iterator());
-//         return listSetsMap;
+    logger.info("listSets");
+    purge(); // clean out old resumptionTokens
+
+    Map listSetsMap = new HashMap();
+    ArrayList sets = new ArrayList();
+
+    String url = backendBaseUrl + "/set";
+    logger.info("listSets using " + url);
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+
+      JSONParser parser = new JSONParser();
+      JSONArray setsJson = (JSONArray) parser.parse(bodyAsString);
+
+      // loop array
+      Iterator<JSONObject> iterator = setsJson.iterator();
+      while (iterator.hasNext()) {
+        JSONObject set = (JSONObject) iterator.next();
+        sets.add(getSetXML(set));
+      }
+
+    } catch (IOException | ParseException e) {
+      logger.error("Error while getting sets", e);
+    }
+
+    listSetsMap.put("sets", sets.iterator());
+    return listSetsMap;
+
+  }
+
+  public String getSetXML(JSONObject setItem) throws IllegalArgumentException {
+    String setSpec = (String) setItem.get("spec");
+    String setName = (String) setItem.get("name");
+    String setDescription = (String) setItem.get("description");
+
+    StringBuffer sb = new StringBuffer();
+    sb.append("<set>");
+    sb.append("<setSpec>");
+    sb.append(setSpec != null ? OAIUtil.xmlEncode(setSpec) : "");
+    sb.append("</setSpec>");
+    sb.append("<setName>");
+    sb.append(setName != null ? OAIUtil.xmlEncode(setName) : "");
+    sb.append("</setName>");
+    if (setDescription != null) {
+      sb.append("<setDescription>");
+      sb.append(
+          "<oai_dc:dc xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd\">");
+      sb.append("<dc:description>");
+      sb.append(OAIUtil.xmlEncode(setDescription));
+      sb.append("</dc:description>");
+      sb.append("</oai_dc:dc>");
+
+      sb.append("</setDescription>");
+    }
+    sb.append("</set>");
+
+    logger.info("getSetXML: " + sb.toString());
+    return sb.toString();
   }
 
   public Map listSets(String resumptionToken) throws BadResumptionTokenException {

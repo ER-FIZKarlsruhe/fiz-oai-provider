@@ -22,6 +22,8 @@ public class MockServerUtil  implements ExpectationInitializer {
     initGetAllFormats(mockServerClient);
     initGetItem(mockServerClient);
     initGetXslt(mockServerClient);
+    initGetSpecificSet(mockServerClient);
+    initGetAllSets(mockServerClient);
     
   }
 
@@ -59,7 +61,7 @@ public class MockServerUtil  implements ExpectationInitializer {
   
   
   private void initGetSpecificFormat(MockServerClient serverClient) {
-    serverClient.when(request().withMethod("GET").withPath("/oaiDc"))
+    serverClient.when(request().withMethod("GET").withPath("/format/oaiDc"))
         .respond(response().withStatusCode(200)
             .withBody("{\n" + "  \"metadataPrefix\":\"oaiDc\",\n"
                 + "  \"schemaLocation\":\"http://www.openarchives.org/OAI/2.0/oai_dc.xsd\",\n"
@@ -91,6 +93,38 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "  \"schemaNamespace\":\"https://www.radar-service.eu/en/radar-schema\",\n" + 
                 "  \"crosswalkStyleSheet\":\"\", \n" + 
                 "  \"identifierXpath\":\"/radarDataset/identifier\"\n" + 
+                "}\n" + 
+                "]"));
+  }
+  
+  private void initGetSpecificSet(MockServerClient serverClient) {
+    serverClient.when(request().withMethod("GET").withPath("/set/Deutsche%20Fotothek"))
+        .respond(response().withStatusCode(200)
+            .withBody("{\n" + 
+                "  \"name\":\"Deutsche Fotothek\",\n" + 
+                "  \"searchUrl\":\"https://www.deutsche-digitale-bibliothek.de/searchresults?isThumbnailFiltered=true&query=&facetValues%5B%5D=provider_fct%3DDeutsche+Fotothek&offset=0\",\n" + 
+                "  \"identifierCssSelector\":\"\"\n" + 
+                "}"));
+  }
+  
+  private void initGetAllSets(MockServerClient serverClient) {
+    serverClient.when(request().withMethod("GET").withPath("/set"))
+        .respond(response().withStatusCode(200)
+            .withBody("[\n" + 
+                "{\n" + 
+                "  \"name\":\"Deutsche Fotothek\",\n" +
+                "  \"spec\":\"Deutsche_Fotothek_Spec\",\n" +
+                "  \"description\":\"Description for Deutsche Fotothek\",\n" +
+                "  \"searchUrl\":\"https://www.deutsche-digitale-bibliothek.de/searchresults?isThumbnailFiltered=true&query=&facetValues%5B%5D=provider_fct%3DDeutsche+Fotothek&offset=0\",\n" + 
+                "  \"identifierCssSelector\":\"\"\n" + 
+                "}\n" + 
+                ",\n" + 
+                "{\n" + 
+                "  \"name\":\"TIB\",\n" +
+                "  \"spec\":\"TIB_Spec\",\n" +
+                "  \"description\":\"Description for TIB\",\n" +
+                "  \"searchUrl\":\"https://www.radar-service.eu/radar/de/search?query=&searchBy=metadata&facetValues=descriptiveMetadata.publishers.publisher%3DTechnische+Informationsbibliothek+(TIB)&offset=0\",\n" + 
+                "  \"identifierCssSelector\":\"\"\n" + 
                 "}\n" + 
                 "]"));
   }
