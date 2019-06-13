@@ -34,6 +34,7 @@ import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import de.fiz_karlsruhe.model.Item;
+import de.fiz_karlsruhe.model.SearchResult;
 
 /**
  * FileSystemOAICatalog is an implementation of AbstractCatalog interface with
@@ -203,38 +204,39 @@ public class FizOAICatalog extends AbstractCatalog {
    *         and an "identifiers" Map object. The "identifiers" Map contains OAI
    *         identifier keys with corresponding values of "true" or null depending
    *         on whether the identifier is deleted or not.
+   * @throws OAIInternalServerError 
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   public Map listIdentifiers(String from, String until, String set, String metadataPrefix)
-      throws NoItemsMatchException {
+      throws NoItemsMatchException, OAIInternalServerError {
     purge(); // clean out old resumptionTokens
-    Map listIdentifiersMap = new HashMap();
-    ArrayList headers = new ArrayList();
-    ArrayList identifiers = new ArrayList();
-    Iterator iterator = fileDateMap.entrySet().iterator();
-    int numRows = fileDateMap.entrySet().size();
-    int count = 0;
-    while (count < maxListSize && iterator.hasNext()) {
-      Map.Entry entryDateMap = (Map.Entry) iterator.next();
-      String fileDate = (String) entryDateMap.getValue();
-      if (fileDate.compareTo(from) >= 0 && fileDate.compareTo(until) <= 0) {
-        
-        HashMap nativeHeader = null;// TODO getNativeHeader((String) entryDateMap.getKey());
-        
-        String[] header = getRecordFactory().createHeader(nativeHeader);
+    Map<String, Iterator<String>> listIdentifiersMap = new HashMap<String, Iterator<String>>();
+    ArrayList<String> headers = new ArrayList<String>();
+    ArrayList<String> identifiers = new ArrayList<String>();    
+    SearchResult<Item> result = null;
+    
+    try {
+      result = BackendService.getInstance(backendBaseUrl).getIdentifiers();
+      
+      if (result == null || result.getData().isEmpty()) {
+        throw new NoItemsMatchException();
+      }
+      
+      for(Item item : result.getData()) {
+        String[] header = getRecordFactory().createHeader(item);
         headers.add(header[0]);
         identifiers.add(header[1]);
-        count++;
       }
+      
+    } catch (IOException e) {
+      throw new OAIInternalServerError(e.getMessage());
     }
-
-    if (count == 0)
-      throw new NoItemsMatchException();
-
+      
     /* decide if you're done */
-    if (iterator.hasNext()) {
+    int cursorPosition = (result.getOffset() + result.getData().size());
+    if (cursorPosition < result.getTotal()) {
       String resumptionId = getRSName();
-      resumptionResults.put(resumptionId, iterator);
+      //TODO resumptionResults.put(resumptionId, iterator);
 
       /*****************************************************************
        * Construct the resumptionToken String however you see fit.
@@ -242,9 +244,9 @@ public class FizOAICatalog extends AbstractCatalog {
       StringBuffer resumptionTokenSb = new StringBuffer();
       resumptionTokenSb.append(resumptionId);
       resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(count));
+      resumptionTokenSb.append(result.getTotal());
       resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(numRows));
+      resumptionTokenSb.append(cursorPosition);
       resumptionTokenSb.append(":");
       resumptionTokenSb.append(metadataPrefix);
 
@@ -253,9 +255,8 @@ public class FizOAICatalog extends AbstractCatalog {
        * attributes in the response. Otherwise, use the line after it that I've
        * commented out.
        *****************************************************************/
-      listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), numRows, 0));
-// 	    listIdentifiersMap.put("resumptionMap",
-// 				   getResumptionMap(resumptionTokenSb.toString()));
+//TODO      listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), cursorPosition, 0));
+//TODO 	    listIdentifiersMap.put("resumptionMap",  getResumptionMap(resumptionTokenSb.toString()));
     }
     listIdentifiersMap.put("headers", headers.iterator());
     listIdentifiersMap.put("identifiers", identifiers.iterator());

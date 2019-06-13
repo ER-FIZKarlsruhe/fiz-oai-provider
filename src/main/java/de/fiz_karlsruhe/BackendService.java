@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ORG.oclc.oai.server.crosswalk.Crosswalk;
@@ -25,6 +27,7 @@ import ORG.oclc.oai.server.crosswalk.CrosswalkItem;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.util.OAIUtil;
 import de.fiz_karlsruhe.model.Item;
+import de.fiz_karlsruhe.model.SearchResult;
 
 public class BackendService {
   
@@ -65,6 +68,29 @@ public class BackendService {
     }
     
     return item;
+  }
+  
+  
+  public SearchResult<Item> getIdentifiers() throws IOException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    
+    SearchResult<Item> result = null;
+    String url = backendBaseUrl + "/item?content=false";
+    
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+      if (response.getStatusLine().getStatusCode() == 200) {
+        String json = EntityUtils.toString(response.getEntity());
+        JavaType type = objectMapper.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
+        result = objectMapper.readValue(json, type);
+      } else {
+        throw new IOException(response.getStatusLine().getReasonPhrase());
+      }
+    } catch (Exception e) {
+      logger.error("Error on getIdentifiers", e);
+    }
+    
+    return result;
   }
   
   
