@@ -24,7 +24,7 @@ public class ListMetadataFormatsIT extends BaseIT {
   @Test
   public void testListMetadataFormats() throws Exception {
     logger.info("testListMetadataFormats");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListMetadataFormats"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -41,7 +41,7 @@ public class ListMetadataFormatsIT extends BaseIT {
   
   public void testListMetadataFormatsValidIdentifier() throws Exception {
     logger.info("testListMetadataFormatsValidIdentifier");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListMetadataFormats"));
     params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));
@@ -60,7 +60,7 @@ public class ListMetadataFormatsIT extends BaseIT {
 
   public void testListMetadataFormatsInvalidIdentifier() throws Exception {
     logger.info("testListMetadataFormatsInvalidIdentifier");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListMetadataFormats"));
     params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:1010000386"));//invalid id
@@ -79,7 +79,7 @@ public class ListMetadataFormatsIT extends BaseIT {
 
   public void testListMetadataFormatsBadArguments() throws Exception {
     logger.info("testListMetadataFormatsBadArguments");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListMetadataFormats"));
     params.add(new BasicNameValuePair("identifiereeeee", "oai:fiz-karlsruhe.de:1010000386"));//Bad argument

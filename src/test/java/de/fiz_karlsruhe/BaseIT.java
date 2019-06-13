@@ -16,6 +16,8 @@ public class BaseIT {
 
   final static Logger logger = LogManager.getLogger(ListMetadataFormatsIT.class);
 
+  public static String TEST_OAI_URL = "http://localhost:8999/fiz-oai-provider/OAIHandler";
+  
   
   protected boolean validateAgainstOaiXsd(String xml) {
     try {

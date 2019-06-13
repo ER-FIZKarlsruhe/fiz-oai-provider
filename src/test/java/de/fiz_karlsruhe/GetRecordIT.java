@@ -24,7 +24,7 @@ public class GetRecordIT extends BaseIT {
   @Test
   public void testGetSingleRecord() throws Exception {
     logger.info("testGetRecord");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
     params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));
@@ -44,7 +44,7 @@ public class GetRecordIT extends BaseIT {
   @Test
   public void testGetSingleRecordInvalidIdentifier() throws Exception {
     logger.info("testGetRecord");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
     params.add(new BasicNameValuePair("identifier", "oai:frlsruhe.de:1133/1003"));//Invalid ID
@@ -65,7 +65,7 @@ public class GetRecordIT extends BaseIT {
   @Test
   public void testGetSingleRecordInvalidFormat() throws Exception {
     logger.info("testGetRecord");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
     params.add(new BasicNameValuePair("identifier", "oai:frlsruhe.de:1133/1003"));//Invalid ID
@@ -86,7 +86,7 @@ public class GetRecordIT extends BaseIT {
   @Test
   public void testGetSingleRecordMissingIdentifier() throws Exception {
     logger.info("testGetRecord");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
     params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
@@ -106,7 +106,7 @@ public class GetRecordIT extends BaseIT {
   @Test
   public void testGetSingleRecordMissingMetadataPrefix() throws Exception {
     logger.info("testGetRecord");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
     params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));

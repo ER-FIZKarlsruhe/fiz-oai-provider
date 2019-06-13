@@ -23,7 +23,7 @@ public class ListSetsIT extends BaseIT {
   @Test
   public void testListSets() throws Exception {
     logger.info("testGetRecord");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListSets"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));

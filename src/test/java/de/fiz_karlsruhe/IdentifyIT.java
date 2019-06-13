@@ -24,7 +24,7 @@ public class IdentifyIT extends BaseIT {
   @Test
   public void testGetIdentify() throws Exception {
     logger.info("testGetIdentifier");
-    String url = "http://localhost:8999/fiz-oai-provider/OAIHandler?verb=Identify";
+    String url = TEST_OAI_URL + "?verb=Identify";
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpPost(url))) {
 
@@ -40,7 +40,7 @@ public class IdentifyIT extends BaseIT {
   @Test
   public void testGetIdentifyWrongVerbName() throws Exception {
     logger.info("testGetIdentifyWrongVerbName");
-    HttpPost httpPost = new HttpPost("http://localhost:8999/fiz-oai-provider/OAIHandler");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "Identify"));
     params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));

@@ -22,17 +22,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.server.verb.BadResumptionTokenException;
@@ -42,7 +33,7 @@ import ORG.oclc.oai.server.verb.NoItemsMatchException;
 import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
-import ORG.oclc.oai.util.OAIUtil;
+import de.fiz_karlsruhe.model.Item;
 
 /**
  * FileSystemOAICatalog is an implementation of AbstractCatalog interface with
@@ -64,11 +55,6 @@ public class FizOAICatalog extends AbstractCatalog {
 
   private String backendBaseUrl;
 
-  private HashMap setMap = new HashMap();
-  private String setSpecItemLabel = null;
-  private String setSpecListLabel = null;
-  private String setNameLabel = null;
-  private String setDescriptionLabel = null;
 
   public FizOAICatalog(Properties properties) {
     showBanner();
@@ -111,46 +97,32 @@ public class FizOAICatalog extends AbstractCatalog {
         .info("#       # ######       ####### #     # ###       #       #    #  ####    ##   # #####  ###### #    # ");
   }
 
-  private HashMap getNativeHeader(String localIdentifier) {
-    HashMap recordMap = null;
-
-    recordMap = new HashMap();
-    recordMap.put("localIdentifier", localIdentifier);
-    recordMap.put("lastModified", "2019-05-22");
-
-    //TODO Load sets for item
+//  private HashMap getNativeHeader(Item item) {
+//    HashMap recordMap = new HashMap();
+//    recordMap.put("localIdentifier", getRecordFactory().getOAIIdentifier(item));
+//    recordMap.put("lastModified", "2019-05-22");
+//
 //    ArrayList setSpecs = new ArrayList();
-//    Iterator keySet = setMap.keySet().iterator();
-//    while (keySet.hasNext()) {
-//        String key = (String)keySet.next();
-//        ArrayList identifierList = (ArrayList)setMap.get(key);
-//        if (identifierList.contains(path)) {
-//            setSpecs.add(key);
-//        }
+//    
+//    for(String set:item.getSets()) {
+//      setSpecs.add(set);
 //    }
+//    
 //    recordMap.put("setSpecs", setSpecs.iterator());
-
-    return recordMap;
-  }
-
-  private HashMap getNativeRecord(String localIdentifier) throws IOException {
-    HashMap recordMap = getNativeHeader(localIdentifier);
-
-    String url = backendBaseUrl + "/item/" + localIdentifier;
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-      if (response.getStatusLine().getStatusCode() == 200) {
-        String bodyAsString = EntityUtils.toString(response.getEntity());
-        recordMap.put("recordBytes", bodyAsString.getBytes());
-      } else {
-        recordMap = null;
-      }
-    } catch (Exception e) {
-      recordMap = null;
-    }
-
-    return recordMap;
-  }
+//
+//    return recordMap;
+//  }
+//
+//  private HashMap getNativeRecord(String localIdentifier) throws IOException {
+//    Item item = BackendService.getInstance(backendBaseUrl).getItem(localIdentifier);
+//    HashMap recordMap = null;
+//    
+//    if (item != null) {
+//      recordMap = getNativeHeader(item);
+//    }    
+//
+//    return recordMap;
+//  }
 
   /**
    * Retrieve the specified metadata for the specified oaiIdentifier
@@ -167,12 +139,12 @@ public class FizOAICatalog extends AbstractCatalog {
    */
   public String getRecord(String oaiIdentifier, String metadataPrefix)
       throws IdDoesNotExistException, CannotDisseminateFormatException, OAIInternalServerError {
-    HashMap nativeItem = null;
+    Item nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
       logger.info("local identifier: " + localIdentifier);
 
-      nativeItem = getNativeRecord(localIdentifier);
+      nativeItem = BackendService.getInstance(backendBaseUrl).getItem(localIdentifier);
       logger.debug(nativeItem);
 
       if (nativeItem == null) {
@@ -181,7 +153,7 @@ public class FizOAICatalog extends AbstractCatalog {
 
       return constructRecord(nativeItem, metadataPrefix);
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error("Cannot read record", e);
       throw new OAIInternalServerError("Database Failure");
     }
   }
@@ -203,11 +175,11 @@ public class FizOAICatalog extends AbstractCatalog {
    */
   public Vector getSchemaLocations(String oaiIdentifier)
       throws IdDoesNotExistException, OAIInternalServerError, NoMetadataFormatsException {
-    HashMap nativeItem = null;
+    Item nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
-      nativeItem = getNativeRecord(localIdentifier);
-    } catch (IOException e) {
+      nativeItem = null; //FIXME getNativeRecord(localIdentifier);
+    } catch (Exception e) {
       e.printStackTrace();
       throw new OAIInternalServerError("Database Failure");
     }
@@ -246,7 +218,9 @@ public class FizOAICatalog extends AbstractCatalog {
       Map.Entry entryDateMap = (Map.Entry) iterator.next();
       String fileDate = (String) entryDateMap.getValue();
       if (fileDate.compareTo(from) >= 0 && fileDate.compareTo(until) <= 0) {
-        HashMap nativeHeader = getNativeHeader((String) entryDateMap.getKey());
+        
+        HashMap nativeHeader = null;// TODO getNativeHeader((String) entryDateMap.getKey());
+        
         String[] header = getRecordFactory().createHeader(nativeHeader);
         headers.add(header[0]);
         identifiers.add(header[1]);
@@ -336,7 +310,7 @@ public class FizOAICatalog extends AbstractCatalog {
     int count = 0;
     while (count < maxListSize && iterator.hasNext()) {
       Map.Entry entryDateMap = (Map.Entry) iterator.next();
-      HashMap nativeHeader = getNativeHeader((String) entryDateMap.getKey());
+      HashMap nativeHeader = null; //TODO getNativeHeader((String) entryDateMap.getKey());
       String[] header = getRecordFactory().createHeader(nativeHeader);
       headers.add(header[0]);
       identifiers.add(header[1]);
@@ -385,7 +359,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception CannotDisseminateFormatException the record is not available for
    *                                             the specified metadataPrefix.
    */
-  private String constructRecord(HashMap nativeItem, String metadataPrefix) throws CannotDisseminateFormatException {
+  private String constructRecord(Item nativeItem, String metadataPrefix) throws CannotDisseminateFormatException {
     String schemaURL = null;
     Iterator setSpecs = getSetSpecs(nativeItem);
     Iterator abouts = getAbouts(nativeItem);
@@ -403,7 +377,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @param rs ResultSet containing the nativeItem
    * @return an Iterator containing the list of setSpec values for this nativeItem
    */
-  private Iterator getSetSpecs(HashMap nativeItem) {
+  private Iterator getSetSpecs(Item nativeItem) {
     return null;
   }
 
@@ -413,7 +387,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @param rs ResultSet containing the nativeItem
    * @return an Iterator containing the list of about values for this nativeItem
    */
-  private Iterator getAbouts(HashMap nativeItem) {
+  private Iterator getAbouts(Item nativeItem) {
     return null;
   }
 
@@ -445,11 +419,11 @@ public class FizOAICatalog extends AbstractCatalog {
       String fileDate = (String) entryDateMap.getValue();
       if (fileDate.compareTo(from) >= 0 && fileDate.compareTo(until) <= 0) {
         try {
-          HashMap nativeItem = getNativeRecord((String) entryDateMap.getKey());
-          String record = constructRecord(nativeItem, metadataPrefix);
+          HashMap nativeItem = null; //FIXME getNativeRecord((String) entryDateMap.getKey());
+          String record = null; //FIXME constructRecord(nativeItem, metadataPrefix);
           records.add(record);
           count++;
-        } catch (IOException e) {
+        } catch (Exception e) {
           e.printStackTrace();
           throw new OAIInternalServerError(e.getMessage());
         }
@@ -536,14 +510,21 @@ public class FizOAICatalog extends AbstractCatalog {
     while (count < maxListSize && iterator.hasNext()) {
       Map.Entry entryDateMap = (Map.Entry) iterator.next();
       try {
-        HashMap nativeItem = getNativeRecord((String) entryDateMap.getKey());
-        String record = constructRecord(nativeItem, metadataPrefix);
+        HashMap nativeItem  = null; //FIXME  getNativeRecord((String) entryDateMap.getKey());
+        String record  = null; //FIXME  constructRecord(nativeItem, metadataPrefix);
         records.add(record);
         count++;
-      } catch (CannotDisseminateFormatException e) {
-        /* the client hacked the resumptionToken beyond repair */
-        throw new BadResumptionTokenException();
-      } catch (IOException e) {
+      } 
+      
+//FIXME      catch (CannotDisseminateFormatException e) {
+//        /* the client hacked the resumptionToken beyond repair */
+//        throw new BadResumptionTokenException();
+//      } catch (IOException e) {
+//        /* the file is probably missing */
+//        throw new BadResumptionTokenException();
+//      }
+      
+      catch (Exception e) {
         /* the file is probably missing */
         throw new BadResumptionTokenException();
       }
@@ -581,69 +562,23 @@ public class FizOAICatalog extends AbstractCatalog {
   }
 
   public Map listSets() throws NoSetHierarchyException, OAIInternalServerError {
+    Map map = null;
+    
     logger.info("listSets");
     purge(); // clean out old resumptionTokens
 
-    Map listSetsMap = new HashMap();
-    ArrayList sets = new ArrayList();
-
-    String url = backendBaseUrl + "/set";
-    logger.info("listSets using " + url);
-
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-
-      String bodyAsString = EntityUtils.toString(response.getEntity());
-
-      JSONParser parser = new JSONParser();
-      JSONArray setsJson = (JSONArray) parser.parse(bodyAsString);
-
-      // loop array
-      Iterator<JSONObject> iterator = setsJson.iterator();
-      while (iterator.hasNext()) {
-        JSONObject set = (JSONObject) iterator.next();
-        sets.add(getSetXML(set));
-      }
-
-    } catch (IOException | ParseException e) {
-      logger.error("Error while getting sets", e);
-      throw new OAIInternalServerError(e.getMessage());
+    
+    try {
+      map = BackendService.getInstance(backendBaseUrl).getSets();
+    } catch (IOException e) {
+      
     }
-
-    listSetsMap.put("sets", sets.iterator());
-    return listSetsMap;
+    
+    return map;
 
   }
 
-  public String getSetXML(JSONObject setItem) throws IllegalArgumentException {
-    String setSpec = (String) setItem.get("spec");
-    String setName = (String) setItem.get("name");
-    String setDescription = (String) setItem.get("description");
 
-    StringBuffer sb = new StringBuffer();
-    sb.append("<set>");
-    sb.append("<setSpec>");
-    sb.append(setSpec != null ? OAIUtil.xmlEncode(setSpec) : "");
-    sb.append("</setSpec>");
-    sb.append("<setName>");
-    sb.append(setName != null ? OAIUtil.xmlEncode(setName) : "");
-    sb.append("</setName>");
-    if (setDescription != null) {
-      sb.append("<setDescription>");
-      sb.append(
-          "<oai_dc:dc xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd\">");
-      sb.append("<dc:description>");
-      sb.append(OAIUtil.xmlEncode(setDescription));
-      sb.append("</dc:description>");
-      sb.append("</oai_dc:dc>");
-
-      sb.append("</setDescription>");
-    }
-    sb.append("</set>");
-
-    logger.info("getSetXML: " + sb.toString());
-    return sb.toString();
-  }
 
   public Map listSets(String resumptionToken) throws BadResumptionTokenException {
     throw new BadResumptionTokenException();

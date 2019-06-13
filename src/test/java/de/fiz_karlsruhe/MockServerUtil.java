@@ -30,33 +30,16 @@ public class MockServerUtil  implements ExpectationInitializer {
   private void initGetItem(MockServerClient serverClient) {
     serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*"))
         .respond(response().withStatusCode(200)
-            .withBody("<ns2:radarDataset xmlns=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-elements\" xmlns:ns2=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-dataset\">\n" + 
-                "    <identifier identifierType=\"DOI\">10.0133/10000386</identifier>\n" + 
-                "    <creators>\n" + 
-                "        <creator>\n" + 
-                "            <creatorName>Mustermann, Max</creatorName>\n" + 
-                "            <givenName>Max</givenName>\n" + 
-                "            <familyName>Mustermann</familyName>\n" + 
-                "        </creator>\n" + 
-                "    </creators>\n" + 
-                "    <title>123</title>\n" + 
-                "    <publishers>\n" + 
-                "        <publisher>FIZ Karlsruhe</publisher>\n" + 
-                "    </publishers>\n" + 
-                "    <productionYear>2019</productionYear>\n" + 
-                "    <subjectAreas>\n" + 
-                "        <subjectArea>\n" + 
-                "            <controlledSubjectAreaName>Astrophysics and Astronomy</controlledSubjectAreaName>\n" + 
-                "        </subjectArea>\n" + 
-                "    </subjectAreas>\n" + 
-                "    <resource resourceType=\"Collection\"></resource>\n" + 
-                "    <rights>\n" + 
-                "        <controlledRights>CC BY-SA 4.0 Attribution-ShareAlike</controlledRights>\n" + 
-                "    </rights>\n" + 
-                "    <rightsHolders>\n" + 
-                "        <rightsHolder>FIZ Karlsruhe</rightsHolder>\n" + 
-                "    </rightsHolders>\n" + 
-                "</ns2:radarDataset>"));
+            .withBody("{\n" + "\"datestamp\":\"2019-12-22\",\n" + 
+                "\"identifier\":\"10.0133/49593\",\n" + 
+                "\"deleteFlag\":\"false\",\n" + 
+                "\"sets\":[\"fiz\",\"fiz:iee\",\"fiz:hr\"],\n" + 
+                "\"content\": \"  " +
+                
+                "<ns2:radarDataset xmlns=\\\"http:\\/\\/radar-service.eu\\/schemas\\/descriptive\\/radar\\/v09\\/radar-elements\\\" xmlns:ns2=\\\"http:\\/\\/radar-service.eu\\/schemas\\/descriptive\\/radar\\/v09\\/radar-dataset\\\">\\r\\n    <identifier identifierType=\\\"RADAR\\\">RADAR\\/10000143<\\/identifier>\\r\\n    <creators>\\r\\n        <creator>\\r\\n            <creatorName>Mustermann, Max<\\/creatorName>\\r\\n            <givenName>Max<\\/givenName>\\r\\n            <familyName>Mustermann<\\/familyName>\\r\\n            <creatorAffiliation>FIZ-Karlsruhe<\\/creatorAffiliation>\\r\\n        <\\/creator>\\r\\n    <\\/creators>\\r\\n    <title>archive public<\\/title>\\r\\n    <publishers>\\r\\n        <publisher>FIZ-Karlsruhe<\\/publisher>\\r\\n    <\\/publishers>\\r\\n    <productionYear>2018-2019<\\/productionYear>\\r\\n    <subjectAreas>\\r\\n        <subjectArea>\\r\\n            <controlledSubjectAreaName>Computer Science<\\/controlledSubjectAreaName>\\r\\n        <\\/subjectArea>\\r\\n    <\\/subjectAreas>\\r\\n    <resource resourceType=\\\"Dataset\\\"><\\/resource>\\r\\n    <rights>\\r\\n        <controlledRights>CC BY-NC-SA 4.0 Attribution-NonCommercial-ShareAlike<\\/controlledRights>\\r\\n    <\\/rights>\\r\\n    <rightsHolders>\\r\\n        <rightsHolder>FIZ-Karlsruhe<\\/rightsHolder>\\r\\n    <\\/rightsHolders>\\r\\n<\\/ns2:radarDataset>\\r\\n" + 
+                
+                "\"" +
+                "}"));
   }
   
   

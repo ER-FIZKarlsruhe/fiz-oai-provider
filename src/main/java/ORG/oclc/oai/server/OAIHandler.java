@@ -59,7 +59,7 @@ public class OAIHandler extends HttpServlet {
     public static final String PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE = OAIHandler.class.getName() + ".properties";
     
     private static final String VERSION = "1.5.62";
-    private static boolean debug = true;
+    private static boolean debug = false;
 
 //    private Transformer transformer = null;
 //    private boolean serviceUnavailable = false;

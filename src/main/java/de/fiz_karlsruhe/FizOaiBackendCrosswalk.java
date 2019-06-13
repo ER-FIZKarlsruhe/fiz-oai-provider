@@ -7,21 +7,21 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.util.OAIUtil;
+import de.fiz_karlsruhe.model.Item;
 
 
 
@@ -105,17 +105,10 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
   public String createMetadata(Object nativeItem) throws CannotDisseminateFormatException {
     try {
       String xmlRec = null;
-      if (nativeItem instanceof HashMap) {
-        HashMap recordMap = (HashMap) nativeItem;
-        xmlRec = (String) recordMap.get("recordString");
-        if (xmlRec == null) {
-          xmlRec = new String((byte[]) recordMap.get("recordBytes"), "UTF-8");
-        }
+      if (nativeItem instanceof Item) {
+        Item item = (Item) nativeItem;
+        xmlRec = item.getContent();
         xmlRec = xmlRec.trim();
-      } else if (nativeItem instanceof String) {
-        xmlRec = (String) nativeItem;
-      } else if (nativeItem instanceof Document) {
-        xmlRec = OAIUtil.toString((Document) nativeItem);
       } else {
         throw new Exception("Unrecognized nativeItem");
       }
@@ -127,9 +120,7 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
         xmlRec = xmlRec.substring(offset + 2);
       }
       
-      
       logger.debug("XSLTCrosswalk.createMetadata: transformer=" + transformer);
-
       
       if (transformer != null) {
         StringReader stringReader = new StringReader(xmlRec);

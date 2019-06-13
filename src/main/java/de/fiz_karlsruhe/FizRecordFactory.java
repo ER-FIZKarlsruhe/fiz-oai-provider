@@ -16,24 +16,15 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import ORG.oclc.oai.server.catalog.RecordFactory;
-import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.crosswalk.CrosswalkItem;
-import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
+import de.fiz_karlsruhe.model.Item;
 
 /**
  * FileRecordFactory converts native XML "items" to "record" Strings. This
@@ -75,51 +66,8 @@ public class FizRecordFactory extends RecordFactory {
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
-    String url = backendBaseUrl + "/format";
-
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-
-      String bodyAsString = EntityUtils.toString(response.getEntity());
-
-      JSONParser parser = new JSONParser();
-      JSONArray formats = (JSONArray) parser.parse(bodyAsString);
-
-      // loop array
-      Iterator<JSONObject> iterator = formats.iterator();
-      while (iterator.hasNext()) {
-        JSONObject format = (JSONObject) iterator.next();
-
-        String metadataPrefix = (String) format.get("metadataPrefix");
-        logger.info(metadataPrefix);
-
-        String schemaLocation = (String) format.get("schemaLocation");
-        logger.info(schemaLocation);
-
-        String schemaNamespace = (String) format.get("schemaNamespace");
-        logger.info(schemaNamespace);
-
-        String crosswalkStyleSheet = (String) format.get("crosswalkStyleSheet");
-        logger.info(crosswalkStyleSheet);
-
-        if (crosswalkStyleSheet.isEmpty()) {
-          logger.warn("Skip crosswalk, as no xslt is available!");
-          continue;
-        }
-
-        String identifierXpath = (String) format.get("identifierXpath");
-        logger.info(identifierXpath);
-        logger.info("");
-
-        Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(schemaLocation, crosswalkStyleSheet);
-
-        CrosswalkItem crosswalkItem = new CrosswalkItem(metadataPrefix, schemaLocation, schemaNamespace,
-            fizOaiBackendCrosswalk);
-        crosswalksMap.put(metadataPrefix, crosswalkItem);
-      }
-    } catch (Exception e) {
-      logger.error("An error occured during initializing the crosswalks", e);
-    }
+    
+    crosswalksMap = BackendService.getInstance(backendBaseUrl).getFormats();
 
     return crosswalksMap;
   }
@@ -163,7 +111,7 @@ public class FizRecordFactory extends RecordFactory {
    * @return local identifier
    */
   public String getLocalIdentifier(Object nativeItem) {
-    return (String) ((HashMap) nativeItem).get("localIdentifier");
+    return ((Item) nativeItem).getIdentifier();
   }
 
   /**
@@ -174,7 +122,7 @@ public class FizRecordFactory extends RecordFactory {
    * @exception IllegalArgumentException Something is wrong with the argument.
    */
   public String getDatestamp(Object nativeItem) throws IllegalArgumentException {
-    return (String) ((HashMap) nativeItem).get("lastModified");
+    return ((Item) nativeItem).getDatestamp();
   }
 
   /**
@@ -185,7 +133,7 @@ public class FizRecordFactory extends RecordFactory {
    * @exception IllegalArgumentException Something is wrong with the argument.
    */
   public Iterator getSetSpecs(Object nativeItem) throws IllegalArgumentException {
-    return null;
+    return ((Item) nativeItem).getSets().iterator();
   }
 
   /**
@@ -209,7 +157,7 @@ public class FizRecordFactory extends RecordFactory {
    * @exception IllegalArgumentException Something is wrong with the argument.
    */
   public boolean isDeleted(Object nativeItem) throws IllegalArgumentException {
-    return false;
+    return Boolean.valueOf(((Item) nativeItem).getDeleteFlag());
   }
 
   /**
