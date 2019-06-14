@@ -27,6 +27,7 @@ public class ListIdentifiersIT extends BaseIT {
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
     params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("set", "fiz"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -39,5 +40,85 @@ public class ListIdentifiersIT extends BaseIT {
     }
   }
 
+  @Test
+  public void testListIdentifiersMissingMetadataArgument() throws Exception {
+    logger.info("testListIdentifiers");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
 
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }
+  
+  @Test
+  public void testListIdentifiersBadFromArgument() throws Exception {
+    logger.info("testListIdentifiers");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("from", "abc"));//Must be like '2019-12-12'
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }
+  
+  @Test
+  public void testListIdentifiersCannotDisseminateFormat() throws Exception {
+    logger.info("testListIdentifiers");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oo"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("cannotDisseminateFormat"));
+      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }
+
+  @Test
+  public void testListIdentifiersEmptySet() throws Exception {
+    logger.info("testListIdentifiers");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("set", "empty"));//Returns an empty resultSet from the backend
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("noRecordsMatch"));
+      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+    }
+  }
+  
 }

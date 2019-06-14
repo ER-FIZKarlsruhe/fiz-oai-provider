@@ -83,8 +83,6 @@ public class BackendService {
         String json = EntityUtils.toString(response.getEntity());
         JavaType type = objectMapper.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
         result = objectMapper.readValue(json, type);
-      } else {
-        throw new IOException(response.getStatusLine().getReasonPhrase());
       }
     } catch (Exception e) {
       logger.error("Error on getIdentifiers", e);

@@ -23,6 +23,7 @@ public class BaseIT {
     try {
       ClassLoader classLoader = new ListMetadataFormatsIT().getClass().getClassLoader();
 
+      InputStream xmlXsd = classLoader.getResourceAsStream("xml.xsd");
       InputStream oaiPmhXsd = classLoader.getResourceAsStream("OAI-PMH.xsd");
       InputStream oaiIdentifierXsd = classLoader.getResourceAsStream("oai-identifier.xsd");
       InputStream oaiDcXsd = classLoader.getResourceAsStream("oai_dc.xsd");
@@ -32,7 +33,8 @@ public class BaseIT {
       
       SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
       
-      StreamSource[] schemas = {new StreamSource(oaiPmhXsd), new StreamSource(oaiIdentifierXsd), new StreamSource(oaiDcXsd), new StreamSource(simpleDcXsd)};
+      StreamSource[] schemas = {new StreamSource(simpleDcXsd), new StreamSource(oaiPmhXsd), new StreamSource(oaiIdentifierXsd), new StreamSource(oaiDcXsd), new StreamSource(xmlXsd)};
+
       Schema schema = factory.newSchema(schemas);
       Validator validator = schema.newValidator();
       validator.validate(new StreamSource(xmlStream));

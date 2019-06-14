@@ -28,6 +28,7 @@ public class MockServerUtil  implements ExpectationInitializer {
     initGetSpecificSet(mockServerClient);
     initGetAllSets(mockServerClient);
     initGetItemsNoContent(mockServerClient);
+    initGetItemsNoResultData(mockServerClient);
   }
 
   private void initGetItem(MockServerClient serverClient) {
@@ -46,7 +47,7 @@ public class MockServerUtil  implements ExpectationInitializer {
   }
   
   private void initGetItemsNoContent(MockServerClient serverClient) {
-    serverClient.when(request().withMethod("GET").withPath("/item").withQueryStringParameters(new Parameter("content", Arrays.asList("false"))))
+    serverClient.when(request().withMethod("GET").withPath("/item").withQueryStringParameters(new Parameter("content", Arrays.asList("false")), new Parameter("set", Arrays.asList("fiz"))))
         .respond(response().withStatusCode(200)
             .withBody("{\n" + 
                 "    \"total\": \"3\",\n" + 
@@ -83,6 +84,18 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "            ]\n" + 
                 "        }\n" + 
                 "    ]\n" + 
+                "}"));
+  }
+  
+  
+  private void initGetItemsNoResultData(MockServerClient serverClient) {
+    serverClient.when(request().withMethod("GET").withPath("/item").withQueryStringParameters(new Parameter("content", Arrays.asList("false")), new Parameter("set", Arrays.asList("empty")) ))
+        .respond(response().withStatusCode(200)
+            .withBody("{\n" + 
+                "    \"total\": \"0\",\n" + 
+                "    \"offset\": \"0\",\n" + 
+                "    \"size\": \"100\",\n" + 
+                "    \"data\": []\n" + 
                 "}"));
   }
   
