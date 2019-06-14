@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -33,8 +34,11 @@ import ORG.oclc.oai.server.verb.NoItemsMatchException;
 import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
+import ORG.oclc.oai.util.OAIUtil;
 import de.fiz_karlsruhe.model.Item;
 import de.fiz_karlsruhe.model.SearchResult;
+import de.fiz_karlsruhe.model.Set;
+import de.fiz_karlsruhe.service.BackendService;
 
 /**
  * FileSystemOAICatalog is an implementation of AbstractCatalog interface with
@@ -563,22 +567,53 @@ public class FizOAICatalog extends AbstractCatalog {
   }
 
   public Map listSets() throws NoSetHierarchyException, OAIInternalServerError {
-    Map map = null;
+    Map<String,Iterator> setsIterator = new HashMap<String,Iterator>();
+    List<String> xmlSets = new ArrayList<String>();
     
     logger.info("listSets");
     purge(); // clean out old resumptionTokens
-
     
+    List<Set> backendSetList;
     try {
-      map = BackendService.getInstance(backendBaseUrl).getSets();
+      backendSetList = BackendService.getInstance(backendBaseUrl).getSets();
     } catch (IOException e) {
-      
+      throw new OAIInternalServerError("Cannot retrieve sets from backend");
     }
     
-    return map;
+    for(Set setItem : backendSetList) {
+      xmlSets.add(getSetXML(setItem));
+    }
+    
+    setsIterator.put("sets", xmlSets.iterator());
+    return setsIterator;
 
   }
 
+  public String getSetXML(Set setItem) throws IllegalArgumentException {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<set>");
+    sb.append("<setSpec>");
+    sb.append(setItem.getSpec() != null ? OAIUtil.xmlEncode(setItem.getSpec()) : "");
+    sb.append("</setSpec>");
+    sb.append("<setName>");
+    sb.append(setItem.getName() != null ? OAIUtil.xmlEncode(setItem.getName()) : "");
+    sb.append("</setName>");
+    if (setItem.getDescription() != null) {
+      sb.append("<setDescription>");
+      sb.append(
+          "<oai_dc:dc xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd\">");
+      sb.append("<dc:description>");
+      sb.append(OAIUtil.xmlEncode(setItem.getDescription()));
+      sb.append("</dc:description>");
+      sb.append("</oai_dc:dc>");
+
+      sb.append("</setDescription>");
+    }
+    sb.append("</set>");
+
+    logger.info("getSetXML: " + sb.toString());
+    return sb.toString();
+  }
 
 
   public Map listSets(String resumptionToken) throws BadResumptionTokenException {

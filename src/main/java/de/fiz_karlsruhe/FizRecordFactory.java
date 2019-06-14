@@ -13,18 +13,21 @@ package de.fiz_karlsruhe;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
-import org.json.simple.parser.ParseException;
 
 import ORG.oclc.oai.server.catalog.RecordFactory;
+import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.crosswalk.CrosswalkItem;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
+import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
+import de.fiz_karlsruhe.service.BackendService;
 
 /**
  * FileRecordFactory converts native XML "items" to "record" Strings. This
@@ -57,7 +60,7 @@ public class FizRecordFactory extends RecordFactory {
   }
 
   private static HashMap<String, CrosswalkItem> initCrosswalks(Properties properties)
-      throws IOException, JSONException, ParseException, OAIInternalServerError {
+      throws IOException, JSONException, OAIInternalServerError {
     logger.info("initCrosswalks");
     HashMap<String, CrosswalkItem> crosswalksMap = new HashMap<String, CrosswalkItem>();
 
@@ -67,8 +70,20 @@ public class FizRecordFactory extends RecordFactory {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
     
-    crosswalksMap = BackendService.getInstance(backendBaseUrl).getFormats();
+    List<Format> backendFormats = BackendService.getInstance(backendBaseUrl).getFormats();
 
+    for (Format format : backendFormats) {
+      if (format.getCrosswalkStyleSheet() == null || format.getCrosswalkStyleSheet().isEmpty()) {
+        logger.warn("skip format, as no stylesheet is defined.");
+        continue;
+      }
+      Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(format.getSchemaLocation(), format.getCrosswalkStyleSheet());
+
+      CrosswalkItem crosswalkItem = new CrosswalkItem(format.getMetadataPrefix(), format.getSchemaLocation(), format.getSchemaNamespace(), fizOaiBackendCrosswalk);
+      crosswalksMap.put(format.getMetadataPrefix(), crosswalkItem);
+    }
+    
+    
     return crosswalksMap;
   }
 
