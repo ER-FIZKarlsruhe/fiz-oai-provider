@@ -5,8 +5,9 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.Calendar;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -15,12 +16,10 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
-import ORG.oclc.oai.util.OAIUtil;
 import de.fiz_karlsruhe.model.Item;
 
 
@@ -66,12 +65,18 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
         URL url = new URL(xsltUrl);
         BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
         StreamSource xslSource = new StreamSource(in);
-        TransformerFactory tFactory = TransformerFactory.newInstance();
-        this.transformer = tFactory.newTransformer(xslSource);
+        TransformerFactory factory = TransformerFactory.newInstance("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        
+        this.transformer = factory.newTransformer(xslSource);
         this.transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         this.transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
         this.transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
+        this.transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        this.transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        this.transformer.setParameter("datasetSize", "0");
+        this.transformer.setParameter("currentYear", Calendar.getInstance().get(Calendar.YEAR));
       } catch (Exception e) {
         logger.error("Error during init of FizOaiBackendCrosswalk", e);
         
@@ -130,7 +135,7 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
           transformer.transform(streamSource, new StreamResult(stringWriter));
         }
         
-        logger.debug("XSLTCrosswalk.createMetadata: return=" + stringWriter.toString());
+        logger.info("XSLTCrosswalk.createMetadata: return=" + stringWriter.toString());
         
         return stringWriter.toString();
       } else {

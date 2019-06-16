@@ -17,24 +17,25 @@ public class BaseIT {
   final static Logger logger = LogManager.getLogger(ListMetadataFormatsIT.class);
 
   public static String TEST_OAI_URL = "http://localhost:8999/fiz-oai-provider/OAIHandler";
-  
-  
+
   protected boolean validateAgainstOaiXsd(String xml) {
+    
     try {
       ClassLoader classLoader = new ListMetadataFormatsIT().getClass().getClassLoader();
 
-      InputStream xmlXsd = classLoader.getResourceAsStream("xml.xsd");
-      InputStream oaiPmhXsd = classLoader.getResourceAsStream("OAI-PMH.xsd");
-      InputStream oaiIdentifierXsd = classLoader.getResourceAsStream("oai-identifier.xsd");
-      InputStream oaiDcXsd = classLoader.getResourceAsStream("oai_dc.xsd");
-      InputStream simpleDcXsd = classLoader.getResourceAsStream("simpledc20021212.xsd");
+      StreamSource[] schemas = { 
+        new StreamSource(classLoader.getResourceAsStream("xml.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("OAI-PMH.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("oai-identifier.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("simpledc20021212.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("oai_dc.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("datacite/datacite.xsd")),         
+      };
       
       InputStream xmlStream = new ByteArrayInputStream(xml.getBytes());
-      
-      SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      
-      StreamSource[] schemas = {new StreamSource(simpleDcXsd), new StreamSource(oaiPmhXsd), new StreamSource(oaiIdentifierXsd), new StreamSource(oaiDcXsd), new StreamSource(xmlXsd)};
 
+      SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      factory.setResourceResolver(new ResourceResolver("datacite"));
       Schema schema = factory.newSchema(schemas);
       Validator validator = schema.newValidator();
       validator.validate(new StreamSource(xmlStream));
@@ -45,5 +46,5 @@ public class BaseIT {
       return false;
     }
   }
-  
+
 }

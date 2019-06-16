@@ -220,7 +220,7 @@ public class FizOAICatalog extends AbstractCatalog {
     SearchResult<Item> result = null;
     
     try {
-      result = BackendService.getInstance(backendBaseUrl).getIdentifiers();
+      result = BackendService.getInstance(backendBaseUrl).getItems(false, 0, 100, set, from, until);
       
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
@@ -414,34 +414,33 @@ public class FizOAICatalog extends AbstractCatalog {
   public Map listRecords(String from, String until, String set, String metadataPrefix)
       throws CannotDisseminateFormatException, OAIInternalServerError, NoItemsMatchException {
     purge(); // clean out old resumptionTokens
+    
+    SearchResult<Item> result = null;
     Map listRecordsMap = new HashMap();
     ArrayList records = new ArrayList();
-    Iterator iterator = fileDateMap.entrySet().iterator();
-    int numRows = fileDateMap.entrySet().size();
-    int count = 0;
-    while (count < maxListSize && iterator.hasNext()) {
-      Map.Entry entryDateMap = (Map.Entry) iterator.next();
-      String fileDate = (String) entryDateMap.getValue();
-      if (fileDate.compareTo(from) >= 0 && fileDate.compareTo(until) <= 0) {
-        try {
-          HashMap nativeItem = null; //FIXME getNativeRecord((String) entryDateMap.getKey());
-          String record = null; //FIXME constructRecord(nativeItem, metadataPrefix);
-          records.add(record);
-          count++;
-        } catch (Exception e) {
-          e.printStackTrace();
-          throw new OAIInternalServerError(e.getMessage());
-        }
+    
+    try {
+      result = BackendService.getInstance(backendBaseUrl).getItems(true,0,100, set, from, until);
+      
+      if (result == null || result.getData().isEmpty()) {
+        throw new NoItemsMatchException();
       }
+      
+      for(Item item : result.getData()) {
+        String record = constructRecord(item, metadataPrefix);
+        records.add(record);
+      }
+      
+    } catch (IOException e) {
+      throw new OAIInternalServerError(e.getMessage());
     }
 
-    if (count == 0)
-      throw new NoItemsMatchException();
 
     /* decide if you're done */
-    if (iterator.hasNext()) {
+    int cursorPosition = (result.getOffset() + result.getData().size());
+    if (cursorPosition < result.getTotal()) {
       String resumptionId = getRSName();
-      resumptionResults.put(resumptionId, iterator);
+      //resumptionResults.put(resumptionId, iterator);
 
       /*****************************************************************
        * Construct the resumptionToken String however you see fit.
@@ -449,9 +448,9 @@ public class FizOAICatalog extends AbstractCatalog {
       StringBuffer resumptionTokenSb = new StringBuffer();
       resumptionTokenSb.append(resumptionId);
       resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(count));
+      resumptionTokenSb.append(cursorPosition);
       resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(numRows));
+      resumptionTokenSb.append(result.getTotal());
       resumptionTokenSb.append(":");
       resumptionTokenSb.append(metadataPrefix);
 
@@ -460,9 +459,8 @@ public class FizOAICatalog extends AbstractCatalog {
        * attributes in the response. Otherwise, use the line after it that I've
        * commented out.
        *****************************************************************/
-      listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), numRows, 0));
-// 	    listRecordsMap.put("resumptionMap",
-// 				   getResumptionMap(resumptionTokenSb.toString()));
+      //listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), cursorPosition, 0));
+// 	    listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString()));
     }
     listRecordsMap.put("records", records.iterator());
     return listRecordsMap;

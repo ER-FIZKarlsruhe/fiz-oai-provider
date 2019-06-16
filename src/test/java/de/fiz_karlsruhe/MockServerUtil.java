@@ -28,6 +28,7 @@ public class MockServerUtil  implements ExpectationInitializer {
     initGetSpecificSet(mockServerClient);
     initGetAllSets(mockServerClient);
     initGetItemsNoContent(mockServerClient);
+    initGetItemsWithContent(mockServerClient);
     initGetItemsNoResultData(mockServerClient);
   }
 
@@ -40,7 +41,7 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "\"sets\":[\"fiz\",\"fiz:iee\",\"fiz:hr\"],\n" + 
                 "\"content\": \"  " +
                 
-                "<ns2:radarDataset xmlns=\\\"http:\\/\\/radar-service.eu\\/schemas\\/descriptive\\/radar\\/v09\\/radar-elements\\\" xmlns:ns2=\\\"http:\\/\\/radar-service.eu\\/schemas\\/descriptive\\/radar\\/v09\\/radar-dataset\\\">\\r\\n    <identifier identifierType=\\\"RADAR\\\">RADAR\\/10000143<\\/identifier>\\r\\n    <creators>\\r\\n        <creator>\\r\\n            <creatorName>Mustermann, Max<\\/creatorName>\\r\\n            <givenName>Max<\\/givenName>\\r\\n            <familyName>Mustermann<\\/familyName>\\r\\n            <creatorAffiliation>FIZ-Karlsruhe<\\/creatorAffiliation>\\r\\n        <\\/creator>\\r\\n    <\\/creators>\\r\\n    <title>archive public<\\/title>\\r\\n    <publishers>\\r\\n        <publisher>FIZ-Karlsruhe<\\/publisher>\\r\\n    <\\/publishers>\\r\\n    <productionYear>2018-2019<\\/productionYear>\\r\\n    <subjectAreas>\\r\\n        <subjectArea>\\r\\n            <controlledSubjectAreaName>Computer Science<\\/controlledSubjectAreaName>\\r\\n        <\\/subjectArea>\\r\\n    <\\/subjectAreas>\\r\\n    <resource resourceType=\\\"Dataset\\\"><\\/resource>\\r\\n    <rights>\\r\\n        <controlledRights>CC BY-NC-SA 4.0 Attribution-NonCommercial-ShareAlike<\\/controlledRights>\\r\\n    <\\/rights>\\r\\n    <rightsHolders>\\r\\n        <rightsHolder>FIZ-Karlsruhe<\\/rightsHolder>\\r\\n    <\\/rightsHolders>\\r\\n<\\/ns2:radarDataset>\\r\\n" + 
+                "<radarDataset>\\r\\n    <identifier identifierType=\\\"RADAR\\\">RADAR\\/10000143<\\/identifier>\\r\\n    <creators>\\r\\n        <creator>\\r\\n            <creatorName>Mustermann, Max<\\/creatorName>\\r\\n            <givenName>Max<\\/givenName>\\r\\n            <familyName>Mustermann<\\/familyName>\\r\\n            <creatorAffiliation>FIZ-Karlsruhe<\\/creatorAffiliation>\\r\\n        <\\/creator>\\r\\n    <\\/creators>\\r\\n    <title>archive public<\\/title>\\r\\n    <publishers>\\r\\n        <publisher>FIZ-Karlsruhe<\\/publisher>\\r\\n    <\\/publishers>\\r\\n    <productionYear>2018-2019<\\/productionYear>\\r\\n    <subjectAreas>\\r\\n        <subjectArea>\\r\\n            <controlledSubjectAreaName>Computer Science<\\/controlledSubjectAreaName>\\r\\n        <\\/subjectArea>\\r\\n    <\\/subjectAreas>\\r\\n    <resource resourceType=\\\"Dataset\\\"><\\/resource>\\r\\n    <rights>\\r\\n        <controlledRights>CC BY-NC-SA 4.0 Attribution-NonCommercial-ShareAlike<\\/controlledRights>\\r\\n    <\\/rights>\\r\\n    <rightsHolders>\\r\\n        <rightsHolder>FIZ-Karlsruhe<\\/rightsHolder>\\r\\n    <\\/rightsHolders>\\r\\n</radarDataset>\\r\\n" + 
                 
                 "\"" +
                 "}"));
@@ -82,6 +83,50 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "                \"fiz\",\n" + 
                 "                \"fiz:iee\"\n" + 
                 "            ]\n" + 
+                "        }\n" + 
+                "    ]\n" + 
+                "}"));
+  }
+  
+  private void initGetItemsWithContent(MockServerClient serverClient) {
+    serverClient.when(request().withMethod("GET").withPath("/item").withQueryStringParameters(new Parameter("content", Arrays.asList("true")), new Parameter("set", Arrays.asList("fiz"))))
+        .respond(response().withStatusCode(200)
+            .withBody("{\n" + 
+                "    \"total\": \"3\",\n" + 
+                "    \"offset\": \"0\",\n" + 
+                "    \"size\": \"100\",\n" + 
+                "    \"data\": [\n" + 
+                "        {\n" + 
+                "            \"datestamp\": \"2019-12-22\",\n" + 
+                "            \"identifier\": \"10.0133/49593\",\n" + 
+                "            \"deleteFlag\": \"false\",\n" + 
+                "            \"sets\": [\n" + 
+                "                \"fiz\",\n" + 
+                "                \"fiz:iee\",\n" + 
+                "                \"fiz:hr\"\n" + 
+                "            ],\n" + 
+                "            \"content\":\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"yes\\\"?>\\r\\n<radarDataset>\\r\\n    <identifier identifierType=\\\"DOI\\\">10.5072\\/10000135<\\/identifier>\\r\\n    <creators>\\r\\n        <creator>\\r\\n            <creatorName>Mustermann, Max<\\/creatorName>\\r\\n            <givenName>Max<\\/givenName>\\r\\n            <familyName>Mustermann<\\/familyName>\\r\\n            <creatorAffiliation>FIZ-Karlsruhe<\\/creatorAffiliation>\\r\\n        <\\/creator>\\r\\n    <\\/creators>\\r\\n    <title>publish set radar<\\/title>\\r\\n    <publishers>\\r\\n        <publisher>FIZ-Karlsruhe<\\/publisher>\\r\\n    <\\/publishers>\\r\\n    <productionYear>2018-2019<\\/productionYear>\\r\\n    <publicationYear>2019<\\/publicationYear>\\r\\n    <subjectAreas>\\r\\n        <subjectArea>\\r\\n            <controlledSubjectAreaName>Computer Science<\\/controlledSubjectAreaName>\\r\\n        <\\/subjectArea>\\r\\n    <\\/subjectAreas>\\r\\n    <resource resourceType=\\\"Dataset\\\"><\\/resource>\\r\\n    <rights>\\r\\n        <controlledRights>CC BY-NC-SA 4.0 Attribution-NonCommercial-ShareAlike<\\/controlledRights>\\r\\n    <\\/rights>\\r\\n    <rightsHolders>\\r\\n        <rightsHolder>FIZ-Karlsruhe<\\/rightsHolder>\\r\\n    <\\/rightsHolders>\\r\\n</radarDataset>\\r\\n\"\n" + 
+                "        },\n" + 
+                "        {\n" + 
+                "            \"datestamp\": \"2019-12-22\",\n" + 
+                "            \"identifier\": \"10.0133/49594\",\n" + 
+                "            \"deleteFlag\": \"false\",\n" + 
+                "            \"sets\": [\n" + 
+                "                \"fiz\",\n" + 
+                "                \"fiz:iee\",\n" + 
+                "                \"fiz:hr\"\n" + 
+                "            ],\n" + 
+                "            \"content\":\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"yes\\\"?>\\r\\n<radarDataset>\\r\\n    <identifier identifierType=\\\"DOI\\\">10.5072\\/10000135<\\/identifier>\\r\\n    <creators>\\r\\n        <creator>\\r\\n            <creatorName>Mustermann, Max<\\/creatorName>\\r\\n            <givenName>Max<\\/givenName>\\r\\n            <familyName>Mustermann<\\/familyName>\\r\\n            <creatorAffiliation>FIZ-Karlsruhe<\\/creatorAffiliation>\\r\\n        <\\/creator>\\r\\n    <\\/creators>\\r\\n    <title>publish set radar<\\/title>\\r\\n    <publishers>\\r\\n        <publisher>FIZ-Karlsruhe<\\/publisher>\\r\\n    <\\/publishers>\\r\\n    <productionYear>2018-2019<\\/productionYear>\\r\\n    <publicationYear>2019<\\/publicationYear>\\r\\n    <subjectAreas>\\r\\n        <subjectArea>\\r\\n            <controlledSubjectAreaName>Computer Science<\\/controlledSubjectAreaName>\\r\\n        <\\/subjectArea>\\r\\n    <\\/subjectAreas>\\r\\n    <resource resourceType=\\\"Dataset\\\"><\\/resource>\\r\\n    <rights>\\r\\n        <controlledRights>CC BY-NC-SA 4.0 Attribution-NonCommercial-ShareAlike<\\/controlledRights>\\r\\n    <\\/rights>\\r\\n    <rightsHolders>\\r\\n        <rightsHolder>FIZ-Karlsruhe<\\/rightsHolder>\\r\\n    <\\/rightsHolders>\\r\\n</radarDataset>\\r\\n\"\n" + 
+                "        },\n" + 
+                "        {\n" + 
+                "            \"datestamp\": \"2019-12-22\",\n" + 
+                "            \"identifier\": \"10.0133/49595\",\n" + 
+                "            \"deleteFlag\": \"false\",\n" + 
+                "            \"sets\": [\n" + 
+                "                \"fiz\",\n" + 
+                "                \"fiz:iee\"\n" + 
+                "            ],\n" + 
+                "            \"content\":\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"yes\\\"?>\\r\\n<radarDataset>\\r\\n    <identifier identifierType=\\\"DOI\\\">10.5072\\/10000135<\\/identifier>\\r\\n    <creators>\\r\\n        <creator>\\r\\n            <creatorName>Mustermann, Max<\\/creatorName>\\r\\n            <givenName>Max<\\/givenName>\\r\\n            <familyName>Mustermann<\\/familyName>\\r\\n            <creatorAffiliation>FIZ-Karlsruhe<\\/creatorAffiliation>\\r\\n        <\\/creator>\\r\\n    <\\/creators>\\r\\n    <title>publish set radar<\\/title>\\r\\n    <publishers>\\r\\n        <publisher>FIZ-Karlsruhe<\\/publisher>\\r\\n    <\\/publishers>\\r\\n    <productionYear>2018-2019<\\/productionYear>\\r\\n    <publicationYear>2019<\\/publicationYear>\\r\\n    <subjectAreas>\\r\\n        <subjectArea>\\r\\n            <controlledSubjectAreaName>Computer Science<\\/controlledSubjectAreaName>\\r\\n        <\\/subjectArea>\\r\\n    <\\/subjectAreas>\\r\\n    <resource resourceType=\\\"Dataset\\\"><\\/resource>\\r\\n    <rights>\\r\\n        <controlledRights>CC BY-NC-SA 4.0 Attribution-NonCommercial-ShareAlike<\\/controlledRights>\\r\\n    <\\/rights>\\r\\n    <rightsHolders>\\r\\n        <rightsHolder>FIZ-Karlsruhe<\\/rightsHolder>\\r\\n    <\\/rightsHolders>\\r\\n</radarDataset>\\r\\n\"\n" + 
                 "        }\n" + 
                 "    ]\n" + 
                 "}"));
