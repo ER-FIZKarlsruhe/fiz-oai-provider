@@ -38,7 +38,7 @@ import de.fiz_karlsruhe.service.BackendService;
 public class FizRecordFactory extends RecordFactory {
 
   private String repositoryIdentifier = null;
-
+  
   final static Logger logger = LogManager.getLogger(FizRecordFactory.class);
 
   /**
@@ -70,17 +70,31 @@ public class FizRecordFactory extends RecordFactory {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
     
+    String defaultMetadataPrefix = properties.getProperty("FizRecordFactory.defaultMetadataPrefix");
+    logger.info("defaultMetadataPrefix: " + defaultMetadataPrefix);
+    if (defaultMetadataPrefix == null) {
+      throw new IllegalArgumentException("FizRecordFactory.defaultMetadataPrefix is missing from the properties file");
+    }
+    
     List<Format> backendFormats = BackendService.getInstance(backendBaseUrl).getFormats();
 
     for (Format format : backendFormats) {
+      if (format.getMetadataPrefix().equals(defaultMetadataPrefix)) {
+        Crosswalk fizDefaultMetadataCrosswalk = new FizDefaultMetadataCrosswalk(format.getSchemaLocation());
+        CrosswalkItem crosswalkItem = new CrosswalkItem(format.getMetadataPrefix(), format.getSchemaLocation(), format.getSchemaNamespace(), fizDefaultMetadataCrosswalk);
+        crosswalksMap.put(format.getMetadataPrefix(), crosswalkItem);
+      } else {
+      
       if (format.getCrosswalkStyleSheet() == null || format.getCrosswalkStyleSheet().isEmpty()) {
         logger.warn("skip format, as no stylesheet is defined.");
         continue;
       }
-      Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(format.getSchemaLocation(), format.getCrosswalkStyleSheet());
-
-      CrosswalkItem crosswalkItem = new CrosswalkItem(format.getMetadataPrefix(), format.getSchemaLocation(), format.getSchemaNamespace(), fizOaiBackendCrosswalk);
-      crosswalksMap.put(format.getMetadataPrefix(), crosswalkItem);
+        Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(format.getSchemaLocation(), format.getCrosswalkStyleSheet());
+        CrosswalkItem crosswalkItem = new CrosswalkItem(format.getMetadataPrefix(), format.getSchemaLocation(), format.getSchemaNamespace(), fizOaiBackendCrosswalk);
+        crosswalksMap.put(format.getMetadataPrefix(), crosswalkItem);
+      }
+      
+      
     }
     
     

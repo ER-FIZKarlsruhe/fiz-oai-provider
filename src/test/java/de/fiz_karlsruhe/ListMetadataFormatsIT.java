@@ -35,7 +35,7 @@ public class ListMetadataFormatsIT extends BaseIT {
       logger.debug("response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
@@ -53,7 +53,7 @@ public class ListMetadataFormatsIT extends BaseIT {
       logger.debug("response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
@@ -73,7 +73,7 @@ public class ListMetadataFormatsIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("idDoesNotExist"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
 
@@ -92,7 +92,7 @@ public class ListMetadataFormatsIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }  
   

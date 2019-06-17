@@ -22,8 +22,29 @@ public class GetRecordIT extends BaseIT {
   final static Logger logger = LogManager.getLogger(GetRecordIT.class);
 
   @Test
-  public void testGetSingleRecord() throws Exception {
-    logger.info("testGetRecord");
+  public void testGetSingleRecordRadarFormat() throws Exception {
+    logger.info("testGetSingleRecordOaiDcFormat");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
+    params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));
+    params.add(new BasicNameValuePair("metadataPrefix", "radar"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("radarDataset"));
+      Assert.assertTrue(validateAgainstRadarXsd(bodyAsString));
+    }
+  }
+  
+  @Test
+  public void testGetSingleRecordOaiDcFormat() throws Exception {
+    logger.info("testGetSingleRecordOaiDcFormat");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
@@ -37,7 +58,7 @@ public class GetRecordIT extends BaseIT {
       logger.info("response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
@@ -58,7 +79,7 @@ public class GetRecordIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("idDoesNotExist"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
 
@@ -79,7 +100,7 @@ public class GetRecordIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("cannotDisseminateFormat"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
 
@@ -99,7 +120,7 @@ public class GetRecordIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
@@ -119,7 +140,7 @@ public class GetRecordIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }  
   

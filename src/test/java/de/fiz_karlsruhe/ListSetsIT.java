@@ -34,7 +34,7 @@ public class ListSetsIT extends BaseIT {
       logger.debug("response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
 

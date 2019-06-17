@@ -18,7 +18,7 @@ public class BaseIT {
 
   public static String TEST_OAI_URL = "http://localhost:8999/fiz-oai-provider/OAIHandler";
 
-  protected boolean validateAgainstOaiXsd(String xml) {
+  protected boolean validateAgainstOaiDcXsd(String xml) {
     
     try {
       ClassLoader classLoader = new ListMetadataFormatsIT().getClass().getClassLoader();
@@ -27,8 +27,33 @@ public class BaseIT {
         new StreamSource(classLoader.getResourceAsStream("xml.xsd")),
         new StreamSource(classLoader.getResourceAsStream("OAI-PMH.xsd")),
         new StreamSource(classLoader.getResourceAsStream("oai-identifier.xsd")),
-        new StreamSource(classLoader.getResourceAsStream("simpledc20021212.xsd")),
-        new StreamSource(classLoader.getResourceAsStream("oai_dc.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("oai_dc/simpledc20021212.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("oai_dc/oai_dc.xsd")),
+      };
+      
+      InputStream xmlStream = new ByteArrayInputStream(xml.getBytes());
+
+      SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      Schema schema = factory.newSchema(schemas);
+      Validator validator = schema.newValidator();
+      validator.validate(new StreamSource(xmlStream));
+      return true;
+    } catch (Exception ex) {
+      System.err.println(ex.getMessage());
+      ex.printStackTrace();
+      return false;
+    }
+  }
+  
+  protected boolean validateAgainstDataciteXsd(String xml) {
+    
+    try {
+      ClassLoader classLoader = new ListMetadataFormatsIT().getClass().getClassLoader();
+
+      StreamSource[] schemas = { 
+        new StreamSource(classLoader.getResourceAsStream("xml.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("OAI-PMH.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("oai-identifier.xsd")),
         new StreamSource(classLoader.getResourceAsStream("datacite/datacite.xsd")),         
       };
       
@@ -41,6 +66,40 @@ public class BaseIT {
       validator.validate(new StreamSource(xmlStream));
       return true;
     } catch (Exception ex) {
+      System.err.println(ex.getMessage());
+      ex.printStackTrace();
+      return false;
+    }
+  }
+  
+  protected boolean validateAgainstRadarXsd(String xml) {
+    
+    try {
+      ClassLoader classLoader = new ListMetadataFormatsIT().getClass().getClassLoader();
+
+      StreamSource[] schemas = { 
+        new StreamSource(classLoader.getResourceAsStream("xml.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("OAI-PMH.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("oai-identifier.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("radar/RadarTypes.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("radar/RadarElements.xsd")),
+        new StreamSource(classLoader.getResourceAsStream("radar/RadarDataset.xsd")),
+//        new StreamSource(classLoader.getResourceAsStream("radar/dcterms.xsd")),
+
+//        new StreamSource(classLoader.getResourceAsStream("datacite/datacite.xsd"))
+     
+      };
+      
+      InputStream xmlStream = new ByteArrayInputStream(xml.getBytes());
+
+      SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      //factory.setResourceResolver(new ResourceResolver("datacite"));
+      Schema schema = factory.newSchema(schemas);
+      Validator validator = schema.newValidator();
+      validator.validate(new StreamSource(xmlStream));
+      return true;
+    } catch (Exception ex) {
+      System.err.println(xml);
       System.err.println(ex.getMessage());
       ex.printStackTrace();
       return false;

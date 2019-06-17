@@ -36,13 +36,13 @@ public class ListIdentifiersIT extends BaseIT {
       System.out.println("response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
 
   @Test
   public void testListIdentifiersMissingMetadataArgument() throws Exception {
-    logger.info("testListIdentifiers");
+    logger.info("testListIdentifiersMissingMetadataArgument");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -55,13 +55,13 @@ public class ListIdentifiersIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
   @Test
   public void testListIdentifiersBadFromArgument() throws Exception {
-    logger.info("testListIdentifiers");
+    logger.info("testListIdentifiersBadFromArgument");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -76,13 +76,13 @@ public class ListIdentifiersIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
   @Test
   public void testListIdentifiersCannotDisseminateFormat() throws Exception {
-    logger.info("testListIdentifiers");
+    logger.info("testListIdentifiersCannotDisseminateFormat");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -96,13 +96,13 @@ public class ListIdentifiersIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("cannotDisseminateFormat"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
 
   @Test
   public void testListIdentifiersEmptySet() throws Exception {
-    logger.info("testListIdentifiers");
+    logger.info("testListIdentifiersEmptySet");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -117,7 +117,7 @@ public class ListIdentifiersIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("noRecordsMatch"));
-      Assert.assertTrue(validateAgainstOaiXsd(bodyAsString));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
