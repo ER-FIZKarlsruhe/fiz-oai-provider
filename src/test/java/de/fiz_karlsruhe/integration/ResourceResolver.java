@@ -1,4 +1,4 @@
-package de.fiz_karlsruhe;
+package de.fiz_karlsruhe.integration;
 
 import java.io.InputStream;
 import java.util.Objects;

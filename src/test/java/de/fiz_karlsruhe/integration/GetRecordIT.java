@@ -1,4 +1,4 @@
-package de.fiz_karlsruhe;
+package de.fiz_karlsruhe.integration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,105 +16,87 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ListRecordsIT extends BaseIT {
 
-  final static Logger logger = LogManager.getLogger(ListRecordsIT.class);
+public class GetRecordIT extends BaseIT {
 
-  public void testListRecordsMetadataPrefixOaiDc() throws Exception {
-    logger.info("testListRecordsMetadataPrefixOaiDc");
+  final static Logger logger = LogManager.getLogger(GetRecordIT.class);
+
+  @Test
+  public void testGetSingleRecordRadarFormat() throws Exception {
+    logger.info("testGetSingleRecordOaiDcFormat");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
-    params.add(new BasicNameValuePair("verb", "ListRecords"));
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
+    params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));
+    params.add(new BasicNameValuePair("metadataPrefix", "radar"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("radarDataset"));
+      Assert.assertTrue(validateAgainstRadarXsd(bodyAsString));
+    }
+  }
+  
+  @Test
+  public void testGetSingleRecordOaiDcFormat() throws Exception {
+    logger.info("testGetSingleRecordOaiDcFormat");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
+    params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));
     params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
-    params.add(new BasicNameValuePair("set", "fiz"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(bodyAsString.contains("oai_dc"));
-      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
-    }
-  }
-  
-  //@Test
-  public void testListRecordsMetadataPrefixDatacite() throws Exception {
-    logger.info("testListRecordsMetadataPrefixDatacite");
-    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
-    List<NameValuePair> params = new ArrayList<NameValuePair>();
-    params.add(new BasicNameValuePair("verb", "ListRecords"));
-    params.add(new BasicNameValuePair("metadataPrefix", "datacite"));
-    params.add(new BasicNameValuePair("set", "fiz"));
-    httpPost.setEntity(new UrlEncodedFormEntity(params));
-
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(httpPost)) {
-      String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
-      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-      Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(bodyAsString.contains("datacite"));
-      Assert.assertTrue(validateAgainstDataciteXsd(bodyAsString));
-    }
-  }
-  
-
-  @Test
-  public void testListRecordsMissingMetadataArgument() throws Exception {
-    logger.info("testListRecordsMissingMetadataArgument");
-    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
-    List<NameValuePair> params = new ArrayList<NameValuePair>();
-    params.add(new BasicNameValuePair("verb", "ListRecords"));
-    httpPost.setEntity(new UrlEncodedFormEntity(params));
-
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(httpPost)) {
-      String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
-      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-      Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(bodyAsString.contains("badArgument"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
   
   @Test
-  public void testListRecordsBadFromArgument() throws Exception {
-    logger.info("testListRecordsBadFromArgument");
+  public void testGetSingleRecordInvalidIdentifier() throws Exception {
+    logger.info("testGetRecord");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
-    params.add(new BasicNameValuePair("verb", "ListRecords"));
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
+    params.add(new BasicNameValuePair("identifier", "oai:frlsruhe.de:1133/1003"));//Invalid ID
     params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
-    params.add(new BasicNameValuePair("from", "abc"));//Must be like '2019-12-12'
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.debug("testGetSingleRecordInvalidIdentifier response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(bodyAsString.contains("idDoesNotExist"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
-  
+
   @Test
-  public void testListRecordsCannotDisseminateFormat() throws Exception {
-    logger.info("testListRecordsCannotDisseminateFormat");
+  public void testGetSingleRecordInvalidFormat() throws Exception {
+    logger.info("testGetRecord");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
-    params.add(new BasicNameValuePair("verb", "ListRecords"));
-    params.add(new BasicNameValuePair("metadataPrefix", "oo"));
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
+    params.add(new BasicNameValuePair("identifier", "oai:frlsruhe.de:1133/1003"));//Invalid ID
+    params.add(new BasicNameValuePair("metadataPrefix", "oc"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.debug("testGetSingleRecordInvalidIdentifier response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("cannotDisseminateFormat"));
@@ -123,24 +105,43 @@ public class ListRecordsIT extends BaseIT {
   }
 
   @Test
-  public void testListRecordsEmptySet() throws Exception {
-    logger.info("testListRecordsEmptySet");
+  public void testGetSingleRecordMissingIdentifier() throws Exception {
+    logger.info("testGetRecord");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
-    params.add(new BasicNameValuePair("verb", "ListRecords"));
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
     params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
-    params.add(new BasicNameValuePair("set", "empty"));//Returns an empty resultSet from the backend
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.debug("response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(bodyAsString.contains("noRecordsMatch"));
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
+  
+  @Test
+  public void testGetSingleRecordMissingMetadataPrefix() throws Exception {
+    logger.info("testGetRecord");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
+    params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.debug("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+  }  
   
 }

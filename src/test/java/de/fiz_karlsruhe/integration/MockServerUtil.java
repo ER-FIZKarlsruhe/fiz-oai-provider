@@ -1,4 +1,4 @@
-package de.fiz_karlsruhe;
+package de.fiz_karlsruhe.integration;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;

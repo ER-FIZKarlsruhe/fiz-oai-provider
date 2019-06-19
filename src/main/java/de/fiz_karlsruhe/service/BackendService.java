@@ -63,7 +63,7 @@ public class BackendService {
     return item;
   }
 
-  public SearchResult<Item> getItems(boolean withContent, int offset, int rows, String set, String from, String until)
+  public SearchResult<Item> getItems(boolean withContent, long offset, long rows, String set, String from, String until)
       throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
 

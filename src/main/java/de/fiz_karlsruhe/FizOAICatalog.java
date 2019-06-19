@@ -36,6 +36,7 @@ import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.util.OAIUtil;
 import de.fiz_karlsruhe.model.Item;
+import de.fiz_karlsruhe.model.ResumptionToken;
 import de.fiz_karlsruhe.model.SearchResult;
 import de.fiz_karlsruhe.model.Set;
 import de.fiz_karlsruhe.service.BackendService;
@@ -54,12 +55,11 @@ public class FizOAICatalog extends AbstractCatalog {
   static final boolean debug = false;
 
   private SimpleDateFormat dateFormatter = new SimpleDateFormat();
-  private HashMap fileDateMap = new HashMap();
-  private HashMap resumptionResults = new HashMap();
   private int maxListSize;
 
   private String backendBaseUrl;
 
+  private BackendService backendService;
 
   public FizOAICatalog(Properties properties) {
     showBanner();
@@ -83,6 +83,8 @@ public class FizOAICatalog extends AbstractCatalog {
     }
     logger.info("FizOaiBackend.baseURL: " + backendBaseUrl);
 
+    
+    backendService = BackendService.getInstance(backendBaseUrl);
   }
 
   private void showBanner() {
@@ -102,32 +104,6 @@ public class FizOAICatalog extends AbstractCatalog {
         .info("#       # ######       ####### #     # ###       #       #    #  ####    ##   # #####  ###### #    # ");
   }
 
-//  private HashMap getNativeHeader(Item item) {
-//    HashMap recordMap = new HashMap();
-//    recordMap.put("localIdentifier", getRecordFactory().getOAIIdentifier(item));
-//    recordMap.put("lastModified", "2019-05-22");
-//
-//    ArrayList setSpecs = new ArrayList();
-//    
-//    for(String set:item.getSets()) {
-//      setSpecs.add(set);
-//    }
-//    
-//    recordMap.put("setSpecs", setSpecs.iterator());
-//
-//    return recordMap;
-//  }
-//
-//  private HashMap getNativeRecord(String localIdentifier) throws IOException {
-//    Item item = BackendService.getInstance(backendBaseUrl).getItem(localIdentifier);
-//    HashMap recordMap = null;
-//    
-//    if (item != null) {
-//      recordMap = getNativeHeader(item);
-//    }    
-//
-//    return recordMap;
-//  }
 
   /**
    * Retrieve the specified metadata for the specified oaiIdentifier
@@ -149,7 +125,7 @@ public class FizOAICatalog extends AbstractCatalog {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
       logger.info("local identifier: " + localIdentifier);
 
-      nativeItem = BackendService.getInstance(backendBaseUrl).getItem(localIdentifier);
+      nativeItem = backendService.getItem(localIdentifier);
       logger.debug(nativeItem);
 
       if (nativeItem == null) {
@@ -213,14 +189,13 @@ public class FizOAICatalog extends AbstractCatalog {
    */
   public Map listIdentifiers(String from, String until, String set, String metadataPrefix)
       throws NoItemsMatchException, OAIInternalServerError {
-    purge(); // clean out old resumptionTokens
-    Map<String, Iterator<String>> listIdentifiersMap = new HashMap<String, Iterator<String>>();
+    Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
     ArrayList<String> headers = new ArrayList<String>();
     ArrayList<String> identifiers = new ArrayList<String>();    
     SearchResult<Item> result = null;
     
     try {
-      result = BackendService.getInstance(backendBaseUrl).getItems(false, 0, 100, set, from, until);
+      result = backendService.getItems(false, 0, maxListSize, set, from, until);
       
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
@@ -235,35 +210,26 @@ public class FizOAICatalog extends AbstractCatalog {
     } catch (IOException e) {
       throw new OAIInternalServerError(e.getMessage());
     }
-      
-    /* decide if you're done */
+
     int cursorPosition = (result.getOffset() + result.getData().size());
+    
+    /*****************************************************************
+     * Construct the resumptionToken 
+     *****************************************************************/
     if (cursorPosition < result.getTotal()) {
-      String resumptionId = getRSName();
-      //TODO resumptionResults.put(resumptionId, iterator);
+      ResumptionToken resumptionToken = new ResumptionToken();
+      resumptionToken.setSet(set);
+      resumptionToken.setFrom(from);
+      resumptionToken.setUntil(until);
+      resumptionToken.setOffset(0);
+      resumptionToken.setCursor(maxListSize-1);
+      resumptionToken.setMetadataPrefix(metadataPrefix);
 
-      /*****************************************************************
-       * Construct the resumptionToken String however you see fit.
-       *****************************************************************/
-      StringBuffer resumptionTokenSb = new StringBuffer();
-      resumptionTokenSb.append(resumptionId);
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(result.getTotal());
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(cursorPosition);
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(metadataPrefix);
-
-      /*****************************************************************
-       * Use the following line if you wish to include the optional resumptionToken
-       * attributes in the response. Otherwise, use the line after it that I've
-       * commented out.
-       *****************************************************************/
-//TODO      listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), cursorPosition, 0));
-//TODO 	    listIdentifiersMap.put("resumptionMap",  getResumptionMap(resumptionTokenSb.toString()));
+      listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
     }
     listIdentifiersMap.put("headers", headers.iterator());
     listIdentifiersMap.put("identifiers", identifiers.iterator());
+    
     return listIdentifiersMap;
   }
 
@@ -276,77 +242,43 @@ public class FizOAICatalog extends AbstractCatalog {
    *         and an "identifiers" Map object. The "identifiers" Map contains OAI
    *         identifier keys with corresponding values of "true" or null depending
    *         on whether the identifier is deleted or not.
+   * @throws OAIInternalServerError 
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
-  public Map listIdentifiers(String resumptionToken) throws BadResumptionTokenException {
-    purge(); // clean out old resumptionTokens
-    Map listIdentifiersMap = new HashMap();
-    ArrayList headers = new ArrayList();
-    ArrayList identifiers = new ArrayList();
+  public Map listIdentifiers(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
+    Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
+    ArrayList<String> headers = new ArrayList<String>();
+    ArrayList<String> identifiers = new ArrayList<String>();  
 
-    /**********************************************************************
-     * parse your resumptionToken and look it up in the resumptionResults, if
-     * necessary
-     **********************************************************************/
-    StringTokenizer tokenizer = new StringTokenizer(resumptionToken, ":");
-    String resumptionId;
-    int oldCount;
-    String metadataPrefix;
-    int numRows;
+    ResumptionToken restoken = new ResumptionToken(resumptionToken);
+    
+    int oldCursorPosition = restoken.getCursor();
+    
+    SearchResult<Item> result = null;
     try {
-      resumptionId = tokenizer.nextToken();
-      oldCount = Integer.parseInt(tokenizer.nextToken());
-      numRows = Integer.parseInt(tokenizer.nextToken());
-      metadataPrefix = tokenizer.nextToken();
-    } catch (NoSuchElementException e) {
-      throw new BadResumptionTokenException();
+      result = backendService.getItems(false, oldCursorPosition, maxListSize, restoken.getSet(), restoken.getFrom(), restoken.getUntil());
+      
+      if (result == null || result.getData().isEmpty()) {
+        throw new OAIInternalServerError("Empty resultSet");
+      }
+      
+      for(Item item : result.getData()) {
+        String[] header = getRecordFactory().createHeader(item);
+        headers.add(header[0]);
+        identifiers.add(header[1]);
+      }
+      
+    } catch (IOException e) {
+      throw new OAIInternalServerError(e.getMessage());
     }
+    
+    int newCursorPosition = restoken.getCursor() + result.getData().size();
+    
+    if (newCursorPosition < result.getTotal()) {
+      restoken.setOffset(restoken.getCursor() + 1);
+      restoken.setCursor(newCursorPosition);
 
-    /* Get some more records from your database */
-    Iterator iterator = (Iterator) resumptionResults.remove(resumptionId);
-    if (iterator == null) {
-      logger.info("FileSystemOAICatalog.listIdentifiers: reuse of old resumptionToken?");
-      iterator = fileDateMap.entrySet().iterator();
-      for (int i = 0; i < oldCount; ++i)
-        iterator.next();
-    }
-
-    /* load the headers and identifiers ArrayLists. */
-    int count = 0;
-    while (count < maxListSize && iterator.hasNext()) {
-      Map.Entry entryDateMap = (Map.Entry) iterator.next();
-      HashMap nativeHeader = null; //TODO getNativeHeader((String) entryDateMap.getKey());
-      String[] header = getRecordFactory().createHeader(nativeHeader);
-      headers.add(header[0]);
-      identifiers.add(header[1]);
-      count++;
-    }
-
-    /* decide if you're done. */
-    if (iterator.hasNext()) {
-      resumptionId = getRSName();
-      resumptionResults.put(resumptionId, iterator);
-
-      /*****************************************************************
-       * Construct the resumptionToken String however you see fit.
-       *****************************************************************/
-      StringBuffer resumptionTokenSb = new StringBuffer();
-      resumptionTokenSb.append(resumptionId);
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(oldCount + count));
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(numRows));
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(metadataPrefix);
-
-      /*****************************************************************
-       * Use the following line if you wish to include the optional resumptionToken
-       * attributes in the response. Otherwise, use the line after it that I've
-       * commented out.
-       *****************************************************************/
-      listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), numRows, oldCount));
-      // listIdentifiersMap.put("resumptionMap",
-      // getResumptionMap(resumptionTokenSb.toString()));
+      listIdentifiersMap.put("resumptionMap", getResumptionMap(restoken.toString(), newCursorPosition, result.getTotal()));
     }
 
     listIdentifiersMap.put("headers", headers.iterator());
@@ -358,7 +290,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * Utility method to construct a Record object for a specified metadataFormat
    * from a native record
    *
-   * @param nativeItem     native item from the dataase
+   * @param nativeItem     native item from the backend
    * @param metadataPrefix the desired metadataPrefix for performing the crosswalk
    * @return the <record/> String
    * @exception CannotDisseminateFormatException the record is not available for
@@ -413,14 +345,12 @@ public class FizOAICatalog extends AbstractCatalog {
    */
   public Map listRecords(String from, String until, String set, String metadataPrefix)
       throws CannotDisseminateFormatException, OAIInternalServerError, NoItemsMatchException {
-    purge(); // clean out old resumptionTokens
-    
     SearchResult<Item> result = null;
     Map listRecordsMap = new HashMap();
     ArrayList records = new ArrayList();
     
     try {
-      result = BackendService.getInstance(backendBaseUrl).getItems(true,0,100, set, from, until);
+      result = backendService.getItems(true,0,100, set, from, until);
       
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
@@ -477,7 +407,6 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   public Map listRecords(String resumptionToken) throws BadResumptionTokenException {
-    purge(); // clean out old resumptionTokens
     Map listRecordsMap = new HashMap();
     ArrayList records = new ArrayList();
 
@@ -489,21 +418,21 @@ public class FizOAICatalog extends AbstractCatalog {
     String resumptionId;
     int oldCount;
     String metadataPrefix;
-    int numRows;
+    int totalCount;
     try {
       resumptionId = tokenizer.nextToken();
       oldCount = Integer.parseInt(tokenizer.nextToken());
-      numRows = Integer.parseInt(tokenizer.nextToken());
+      totalCount = Integer.parseInt(tokenizer.nextToken());
       metadataPrefix = tokenizer.nextToken();
     } catch (NoSuchElementException e) {
       throw new BadResumptionTokenException();
     }
 
     /* Get some more records from your database */
-    Iterator iterator = (Iterator) resumptionResults.remove(resumptionId);
+    Iterator iterator = null;//TODO (Iterator) resumptionResults.remove(resumptionId);
     if (iterator == null) {
       logger.info("FileSystemOAICatalog.listRecords: reuse of old resumptionToken?");
-      iterator = fileDateMap.entrySet().iterator();
+      //iterator = fileDateMap.entrySet().iterator();
       for (int i = 0; i < oldCount; ++i)
         iterator.next();
     }
@@ -536,7 +465,7 @@ public class FizOAICatalog extends AbstractCatalog {
     /* decide if you're done. */
     if (iterator.hasNext()) {
       resumptionId = getRSName();
-      resumptionResults.put(resumptionId, iterator);
+      //TODOresumptionResults.put(resumptionId, iterator);
 
       /*****************************************************************
        * Construct the resumptionToken String however you see fit.
@@ -546,7 +475,7 @@ public class FizOAICatalog extends AbstractCatalog {
       resumptionTokenSb.append(":");
       resumptionTokenSb.append(Integer.toString(oldCount + count));
       resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(numRows));
+      resumptionTokenSb.append(Integer.toString(totalCount));
       resumptionTokenSb.append(":");
       resumptionTokenSb.append(metadataPrefix);
 
@@ -555,7 +484,7 @@ public class FizOAICatalog extends AbstractCatalog {
        * attributes in the response. Otherwise, use the line after it that I've
        * commented out.
        *****************************************************************/
-      listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), numRows, oldCount));
+      listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), totalCount, oldCount));
       // listRecordsMap.put("resumptionMap",
       // getResumptionMap(resumptionTokenSb.toString()));
     }
@@ -569,11 +498,10 @@ public class FizOAICatalog extends AbstractCatalog {
     List<String> xmlSets = new ArrayList<String>();
     
     logger.info("listSets");
-    purge(); // clean out old resumptionTokens
     
     List<Set> backendSetList;
     try {
-      backendSetList = BackendService.getInstance(backendBaseUrl).getSets();
+      backendSetList = backendService.getSets();
     } catch (IOException e) {
       throw new OAIInternalServerError("Cannot retrieve sets from backend");
     }
@@ -624,28 +552,6 @@ public class FizOAICatalog extends AbstractCatalog {
   public void close() {
   }
 
-  /**
-   * Purge tokens that are older than the time-to-live.
-   */
-  private void purge() {
-    ArrayList old = new ArrayList();
-    Date then, now = new Date();
-    Iterator keySet = resumptionResults.keySet().iterator();
-    String key;
-
-    while (keySet.hasNext()) {
-      key = (String) keySet.next();
-      then = new Date(Long.parseLong(key) + getMillisecondsToLive());
-      if (now.after(then)) {
-        old.add(key);
-      }
-    }
-    Iterator iterator = old.iterator();
-    while (iterator.hasNext()) {
-      key = (String) iterator.next();
-      resumptionResults.remove(key);
-    }
-  }
 
   /**
    * Use the current date as the basis for the resumptiontoken
@@ -655,5 +561,13 @@ public class FizOAICatalog extends AbstractCatalog {
   private synchronized static String getRSName() {
     Date now = new Date();
     return Long.toString(now.getTime());
+  }
+
+  public BackendService getBackendService() {
+    return backendService;
+  }
+
+  public void setBackendService(BackendService backendService) {
+    this.backendService = backendService;
   }
 }
