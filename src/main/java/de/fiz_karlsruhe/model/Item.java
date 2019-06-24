@@ -15,6 +15,7 @@ public class Item {
 
   private List<String> sets;
 
+  private List<Format> formats;
   
   public String getIdentifier() {
     return identifier;
@@ -57,8 +58,16 @@ public class Item {
   }
   
   
-  public HashMap toNativeitem() {
-    HashMap map = new HashMap();
+  public List<Format> getFormats() {
+    return formats;
+  }
+
+  public void setFormats(List<Format> formats) {
+    this.formats = formats;
+  }
+
+  public HashMap<String,Object> toNativeitem() {
+    HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("localIdentifier", this.identifier);
     map.put("lastModified", this.datestamp);
     map.put("recordBytes", this.content);

@@ -83,7 +83,6 @@ public class FizOAICatalog extends AbstractCatalog {
     }
     logger.info("FizOaiBackend.baseURL: " + backendBaseUrl);
 
-    
     backendService = BackendService.getInstance(backendBaseUrl);
   }
 
@@ -103,7 +102,6 @@ public class FizOAICatalog extends AbstractCatalog {
     logger
         .info("#       # ######       ####### #     # ###       #       #    #  ####    ##   # #####  ###### #    # ");
   }
-
 
   /**
    * Retrieve the specified metadata for the specified oaiIdentifier
@@ -159,7 +157,7 @@ public class FizOAICatalog extends AbstractCatalog {
     Item nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
-      nativeItem = null; //FIXME getNativeRecord(localIdentifier);
+      nativeItem = null; // FIXME getNativeRecord(localIdentifier);
     } catch (Exception e) {
       e.printStackTrace();
       throw new OAIInternalServerError("Database Failure");
@@ -184,37 +182,37 @@ public class FizOAICatalog extends AbstractCatalog {
    *         and an "identifiers" Map object. The "identifiers" Map contains OAI
    *         identifier keys with corresponding values of "true" or null depending
    *         on whether the identifier is deleted or not.
-   * @throws OAIInternalServerError 
+   * @throws OAIInternalServerError
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   public Map listIdentifiers(String from, String until, String set, String metadataPrefix)
       throws NoItemsMatchException, OAIInternalServerError {
     Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
     ArrayList<String> headers = new ArrayList<String>();
-    ArrayList<String> identifiers = new ArrayList<String>();    
+    ArrayList<String> identifiers = new ArrayList<String>();
     SearchResult<Item> result = null;
-    
+
     try {
       result = backendService.getItems(false, 0, maxListSize, set, from, until);
-      
+
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
       }
-      
-      for(Item item : result.getData()) {
+
+      for (Item item : result.getData()) {
         String[] header = getRecordFactory().createHeader(item);
         headers.add(header[0]);
         identifiers.add(header[1]);
       }
-      
+
     } catch (IOException e) {
       throw new OAIInternalServerError(e.getMessage());
     }
 
     int cursorPosition = (result.getOffset() + result.getData().size());
-    
+
     /*****************************************************************
-     * Construct the resumptionToken 
+     * Construct the resumptionToken
      *****************************************************************/
     if (cursorPosition < result.getTotal()) {
       ResumptionToken resumptionToken = new ResumptionToken();
@@ -222,14 +220,15 @@ public class FizOAICatalog extends AbstractCatalog {
       resumptionToken.setFrom(from);
       resumptionToken.setUntil(until);
       resumptionToken.setOffset(0);
-      resumptionToken.setCursor(maxListSize-1);
+      resumptionToken.setRows(maxListSize);
       resumptionToken.setMetadataPrefix(metadataPrefix);
 
-      listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
+      listIdentifiersMap.put("resumptionMap",
+          getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
     }
     listIdentifiersMap.put("headers", headers.iterator());
     listIdentifiersMap.put("identifiers", identifiers.iterator());
-    
+
     return listIdentifiersMap;
   }
 
@@ -242,43 +241,45 @@ public class FizOAICatalog extends AbstractCatalog {
    *         and an "identifiers" Map object. The "identifiers" Map contains OAI
    *         identifier keys with corresponding values of "true" or null depending
    *         on whether the identifier is deleted or not.
-   * @throws OAIInternalServerError 
+   * @throws OAIInternalServerError
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   public Map listIdentifiers(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
     Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
     ArrayList<String> headers = new ArrayList<String>();
-    ArrayList<String> identifiers = new ArrayList<String>();  
+    ArrayList<String> identifiers = new ArrayList<String>();
 
     ResumptionToken restoken = new ResumptionToken(resumptionToken);
-    
-    int oldCursorPosition = restoken.getCursor();
-    
+
+    int oldCursorPosition = restoken.getRows();
+
     SearchResult<Item> result = null;
     try {
-      result = backendService.getItems(false, oldCursorPosition, maxListSize, restoken.getSet(), restoken.getFrom(), restoken.getUntil());
-      
+      result = backendService.getItems(false, oldCursorPosition, maxListSize, restoken.getSet(), restoken.getFrom(),
+          restoken.getUntil());
+
       if (result == null || result.getData().isEmpty()) {
         throw new OAIInternalServerError("Empty resultSet");
       }
-      
-      for(Item item : result.getData()) {
+
+      for (Item item : result.getData()) {
         String[] header = getRecordFactory().createHeader(item);
         headers.add(header[0]);
         identifiers.add(header[1]);
       }
-      
+
     } catch (IOException e) {
       throw new OAIInternalServerError(e.getMessage());
     }
-    
-    int newCursorPosition = restoken.getCursor() + result.getData().size();
-    
-    if (newCursorPosition < result.getTotal()) {
-      restoken.setOffset(restoken.getCursor() + 1);
-      restoken.setCursor(newCursorPosition);
 
-      listIdentifiersMap.put("resumptionMap", getResumptionMap(restoken.toString(), newCursorPosition, result.getTotal()));
+    int newCursorPosition = restoken.getRows() + result.getData().size();
+
+    if (newCursorPosition < result.getTotal()) {
+      restoken.setOffset(restoken.getRows());
+      restoken.setRows(newCursorPosition);
+
+      listIdentifiersMap.put("resumptionMap",
+          getResumptionMap(restoken.toString(), newCursorPosition, result.getTotal()));
     }
 
     listIdentifiersMap.put("headers", headers.iterator());
@@ -346,52 +347,43 @@ public class FizOAICatalog extends AbstractCatalog {
   public Map listRecords(String from, String until, String set, String metadataPrefix)
       throws CannotDisseminateFormatException, OAIInternalServerError, NoItemsMatchException {
     SearchResult<Item> result = null;
-    Map listRecordsMap = new HashMap();
-    ArrayList records = new ArrayList();
-    
+    Map<String, Object> listRecordsMap = new HashMap<String, Object>();
+    ArrayList<String> records = new ArrayList<String>();
+
     try {
-      result = backendService.getItems(true,0,100, set, from, until);
-      
+      result = backendService.getItems(true, 0, maxListSize, set, from, until);
+
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
       }
-      
-      for(Item item : result.getData()) {
+
+      for (Item item : result.getData()) {
         String record = constructRecord(item, metadataPrefix);
         records.add(record);
       }
-      
+
     } catch (IOException e) {
       throw new OAIInternalServerError(e.getMessage());
     }
 
-
-    /* decide if you're done */
     int cursorPosition = (result.getOffset() + result.getData().size());
+
+    /*****************************************************************
+     * Construct the resumptionToken
+     *****************************************************************/
     if (cursorPosition < result.getTotal()) {
-      String resumptionId = getRSName();
-      //resumptionResults.put(resumptionId, iterator);
+      ResumptionToken resumptionToken = new ResumptionToken();
+      resumptionToken.setSet(set);
+      resumptionToken.setFrom(from);
+      resumptionToken.setUntil(until);
+      resumptionToken.setOffset(0);
+      resumptionToken.setRows(maxListSize - 1);
+      resumptionToken.setMetadataPrefix(metadataPrefix);
 
-      /*****************************************************************
-       * Construct the resumptionToken String however you see fit.
-       *****************************************************************/
-      StringBuffer resumptionTokenSb = new StringBuffer();
-      resumptionTokenSb.append(resumptionId);
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(cursorPosition);
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(result.getTotal());
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(metadataPrefix);
-
-      /*****************************************************************
-       * Use the following line if you wish to include the optional resumptionToken
-       * attributes in the response. Otherwise, use the line after it that I've
-       * commented out.
-       *****************************************************************/
-      //listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), cursorPosition, 0));
-// 	    listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString()));
+      listRecordsMap.put("resumptionMap",
+          getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
     }
+
     listRecordsMap.put("records", records.iterator());
     return listRecordsMap;
   }
@@ -404,89 +396,42 @@ public class FizOAICatalog extends AbstractCatalog {
    * @return a Map object containing an optional "resumptionToken" key/value pair
    *         and a "records" Iterator object. The "records" Iterator contains a
    *         set of Records objects.
+   * @throws NoItemsMatchException
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
-  public Map listRecords(String resumptionToken) throws BadResumptionTokenException {
-    Map listRecordsMap = new HashMap();
-    ArrayList records = new ArrayList();
+  public Map listRecords(String resumptionToken)
+      throws BadResumptionTokenException, OAIInternalServerError {
+    Map<String, Object> listRecordsMap = new HashMap<String, Object>();
+    ArrayList<String> records = new ArrayList<String>();
+    SearchResult<Item> result = null;
 
-    /**********************************************************************
-     * parse your resumptionToken and look it up in the resumptionResults, if
-     * necessary
-     **********************************************************************/
-    StringTokenizer tokenizer = new StringTokenizer(resumptionToken, ":");
-    String resumptionId;
-    int oldCount;
-    String metadataPrefix;
-    int totalCount;
+    ResumptionToken token = new ResumptionToken(resumptionToken);
+    token.setOffset(token.getRows());
+
     try {
-      resumptionId = tokenizer.nextToken();
-      oldCount = Integer.parseInt(tokenizer.nextToken());
-      totalCount = Integer.parseInt(tokenizer.nextToken());
-      metadataPrefix = tokenizer.nextToken();
-    } catch (NoSuchElementException e) {
-      throw new BadResumptionTokenException();
-    }
+      result = backendService.getItems(true, token.getOffset(), maxListSize, token.getSet(), token.getFrom(),
+          token.getUntil());
 
-    /* Get some more records from your database */
-    Iterator iterator = null;//TODO (Iterator) resumptionResults.remove(resumptionId);
-    if (iterator == null) {
-      logger.info("FileSystemOAICatalog.listRecords: reuse of old resumptionToken?");
-      //iterator = fileDateMap.entrySet().iterator();
-      for (int i = 0; i < oldCount; ++i)
-        iterator.next();
-    }
-
-    /* load the records ArrayLists. */
-    int count = 0;
-    while (count < maxListSize && iterator.hasNext()) {
-      Map.Entry entryDateMap = (Map.Entry) iterator.next();
-      try {
-        HashMap nativeItem  = null; //FIXME  getNativeRecord((String) entryDateMap.getKey());
-        String record  = null; //FIXME  constructRecord(nativeItem, metadataPrefix);
-        records.add(record);
-        count++;
-      } 
-      
-//FIXME      catch (CannotDisseminateFormatException e) {
-//        /* the client hacked the resumptionToken beyond repair */
-//        throw new BadResumptionTokenException();
-//      } catch (IOException e) {
-//        /* the file is probably missing */
-//        throw new BadResumptionTokenException();
-//      }
-      
-      catch (Exception e) {
-        /* the file is probably missing */
-        throw new BadResumptionTokenException();
+      if (result == null || result.getData().isEmpty()) {
+        throw new OAIInternalServerError("There is a problem wit the resumption token. Cannot retrieve any results!");
       }
+
+      for (Item item : result.getData()) {
+        String record = constructRecord(item, token.getMetadataPrefix());
+        records.add(record);
+      }
+
+    } catch (IOException e) {
+      throw new OAIInternalServerError(e.getMessage());
+    } catch (CannotDisseminateFormatException e) {
+      e.printStackTrace();
     }
 
-    /* decide if you're done. */
-    if (iterator.hasNext()) {
-      resumptionId = getRSName();
-      //TODOresumptionResults.put(resumptionId, iterator);
+    int cursorPosition = (result.getOffset() + result.getData().size());
 
-      /*****************************************************************
-       * Construct the resumptionToken String however you see fit.
-       *****************************************************************/
-      StringBuffer resumptionTokenSb = new StringBuffer();
-      resumptionTokenSb.append(resumptionId);
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(oldCount + count));
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(Integer.toString(totalCount));
-      resumptionTokenSb.append(":");
-      resumptionTokenSb.append(metadataPrefix);
-
-      /*****************************************************************
-       * Use the following line if you wish to include the optional resumptionToken
-       * attributes in the response. Otherwise, use the line after it that I've
-       * commented out.
-       *****************************************************************/
-      listRecordsMap.put("resumptionMap", getResumptionMap(resumptionTokenSb.toString(), totalCount, oldCount));
-      // listRecordsMap.put("resumptionMap",
-      // getResumptionMap(resumptionTokenSb.toString()));
+    if (cursorPosition < result.getTotal()) {
+      listRecordsMap.put("resumptionMap",
+          getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
     }
 
     listRecordsMap.put("records", records.iterator());
@@ -494,22 +439,22 @@ public class FizOAICatalog extends AbstractCatalog {
   }
 
   public Map listSets() throws NoSetHierarchyException, OAIInternalServerError {
-    Map<String,Iterator> setsIterator = new HashMap<String,Iterator>();
+    Map<String, Iterator> setsIterator = new HashMap<String, Iterator>();
     List<String> xmlSets = new ArrayList<String>();
-    
+
     logger.info("listSets");
-    
+
     List<Set> backendSetList;
     try {
       backendSetList = backendService.getSets();
     } catch (IOException e) {
       throw new OAIInternalServerError("Cannot retrieve sets from backend");
     }
-    
-    for(Set setItem : backendSetList) {
+
+    for (Set setItem : backendSetList) {
       xmlSets.add(getSetXML(setItem));
     }
-    
+
     setsIterator.put("sets", xmlSets.iterator());
     return setsIterator;
 
@@ -541,7 +486,6 @@ public class FizOAICatalog extends AbstractCatalog {
     return sb.toString();
   }
 
-
   public Map listSets(String resumptionToken) throws BadResumptionTokenException {
     throw new BadResumptionTokenException();
   }
@@ -550,17 +494,6 @@ public class FizOAICatalog extends AbstractCatalog {
    * close the repository
    */
   public void close() {
-  }
-
-
-  /**
-   * Use the current date as the basis for the resumptiontoken
-   *
-   * @return a long integer version of the current time
-   */
-  private synchronized static String getRSName() {
-    Date now = new Date();
-    return Long.toString(now.getTime());
   }
 
   public BackendService getBackendService() {
