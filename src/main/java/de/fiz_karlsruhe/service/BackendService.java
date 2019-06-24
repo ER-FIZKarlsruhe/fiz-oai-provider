@@ -43,11 +43,19 @@ public class BackendService {
     return INSTANCE;
   }
 
-  public Item getItem(String localIdentifier) throws IOException {
+  public Item getItem(String localIdentifier, String metadataPrefix) throws IOException {
+    if (localIdentifier == null || localIdentifier.isEmpty()) {
+      throw new IllegalArgumentException("localIdentifier must not be null");
+    }
+    
+    if (metadataPrefix == null || metadataPrefix.isEmpty()) {
+      throw new IllegalArgumentException("metadataPrefix must not be null");
+    }
+    
     ObjectMapper objectMapper = new ObjectMapper();
 
     Item item = null;
-    String url = backendBaseUrl + "/item/" + localIdentifier;
+    String url = backendBaseUrl + "/item/" + localIdentifier + "?format=" + metadataPrefix;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {
@@ -63,8 +71,13 @@ public class BackendService {
     return item;
   }
 
-  public SearchResult<Item> getItems(boolean withContent, long offset, long rows, String set, String from, String until)
+  public SearchResult<Item> getItems(boolean withContent, long offset, long rows, String set, String from, String until, String metadataPrefix)
       throws IOException {
+    
+    if (metadataPrefix == null || metadataPrefix.isEmpty()) {
+      throw new IllegalArgumentException("metadataPrefix must not be null");
+    }
+    
     ObjectMapper objectMapper = new ObjectMapper();
 
     SearchResult<Item> result = null;

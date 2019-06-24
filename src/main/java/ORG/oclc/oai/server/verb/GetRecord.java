@@ -30,7 +30,7 @@ import ORG.oclc.oai.server.crosswalk.Crosswalks;
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
  */
 public class GetRecord extends ServerVerb {
-    private static final boolean debug = true;
+    private static final boolean debug = false;
     private static ArrayList validParamNames = new ArrayList();
     static {
 	validParamNames.add("verb");

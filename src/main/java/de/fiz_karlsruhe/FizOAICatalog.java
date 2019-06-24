@@ -11,16 +11,12 @@
 package de.fiz_karlsruhe;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.log4j.LogManager;
@@ -54,7 +50,6 @@ public class FizOAICatalog extends AbstractCatalog {
 
   static final boolean debug = false;
 
-  private SimpleDateFormat dateFormatter = new SimpleDateFormat();
   private int maxListSize;
 
   private String backendBaseUrl;
@@ -67,7 +62,6 @@ public class FizOAICatalog extends AbstractCatalog {
 
     String temp;
 
-    dateFormatter.applyPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
     temp = properties.getProperty("FizOAICatalog.maxListSize");
 
     if (temp == null) {
@@ -116,6 +110,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception OAIInternalServerError           signals an http status code 500
    *                                             problem
    */
+  @Override
   public String getRecord(String oaiIdentifier, String metadataPrefix)
       throws IdDoesNotExistException, CannotDisseminateFormatException, OAIInternalServerError {
     Item nativeItem = null;
@@ -123,7 +118,7 @@ public class FizOAICatalog extends AbstractCatalog {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
       logger.info("local identifier: " + localIdentifier);
 
-      nativeItem = backendService.getItem(localIdentifier);
+      nativeItem = backendService.getItem(localIdentifier, metadataPrefix);
       logger.debug(nativeItem);
 
       if (nativeItem == null) {
@@ -152,19 +147,20 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception OAINotFoundException   signals an http status code 404 problem
    * @exception OAIInternalServerError signals an http status code 500 problem
    */
+  @Override
   public Vector getSchemaLocations(String oaiIdentifier)
       throws IdDoesNotExistException, OAIInternalServerError, NoMetadataFormatsException {
     Item nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
-      nativeItem = null; // FIXME getNativeRecord(localIdentifier);
+      //TODO nativeItem = backendService.getItem(localIdentifier);
     } catch (Exception e) {
       e.printStackTrace();
       throw new OAIInternalServerError("Database Failure");
     }
 
     if (nativeItem != null) {
-      return getRecordFactory().getSchemaLocations(nativeItem);
+      return getRecordFactory().getSchemaLocations(nativeItem);// TODO get formats from backendService
     } else {
       throw new IdDoesNotExistException(oaiIdentifier);
     }
@@ -185,6 +181,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @throws OAIInternalServerError
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
+  @Override
   public Map listIdentifiers(String from, String until, String set, String metadataPrefix)
       throws NoItemsMatchException, OAIInternalServerError {
     Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
@@ -193,7 +190,7 @@ public class FizOAICatalog extends AbstractCatalog {
     SearchResult<Item> result = null;
 
     try {
-      result = backendService.getItems(false, 0, maxListSize, set, from, until);
+      result = backendService.getItems(false, 0, maxListSize, set, from, until, metadataPrefix);
 
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
@@ -223,8 +220,11 @@ public class FizOAICatalog extends AbstractCatalog {
       resumptionToken.setRows(maxListSize);
       resumptionToken.setMetadataPrefix(metadataPrefix);
 
-      listIdentifiersMap.put("resumptionMap",
-          getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
+      try {
+        listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionToken.getToken(), cursorPosition, result.getTotal()));
+      } catch (BadResumptionTokenException e) {
+       throw new OAIInternalServerError("An error occured while creating the ResumptionToken");
+      }
     }
     listIdentifiersMap.put("headers", headers.iterator());
     listIdentifiersMap.put("identifiers", identifiers.iterator());
@@ -244,6 +244,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @throws OAIInternalServerError
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
+  @Override
   public Map listIdentifiers(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
     Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
     ArrayList<String> headers = new ArrayList<String>();
@@ -256,7 +257,7 @@ public class FizOAICatalog extends AbstractCatalog {
     SearchResult<Item> result = null;
     try {
       result = backendService.getItems(false, oldCursorPosition, maxListSize, restoken.getSet(), restoken.getFrom(),
-          restoken.getUntil());
+          restoken.getUntil(), restoken.getFrom());
 
       if (result == null || result.getData().isEmpty()) {
         throw new OAIInternalServerError("Empty resultSet");
@@ -299,14 +300,13 @@ public class FizOAICatalog extends AbstractCatalog {
    */
   private String constructRecord(Item nativeItem, String metadataPrefix) throws CannotDisseminateFormatException {
     String schemaURL = null;
-    Iterator setSpecs = getSetSpecs(nativeItem);
-    Iterator abouts = getAbouts(nativeItem);
+    Iterator<String> setSpecs = getSetSpecs(nativeItem);
 
     if (metadataPrefix != null) {
       if ((schemaURL = getCrosswalks().getSchemaURL(metadataPrefix)) == null)
         throw new CannotDisseminateFormatException(metadataPrefix);
     }
-    return getRecordFactory().create(nativeItem, schemaURL, metadataPrefix, setSpecs, abouts);
+    return getRecordFactory().create(nativeItem, schemaURL, metadataPrefix, setSpecs, null);
   }
 
   /**
@@ -315,19 +315,10 @@ public class FizOAICatalog extends AbstractCatalog {
    * @param rs ResultSet containing the nativeItem
    * @return an Iterator containing the list of setSpec values for this nativeItem
    */
-  private Iterator getSetSpecs(Item nativeItem) {
-    return null;
+  private Iterator<String> getSetSpecs(Object nativeItem) throws IllegalArgumentException {
+    return ((Item) nativeItem).getSets().iterator();
   }
 
-  /**
-   * get an Iterator containing the abouts for the nativeItem
-   *
-   * @param rs ResultSet containing the nativeItem
-   * @return an Iterator containing the list of about values for this nativeItem
-   */
-  private Iterator getAbouts(Item nativeItem) {
-    return null;
-  }
 
   /**
    * Retrieve a list of records that satisfy the specified criteria
@@ -344,6 +335,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception OAIBadRequestException signals an http status code 400 problem
    * @exception OAIInternalServerError signals an http status code 500 problem
    */
+  @Override
   public Map listRecords(String from, String until, String set, String metadataPrefix)
       throws CannotDisseminateFormatException, OAIInternalServerError, NoItemsMatchException {
     SearchResult<Item> result = null;
@@ -351,7 +343,7 @@ public class FizOAICatalog extends AbstractCatalog {
     ArrayList<String> records = new ArrayList<String>();
 
     try {
-      result = backendService.getItems(true, 0, maxListSize, set, from, until);
+      result = backendService.getItems(true, 0, maxListSize, set, from, until, metadataPrefix);
 
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
@@ -399,8 +391,8 @@ public class FizOAICatalog extends AbstractCatalog {
    * @throws NoItemsMatchException
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
-  public Map listRecords(String resumptionToken)
-      throws BadResumptionTokenException, OAIInternalServerError {
+  @Override
+  public Map listRecords(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
     Map<String, Object> listRecordsMap = new HashMap<String, Object>();
     ArrayList<String> records = new ArrayList<String>();
     SearchResult<Item> result = null;
@@ -409,8 +401,7 @@ public class FizOAICatalog extends AbstractCatalog {
     token.setOffset(token.getRows());
 
     try {
-      result = backendService.getItems(true, token.getOffset(), maxListSize, token.getSet(), token.getFrom(),
-          token.getUntil());
+      result = backendService.getItems(true, token.getOffset(), maxListSize, token.getSet(), token.getFrom(), token.getUntil(), token.getMetadataPrefix());
 
       if (result == null || result.getData().isEmpty()) {
         throw new OAIInternalServerError("There is a problem wit the resumption token. Cannot retrieve any results!");
@@ -438,6 +429,7 @@ public class FizOAICatalog extends AbstractCatalog {
     return listRecordsMap;
   }
 
+  @Override
   public Map listSets() throws NoSetHierarchyException, OAIInternalServerError {
     Map<String, Iterator> setsIterator = new HashMap<String, Iterator>();
     List<String> xmlSets = new ArrayList<String>();
@@ -460,7 +452,7 @@ public class FizOAICatalog extends AbstractCatalog {
 
   }
 
-  public String getSetXML(Set setItem) throws IllegalArgumentException {
+  private String getSetXML(Set setItem) throws IllegalArgumentException {
     StringBuffer sb = new StringBuffer();
     sb.append("<set>");
     sb.append("<setSpec>");
@@ -486,6 +478,7 @@ public class FizOAICatalog extends AbstractCatalog {
     return sb.toString();
   }
 
+  @Override
   public Map listSets(String resumptionToken) throws BadResumptionTokenException {
     throw new BadResumptionTokenException();
   }
@@ -493,6 +486,7 @@ public class FizOAICatalog extends AbstractCatalog {
   /**
    * close the repository
    */
+  @Override
   public void close() {
   }
 

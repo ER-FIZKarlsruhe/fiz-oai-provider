@@ -41,6 +41,97 @@ public class ListIdentifiersIT extends BaseIT {
   }
 
   @Test
+  public void testListIdentifiersWithDateRange() throws Exception {
+    logger.info("testListIdentifiersWithDateRange");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("set", "fiz"));
+    params.add(new BasicNameValuePair("from", "1970-01-01"));
+    params.add(new BasicNameValuePair("until", "9999-12-31"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+  }
+
+  @Test
+  public void testListIdentifiersWithDatetimeRange() throws Exception {
+    logger.info("testListIdentifiersWithDatetimeRange");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("set", "fiz"));
+    params.add(new BasicNameValuePair("from", "1970-01-01T00:00:01Z"));
+    params.add(new BasicNameValuePair("until", "9999-12-31T23:59:59Z"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+  }
+  
+  
+  @Test
+  public void testListIdentifiersWithInvalidDateRange() throws Exception {
+    logger.info("testListIdentifiersWithInvalidDateRange");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("set", "fiz"));
+    params.add(new BasicNameValuePair("until", "1970-01-01"));//until is smaller than from
+    params.add(new BasicNameValuePair("from", "9999-12-31"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("testListIdentifiersWithInvalidRange response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+  }
+  
+  @Test
+  public void testListIdentifiersWithInvalidDatetimeRange() throws Exception {
+    logger.info("testListIdentifiersWithInvalidDatetimeRange");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("set", "fiz"));
+    params.add(new BasicNameValuePair("until", "1970-01-01T11:12:12Z"));//until is 1s smaller than from
+    params.add(new BasicNameValuePair("from", "1970-01-01T11:12:13Z"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      System.out.println("testListIdentifiersWithInvalidRange response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+  }
+  
+  @Test
   public void testListIdentifiersMissingMetadataArgument() throws Exception {
     logger.info("testListIdentifiersMissingMetadataArgument");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
