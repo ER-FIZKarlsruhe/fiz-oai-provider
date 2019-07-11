@@ -112,7 +112,7 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
       String xmlRec = null;
       if (nativeItem instanceof Item) {
         Item item = (Item) nativeItem;
-        xmlRec = item.getContent();
+        xmlRec = item.getContent().getContent();
         xmlRec = xmlRec.trim();
       } else {
         throw new Exception("Unrecognized nativeItem");

@@ -76,9 +76,12 @@ public class FizRecordFactory extends RecordFactory {
       throw new IllegalArgumentException("FizRecordFactory.defaultMetadataPrefix is missing from the properties file");
     }
 
-    List<Format> backendFormats = BackendService.getInstance(backendBaseUrl).getFormats();
+    List<Format> backendFormats = BackendService.getInstance(backendBaseUrl).getFormats();    
+    
     if (backendFormats != null) {
+      logger.info("getFormats result: " + backendFormats);
       for (Format format : backendFormats) {
+        logger.info("");
         if (format.getMetadataPrefix().equals(defaultMetadataPrefix)) {
           Crosswalk fizDefaultMetadataCrosswalk = new FizDefaultMetadataCrosswalk(format.getSchemaLocation());
           CrosswalkItem crosswalkItem = new CrosswalkItem(format.getMetadataPrefix(), format.getSchemaLocation(),
@@ -87,7 +90,7 @@ public class FizRecordFactory extends RecordFactory {
         } else {
 
           if (format.getCrosswalkStyleSheet() == null || format.getCrosswalkStyleSheet().isEmpty()) {
-            logger.warn("skip format, as no stylesheet is defined.");
+            logger.warn("skip format " + format.getMetadataPrefix() + " , as no stylesheet is defined.");
             continue;
           }
           Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(format.getSchemaLocation(),
@@ -164,7 +167,9 @@ public class FizRecordFactory extends RecordFactory {
    * @exception IllegalArgumentException Something is wrong with the argument.
    */
   public Iterator getSetSpecs(Object nativeItem) throws IllegalArgumentException {
-    return ((Item) nativeItem).getSets().iterator();
+    //TODO return ((Item) nativeItem).getSets().iterator();
+    
+    return null;
   }
 
   /**

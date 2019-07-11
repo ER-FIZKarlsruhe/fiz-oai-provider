@@ -11,10 +11,14 @@ public class Item {
   
   private String deleteFlag;
   
-  private String content;
+  private Content content;
+  
+  private String ingestFormat;
 
-  private List<String> sets;
+  private List<String> tags;
 
+  private List<Set> sets;
+  
   private List<Format> formats;
   
   public String getIdentifier() {
@@ -41,20 +45,20 @@ public class Item {
     this.deleteFlag = deleteFlag;
   }
   
-  public String getContent() {
+  public Content getContent() {
     return content;
   }
   
-  public void setContent(String content) {
+  public void setContent(Content content) {
     this.content = content;
   }
   
-  public List<String> getSets() {
-    return sets;
+  public List<String> getTags() {
+    return tags;
   }
   
-  public void setSets(List<String> sets) {
-    this.sets = sets;
+  public void setTags(List<String> tags) {
+    this.tags = tags;
   }
   
   
@@ -64,6 +68,22 @@ public class Item {
 
   public void setFormats(List<Format> formats) {
     this.formats = formats;
+  }
+
+  public String getIngestFormat() {
+    return ingestFormat;
+  }
+
+  public void setIngestFormat(String ingestFormat) {
+    this.ingestFormat = ingestFormat;
+  }
+
+  public List<Set> getSets() {
+    return sets;
+  }
+
+  public void setSets(List<Set> sets) {
+    this.sets = sets;
   }
 
   public HashMap<String,Object> toNativeitem() {
@@ -78,7 +98,7 @@ public class Item {
   @Override
   public String toString() {
     return "Item [identifier=" + identifier + ", datestamp=" + datestamp + ", deleteFlag=" + deleteFlag + ", content="
-        + content + ", sets=" + sets + "]";
+        + content + ", tags=" + tags + "]";
   }
 
   @Override

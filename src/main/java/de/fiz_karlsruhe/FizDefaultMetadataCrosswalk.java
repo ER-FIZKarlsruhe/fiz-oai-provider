@@ -43,6 +43,9 @@ public class FizDefaultMetadataCrosswalk extends Crosswalk {
    *                                             format.
    */
   public String createMetadata(Object nativeItem) throws CannotDisseminateFormatException {
-   return ((Item)nativeItem).getContent();
+    String content = ((Item)nativeItem).getContent().getContent(); 
+    
+    //Replace xml Starttags!
+    return content.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
   }
 }

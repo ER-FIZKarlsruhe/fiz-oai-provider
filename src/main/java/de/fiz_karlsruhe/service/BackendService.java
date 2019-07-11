@@ -1,6 +1,7 @@
 package de.fiz_karlsruhe.service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +18,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
-import de.fiz_karlsruhe.FizOAICatalog;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
 import de.fiz_karlsruhe.model.SearchResult;
@@ -29,7 +29,7 @@ public class BackendService {
 
   private static BackendService INSTANCE;
 
-  final static Logger logger = LogManager.getLogger(FizOAICatalog.class);
+  final static Logger logger = LogManager.getLogger(BackendService.class);
 
   private BackendService(String backendBaseUrl) {
     BackendService.backendBaseUrl = backendBaseUrl;
@@ -55,8 +55,10 @@ public class BackendService {
     ObjectMapper objectMapper = new ObjectMapper();
 
     Item item = null;
-    String url = backendBaseUrl + "/item/" + localIdentifier + "?format=" + metadataPrefix;
+    String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier) + "?format=" + URLEncoder.encode(metadataPrefix) + "&content=true";
 
+    logger.info("getItem url: " + url.toString());
+    
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
@@ -73,7 +75,6 @@ public class BackendService {
 
   public SearchResult<Item> getItems(boolean withContent, long offset, long rows, String set, String from, String until, String metadataPrefix)
       throws IOException {
-    
     if (metadataPrefix == null || metadataPrefix.isEmpty()) {
       throw new IllegalArgumentException("metadataPrefix must not be null");
     }
@@ -83,6 +84,7 @@ public class BackendService {
     SearchResult<Item> result = null;
     StringBuffer url = new StringBuffer();
     url.append(backendBaseUrl + "/item?content=" + withContent);
+    url.append("&format=" + URLEncoder.encode(metadataPrefix));
     url.append("&offset=" + offset);
     url.append("&rows=" + rows);
 
@@ -115,9 +117,12 @@ public class BackendService {
   }
 
   public List<Format> getFormats() throws IOException {
+
     ObjectMapper mapper = new ObjectMapper();
 
     String url = backendBaseUrl + "/format";
+
+    logger.info("getFormats url: " + url.toString());
     List<Format> formatList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -127,9 +132,9 @@ public class BackendService {
         formatList = Arrays.asList(mapper.readValue(json, Format[].class));
       }
     } catch (Exception e) {
-      logger.error("Error on getIdentifiers", e);
+      logger.error("Error on getFormats", e);
     }
-
+    
     return formatList;
 
   }
@@ -137,7 +142,7 @@ public class BackendService {
   public List<Set> getSets() throws OAIInternalServerError, IOException {
     ObjectMapper mapper = new ObjectMapper();
     String url = backendBaseUrl + "/set";
-    logger.info("listSets using " + url);
+    logger.info("getSets url " + url);
     List<Set> setObjects = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
