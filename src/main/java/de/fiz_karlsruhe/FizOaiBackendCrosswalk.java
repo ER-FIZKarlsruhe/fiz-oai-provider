@@ -1,89 +1,20 @@
 package de.fiz_karlsruhe;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.net.URL;
-import java.util.Calendar;
-
-import javax.xml.XMLConstants;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
-import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import de.fiz_karlsruhe.model.Item;
-
-
 
 public class FizOaiBackendCrosswalk extends Crosswalk {
 
   final static Logger logger = LogManager.getLogger(FizOaiBackendCrosswalk.class);
-  
-  private boolean debug = true;
-  protected Transformer transformer = null;
 
-  public FizOaiBackendCrosswalk(String schemaLocation, String xsltUrl) throws OAIInternalServerError {
-    this(schemaLocation, (String) null, xsltUrl);
+  public FizOaiBackendCrosswalk(String schemaLocation, String crosswalkName) {
+    super(schemaLocation);
   }
 
-  public FizOaiBackendCrosswalk(String schemaLocation, String contentType, String xsltUrl)
-      throws OAIInternalServerError {
-    this(schemaLocation, contentType, (String) null, xsltUrl);
-  }
-
-  public FizOaiBackendCrosswalk(String schemaLocation, String contentType, String docType, String xsltUrl)
-      throws OAIInternalServerError {
-    this(schemaLocation, contentType, docType, (String) null, xsltUrl);
-  }
-
-  /**
-   * The constructor assigns the schemaLocation associated with this crosswalk.
-   * Since the crosswalk is trivial in this case, no properties are utilized.
-   *
-   * @param properties properties that are needed to configure the crosswalk.
-   */
-  public FizOaiBackendCrosswalk(String schemaLocation, String contentType, String docType, String encoding,
-      String xsltUrl) throws OAIInternalServerError {
-    // super("http://www.openarchives.org/OAI/2.0/oai_dc/
-    // http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
-    super(schemaLocation, contentType, docType, encoding);
-
-    logger.info("Initializing FizOaiBackendCrosswalk");
-    
-    if (xsltUrl != null) {
-
-      try {
-        URL url = new URL(xsltUrl);
-        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-        StreamSource xslSource = new StreamSource(in);
-        TransformerFactory factory = TransformerFactory.newInstance("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null);
-        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-        
-        this.transformer = factory.newTransformer(xslSource);
-        this.transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        this.transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
-        this.transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        this.transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        this.transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-        this.transformer.setParameter("datasetSize", "0");
-        this.transformer.setParameter("currentYear", Calendar.getInstance().get(Calendar.YEAR));
-      } catch (Exception e) {
-        logger.error("Error during init of FizOaiBackendCrosswalk", e);
-        
-        throw new OAIInternalServerError(e.getMessage());
-      }
-    }
-  }
 
   /**
    * Can this nativeItem be represented in other formats?
@@ -95,57 +26,10 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
     return true;
   }
 
-  /**
-   * Perform the actual crosswalk.
-   *
-   * @param nativeItem the native "item". In this case, it is already formatted as
-   *                   an OAI <record> element, with the possible exception that
-   *                   multiple metadataFormats are present in the <metadata>
-   *                   element.
-   * @return a String containing the FileMap to be stored within the <metadata>
-   *         element.
-   * @exception CannotDisseminateFormatException nativeItem doesn't support this
-   *                                             format.
-   */
   public String createMetadata(Object nativeItem) throws CannotDisseminateFormatException {
-    try {
-      String xmlRec = null;
-      if (nativeItem instanceof Item) {
-        Item item = (Item) nativeItem;
-        xmlRec = item.getContent().getContent();
-        xmlRec = xmlRec.trim();
-      } else {
-        throw new Exception("Unrecognized nativeItem");
-      }
+    String content = ((Item) nativeItem).getContent().getContent();
 
-      logger.debug("XSLTCrosswalk.createMetadata: xmlRec=" + xmlRec);
-
-      if (xmlRec.startsWith("<?")) {
-        int offset = xmlRec.indexOf("?>");
-        xmlRec = xmlRec.substring(offset + 2);
-      }
-      
-      logger.debug("XSLTCrosswalk.createMetadata: transformer=" + transformer);
-      
-      if (transformer != null) {
-        StringReader stringReader = new StringReader(xmlRec);
-        StreamSource streamSource = new StreamSource(stringReader);
-        StringWriter stringWriter = new StringWriter();
-        synchronized (this) {
-          transformer.transform(streamSource, new StreamResult(stringWriter));
-        }
-        
-        logger.info("XSLTCrosswalk.createMetadata: return=" + stringWriter.toString());
-        
-        return stringWriter.toString();
-      } else {
-        return xmlRec;
-      }
-    } catch (Exception e) {
-      if (debug) {
-        e.printStackTrace();
-      }
-      throw new CannotDisseminateFormatException(e.getMessage());
-    }
+    // Replace xml Starttags!
+    return content.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
   }
 }

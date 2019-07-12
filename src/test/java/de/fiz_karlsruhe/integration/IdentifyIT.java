@@ -43,7 +43,7 @@ public class IdentifyIT extends BaseIT {
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "Identify"));
-    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();

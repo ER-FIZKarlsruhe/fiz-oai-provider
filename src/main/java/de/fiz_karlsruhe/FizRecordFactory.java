@@ -27,6 +27,7 @@ import ORG.oclc.oai.server.crosswalk.CrosswalkItem;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
+import de.fiz_karlsruhe.model.Transformation;
 import de.fiz_karlsruhe.service.BackendService;
 
 /**
@@ -76,31 +77,31 @@ public class FizRecordFactory extends RecordFactory {
       throw new IllegalArgumentException("FizRecordFactory.defaultMetadataPrefix is missing from the properties file");
     }
 
-    List<Format> backendFormats = BackendService.getInstance(backendBaseUrl).getFormats();    
-    
-    if (backendFormats != null) {
-      logger.info("getFormats result: " + backendFormats);
-      for (Format format : backendFormats) {
-        logger.info("");
-        if (format.getMetadataPrefix().equals(defaultMetadataPrefix)) {
-          Crosswalk fizDefaultMetadataCrosswalk = new FizDefaultMetadataCrosswalk(format.getSchemaLocation());
-          CrosswalkItem crosswalkItem = new CrosswalkItem(format.getMetadataPrefix(), format.getSchemaLocation(),
-              format.getSchemaNamespace(), fizDefaultMetadataCrosswalk);
-          crosswalksMap.put(format.getMetadataPrefix(), crosswalkItem);
-        } else {
+    //Add crosswalk for the default metadataPrefix 
+    Format defaultFormat = BackendService.getInstance(backendBaseUrl).getFormat(defaultMetadataPrefix);
+    if (defaultFormat != null) {
+      Crosswalk fizDefaultMetadataCrosswalk = new FizDefaultMetadataCrosswalk(defaultFormat.getSchemaLocation());
+      CrosswalkItem crosswalkItem = new CrosswalkItem(defaultFormat.getMetadataPrefix(),
+          defaultFormat.getSchemaLocation(), defaultFormat.getSchemaNamespace(), fizDefaultMetadataCrosswalk);
+      crosswalksMap.put(defaultFormat.getMetadataPrefix(), crosswalkItem);
+    }
+    //Add further crosswalks for all available transformations
+    List<Transformation> backendCrosswalks = BackendService.getInstance(backendBaseUrl).getTransformations();
 
-          if (format.getCrosswalkStyleSheet() == null || format.getCrosswalkStyleSheet().isEmpty()) {
-            logger.warn("skip format " + format.getMetadataPrefix() + " , as no stylesheet is defined.");
-            continue;
-          }
-          Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(format.getSchemaLocation(),
-              format.getCrosswalkStyleSheet());
-          CrosswalkItem crosswalkItem = new CrosswalkItem(format.getMetadataPrefix(), format.getSchemaLocation(),
-              format.getSchemaNamespace(), fizOaiBackendCrosswalk);
-          crosswalksMap.put(format.getMetadataPrefix(), crosswalkItem);
+    if (backendCrosswalks != null) {
+      for (Transformation crosswalk : backendCrosswalks) {
+        if (crosswalk.getName() == null) {
+          logger.warn("skip crosswalk as no name is defined");
+          continue;
         }
-      }
+        logger.info("Add crosswalk" + crosswalk.getName());
+        Format formatFrom = BackendService.getInstance(backendBaseUrl).getFormat(crosswalk.getFormatFrom());
+        Format formatTo = BackendService.getInstance(backendBaseUrl).getFormat(crosswalk.getFormatTo());
 
+        Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(formatTo.getSchemaLocation(), crosswalk.getName());
+        CrosswalkItem crosswalkItem = new CrosswalkItem(formatTo.getMetadataPrefix(), formatTo.getSchemaLocation(), formatTo.getSchemaNamespace(), fizOaiBackendCrosswalk);
+        crosswalksMap.put(formatTo.getMetadataPrefix(), crosswalkItem);
+      }
     }
 
     return crosswalksMap;
@@ -167,8 +168,8 @@ public class FizRecordFactory extends RecordFactory {
    * @exception IllegalArgumentException Something is wrong with the argument.
    */
   public Iterator getSetSpecs(Object nativeItem) throws IllegalArgumentException {
-    //TODO return ((Item) nativeItem).getSets().iterator();
-    
+    // TODO return ((Item) nativeItem).getSets().iterator();
+
     return null;
   }
 

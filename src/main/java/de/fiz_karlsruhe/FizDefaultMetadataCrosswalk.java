@@ -7,8 +7,6 @@ import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import de.fiz_karlsruhe.model.Item;
 
-
-
 public class FizDefaultMetadataCrosswalk extends Crosswalk {
 
   public FizDefaultMetadataCrosswalk(String schemaLocation) {
@@ -16,9 +14,6 @@ public class FizDefaultMetadataCrosswalk extends Crosswalk {
   }
 
   final static Logger logger = LogManager.getLogger(FizDefaultMetadataCrosswalk.class);
-  
-  private boolean debug = true;
- 
 
   /**
    * Can this nativeItem be represented in other formats?
@@ -43,9 +38,9 @@ public class FizDefaultMetadataCrosswalk extends Crosswalk {
    *                                             format.
    */
   public String createMetadata(Object nativeItem) throws CannotDisseminateFormatException {
-    String content = ((Item)nativeItem).getContent().getContent(); 
-    
-    //Replace xml Starttags!
+    String content = ((Item) nativeItem).getContent().getContent();
+
+    // Replace xml Starttags!
     return content.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
   }
 }

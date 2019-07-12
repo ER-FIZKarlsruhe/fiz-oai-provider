@@ -17,11 +17,13 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
 import de.fiz_karlsruhe.model.SearchResult;
 import de.fiz_karlsruhe.model.Set;
+import de.fiz_karlsruhe.model.Transformation;
 
 public class BackendService {
 
@@ -136,9 +138,52 @@ public class BackendService {
     }
     
     return formatList;
-
   }
 
+  public Format getFormat(String metadataPrefix) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+
+    String url = backendBaseUrl + "/format/" + metadataPrefix;
+
+    logger.info("getFormat url: " + url.toString());
+    Format format = null;
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+      if (response.getStatusLine().getStatusCode() == 200) {
+        String json = EntityUtils.toString(response.getEntity());
+        format = mapper.readValue(json, Format.class);
+      }
+    } catch (Exception e) {
+      logger.error("Error on getFormats", e);
+    }
+    
+    return format;
+  }
+  
+  
+  public List<Transformation> getTransformations() throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+
+    String url = backendBaseUrl + "/crosswalk";
+
+    logger.info("getTransformations url: " + url.toString());
+    List<Transformation> transformationList = null;
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+      if (response.getStatusLine().getStatusCode() == 200) {
+        String json = EntityUtils.toString(response.getEntity());
+        transformationList = Arrays.asList(mapper.readValue(json, Transformation[].class));
+      }
+    } catch (Exception e) {
+      logger.error("Error on getTransformations", e);
+    }
+    
+    return transformationList;
+  }
+  
+  
   public List<Set> getSets() throws OAIInternalServerError, IOException {
     ObjectMapper mapper = new ObjectMapper();
     String url = backendBaseUrl + "/set";

@@ -7,8 +7,6 @@ public class Format {
   
   private String schemaNamespace;
   
-  private String crosswalkStyleSheet;
-  
   private String identifierXpath;
 
   public String getMetadataPrefix() {
@@ -35,14 +33,6 @@ public class Format {
     this.schemaNamespace = schemaNamespace;
   }
 
-  public String getCrosswalkStyleSheet() {
-    return crosswalkStyleSheet;
-  }
-
-  public void setCrosswalkStyleSheet(String crosswalkStyleSheet) {
-    this.crosswalkStyleSheet = crosswalkStyleSheet;
-  }
-
   public String getIdentifierXpath() {
     return identifierXpath;
   }
@@ -54,7 +44,7 @@ public class Format {
   @Override
   public String toString() {
     return "Format [metadataPrefix=" + metadataPrefix + ", schemaLocation=" + schemaLocation + ", schemaNamespace="
-        + schemaNamespace + ", crosswalkStyleSheet=" + crosswalkStyleSheet + ", identifierXpath=" + identifierXpath
+        + schemaNamespace + ", identifierXpath=" + identifierXpath
         + "]";
   }
 

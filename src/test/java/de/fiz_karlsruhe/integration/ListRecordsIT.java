@@ -25,7 +25,7 @@ public class ListRecordsIT extends BaseIT {
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListRecords"));
-    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
     params.add(new BasicNameValuePair("set", "fiz"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
@@ -87,7 +87,7 @@ public class ListRecordsIT extends BaseIT {
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListRecords"));
-    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
     params.add(new BasicNameValuePair("from", "abc"));//Must be like '2019-12-12'
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
@@ -128,7 +128,7 @@ public class ListRecordsIT extends BaseIT {
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListRecords"));
-    params.add(new BasicNameValuePair("metadataPrefix", "oaiDc"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
     params.add(new BasicNameValuePair("set", "empty"));//Returns an empty resultSet from the backend
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 

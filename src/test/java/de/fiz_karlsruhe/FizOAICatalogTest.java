@@ -21,14 +21,13 @@ import junit.framework.Assert;
 public class FizOAICatalogTest {
 
   private Properties prop;
-  
-  
+
   @Mock
   BackendService backendService;
-  
+
   @Before
   public void init() {
-    
+
     try {
       prop = new Properties();
       File resourcesDirectory = new File("src/test/resources").getAbsoluteFile();
@@ -40,36 +39,37 @@ public class FizOAICatalogTest {
       e.printStackTrace();
     }
   }
-  
+
   @Test
   public void initCatalogWithoutProperties() throws Exception {
     try {
       FizOAICatalog catalog = new FizOAICatalog(null);
-    } catch(Exception e) {
+    } catch (Exception e) {
       assertTrue(true);
     }
   }
-  
+
   @Test
   public void initCatalogWithProperties() throws Exception {
-      FizOAICatalog catalog = new FizOAICatalog(prop);
-      assertTrue(true);
+    FizOAICatalog catalog = new FizOAICatalog(prop);
+    assertTrue(true);
   }
-  
+
   @Test
   public void testGetRecordIdDoesNotExist() throws Exception {
     FizOAICatalog catalog;
     try {
-      catalog = (FizOAICatalog) FizOAICatalog.factory(prop, null);      
+      catalog = (FizOAICatalog) FizOAICatalog.factory(prop, null);
       catalog.setBackendService(backendService);
       catalog.getRecord("abc", "ii");
       Assert.fail("IdDoesNotExistException expected");
     } catch (IdDoesNotExistException e) {
-      //do nothing
-    } catch(Throwable t) {
+      // do nothing
+    } catch (Throwable t) {
+      t.printStackTrace();
       Assert.fail("Unexpected exception");
     }
-     
+
   }
-  
+
 }
