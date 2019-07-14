@@ -98,7 +98,7 @@ public class FizRecordFactory extends RecordFactory {
         Format formatFrom = BackendService.getInstance(backendBaseUrl).getFormat(crosswalk.getFormatFrom());
         Format formatTo = BackendService.getInstance(backendBaseUrl).getFormat(crosswalk.getFormatTo());
 
-        Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(formatTo.getSchemaLocation(), crosswalk.getName());
+        Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(formatTo.getSchemaLocation(), crosswalk.getName(), crosswalk.getFormatFrom(),crosswalk.getFormatTo());
         CrosswalkItem crosswalkItem = new CrosswalkItem(formatTo.getMetadataPrefix(), formatTo.getSchemaLocation(), formatTo.getSchemaNamespace(), fizOaiBackendCrosswalk);
         crosswalksMap.put(formatTo.getMetadataPrefix(), crosswalkItem);
       }

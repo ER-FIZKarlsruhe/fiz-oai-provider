@@ -45,6 +45,14 @@ public class BackendService {
     return INSTANCE;
   }
 
+  public static BackendService getInstance() {
+	    if (INSTANCE == null) {
+	      throw new RuntimeException("Service must be initialized with backendUrl first!"); 
+	    }
+
+	    return INSTANCE;
+	  }
+  
   public Item getItem(String localIdentifier, String metadataPrefix) throws IOException {
     if (localIdentifier == null || localIdentifier.isEmpty()) {
       throw new IllegalArgumentException("localIdentifier must not be null");
