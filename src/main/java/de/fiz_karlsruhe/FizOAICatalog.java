@@ -153,14 +153,14 @@ public class FizOAICatalog extends AbstractCatalog {
     Item nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
-      //TODO nativeItem = backendService.getItem(localIdentifier);
+      nativeItem = backendService.getItem(localIdentifier);
     } catch (Exception e) {
       e.printStackTrace();
       throw new OAIInternalServerError("Database Failure");
     }
 
     if (nativeItem != null) {
-      return getRecordFactory().getSchemaLocations(nativeItem);// TODO get formats from backendService
+      return getRecordFactory().getSchemaLocations(nativeItem);
     } else {
       throw new IdDoesNotExistException(oaiIdentifier);
     }
