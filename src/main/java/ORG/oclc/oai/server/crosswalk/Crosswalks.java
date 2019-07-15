@@ -80,7 +80,7 @@ public class Crosswalks {
     
     String location = null;
 
-    Optional<Format> format = this.formats.stream().filter(f -> f.getSchemaLocation().equals(namespaceURI)).findFirst();
+    Optional<Format> format = this.formats.stream().filter(f -> f.getSchemaLocation().trim().equals(sb.toString().trim())).findFirst();
     if (format.isPresent()) {
       location = format.get().getMetadataPrefix(); 
     }
