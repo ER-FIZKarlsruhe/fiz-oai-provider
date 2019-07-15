@@ -1,6 +1,6 @@
 package de.fiz_karlsruhe;
 
-import java.util.Properties;
+import java.io.IOException;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,11 +16,9 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
   
   private String formatTo;
   
-  private Properties properties;
-	
   final static Logger logger = LogManager.getLogger(FizOaiBackendCrosswalk.class);
 
-  public FizOaiBackendCrosswalk(Properties properties, String schemaLocation, String crosswalkName, String formatFrom, String formatTo) {
+  public FizOaiBackendCrosswalk( String schemaLocation, String crosswalkName, String formatFrom, String formatTo) {
     super(schemaLocation);
     this.formatFrom = formatFrom;
     this.formatTo = formatTo;
@@ -40,10 +38,17 @@ public class FizOaiBackendCrosswalk extends Crosswalk {
   }
 
   public String createMetadata(Object nativeItem) throws CannotDisseminateFormatException {
+    String metadata = null;
     Item item = (Item) nativeItem;
-    Item crosswalkItem = BackendService.getInstance().getItem(item.getIdentifier(), formatTo);
+    Item crosswalkItem;
+    try {
+      crosswalkItem = BackendService.getInstance().getItem(item.getIdentifier(), formatTo);
+      metadata = crosswalkItem.getContent().getContent().replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     // Replace xml Starttags!
-    return crosswalkItem.getContent().getContent().replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
+    return metadata;
   }
 }
