@@ -77,15 +77,15 @@ public class Crosswalks {
       sb.append(namespaceURI);
     }
     sb.append(" ").append(schemaURL);
-//  TODO
-//    Iterator iterator = crosswalksMap.entrySet().iterator();
-//    while (iterator.hasNext()) {
-//      Map.Entry entry = (Map.Entry) iterator.next();
-//      if (((CrosswalkItem) entry.getValue()).getCrosswalk().getSchemaLocation().equals(sb.toString())) {
-//        return (String) entry.getKey();
-//      }
-//    }
-    return null;
+    
+    String location = null;
+
+    Optional<Format> format = this.formats.stream().filter(f -> f.getSchemaLocation().equals(namespaceURI)).findFirst();
+    if (format.isPresent()) {
+      location = format.get().getMetadataPrefix(); 
+    }
+
+    return location;
   }
 
   /**
