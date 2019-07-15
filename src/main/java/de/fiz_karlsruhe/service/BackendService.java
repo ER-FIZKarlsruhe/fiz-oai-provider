@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ORG.oclc.oai.server.crosswalk.Crosswalk;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
@@ -83,6 +82,33 @@ public class BackendService {
     return item;
   }
 
+  public Item getItem(String localIdentifier) throws IOException {
+    if (localIdentifier == null || localIdentifier.isEmpty()) {
+      throw new IllegalArgumentException("localIdentifier must not be null");
+    }
+    
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    Item item = null;
+    String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier);
+
+    logger.info("getItem url: " + url.toString());
+    
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+      if (response.getStatusLine().getStatusCode() == 200) {
+        String json = EntityUtils.toString(response.getEntity());
+
+        item = objectMapper.readValue(json, Item.class);
+      }
+    } catch (Exception e) {
+      logger.error("Error on getItem", e);
+    }
+
+    return item;
+  }
+  
+  
   public SearchResult<Item> getItems(boolean withContent, long offset, long rows, String set, String from, String until, String metadataPrefix)
       throws IOException {
     if (metadataPrefix == null || metadataPrefix.isEmpty()) {
@@ -127,7 +153,6 @@ public class BackendService {
   }
 
   public List<Format> getFormats() throws IOException {
-
     ObjectMapper mapper = new ObjectMapper();
 
     String url = backendBaseUrl + "/format";

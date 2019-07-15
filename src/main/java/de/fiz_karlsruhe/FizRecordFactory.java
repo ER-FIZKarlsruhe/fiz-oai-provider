@@ -11,7 +11,6 @@
 package de.fiz_karlsruhe;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -19,12 +18,9 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 
 import ORG.oclc.oai.server.catalog.RecordFactory;
-import ORG.oclc.oai.server.crosswalk.Crosswalk;
-import ORG.oclc.oai.server.crosswalk.CrosswalkItem;
-import ORG.oclc.oai.server.verb.OAIInternalServerError;
+import ORG.oclc.oai.server.crosswalk.Crosswalks;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
 import de.fiz_karlsruhe.model.Transformation;
@@ -52,18 +48,41 @@ public class FizRecordFactory extends RecordFactory {
    * @throws IOException
    */
   public FizRecordFactory(Properties properties) throws IllegalArgumentException, Exception {
-    super(initCrosswalks(properties));
-
+    super();
+    List<Format> formats = initFormats(properties);
+    List<Transformation> transformations = initTransformations(properties);
+    System.out.println(formats);
+    System.out.println(transformations);
+    this.crosswalks = new Crosswalks(formats, transformations);
+    
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
     if (repositoryIdentifier == null) {
       throw new IllegalArgumentException("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
   }
 
-  private static HashMap<String, CrosswalkItem> initCrosswalks(Properties properties)
-      throws IOException, JSONException, OAIInternalServerError {
-    logger.info("initCrosswalks");
-    HashMap<String, CrosswalkItem> crosswalksMap = new HashMap<String, CrosswalkItem>();
+  private List<Format> initFormats(Properties properties) {
+    logger.info("initFormats");
+
+    String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
+    System.out.println("backendBaseUrl: " + backendBaseUrl);
+    if (backendBaseUrl == null) {
+      throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
+    }
+
+    List<Format> formats = null;
+    try {
+      formats = BackendService.getInstance(backendBaseUrl).getFormats();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    System.out.println("formats: " + formats);
+    return formats;
+  }
+  
+  private List<Transformation> initTransformations(Properties properties) {
+    logger.info("initTransformations");
 
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
     logger.info("backendBaseUrl: " + backendBaseUrl);
@@ -71,40 +90,14 @@ public class FizRecordFactory extends RecordFactory {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
 
-    String defaultMetadataPrefix = properties.getProperty("FizRecordFactory.defaultMetadataPrefix");
-    logger.info("defaultMetadataPrefix: " + defaultMetadataPrefix);
-    if (defaultMetadataPrefix == null) {
-      throw new IllegalArgumentException("FizRecordFactory.defaultMetadataPrefix is missing from the properties file");
+    List<Transformation> transformations = null;
+    try {
+      transformations = BackendService.getInstance(backendBaseUrl).getTransformations();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-
-    //Add crosswalk for the default metadataPrefix 
-    Format defaultFormat = BackendService.getInstance(backendBaseUrl).getFormat(defaultMetadataPrefix);
-    if (defaultFormat != null) {
-      Crosswalk fizDefaultMetadataCrosswalk = new FizDefaultMetadataCrosswalk(defaultFormat.getSchemaLocation());
-      CrosswalkItem crosswalkItem = new CrosswalkItem(defaultFormat.getMetadataPrefix(),
-          defaultFormat.getSchemaLocation(), defaultFormat.getSchemaNamespace(), fizDefaultMetadataCrosswalk);
-      crosswalksMap.put(defaultFormat.getMetadataPrefix(), crosswalkItem);
-    }
-    //Add further crosswalks for all available transformations
-    List<Transformation> backendCrosswalks = BackendService.getInstance(backendBaseUrl).getTransformations();
-
-    if (backendCrosswalks != null) {
-      for (Transformation crosswalk : backendCrosswalks) {
-        if (crosswalk.getName() == null) {
-          logger.warn("skip crosswalk as no name is defined");
-          continue;
-        }
-        logger.info("Add crosswalk" + crosswalk.getName());
-        Format formatFrom = BackendService.getInstance(backendBaseUrl).getFormat(crosswalk.getFormatFrom());
-        Format formatTo = BackendService.getInstance(backendBaseUrl).getFormat(crosswalk.getFormatTo());
-
-        Crosswalk fizOaiBackendCrosswalk = new FizOaiBackendCrosswalk(formatTo.getSchemaLocation(), crosswalk.getName(), crosswalk.getFormatFrom(),crosswalk.getFormatTo());
-        CrosswalkItem crosswalkItem = new CrosswalkItem(formatTo.getMetadataPrefix(), formatTo.getSchemaLocation(), formatTo.getSchemaNamespace(), fizOaiBackendCrosswalk);
-        crosswalksMap.put(formatTo.getMetadataPrefix(), crosswalkItem);
-      }
-    }
-
-    return crosswalksMap;
+    
+    return transformations;
   }
 
   /**

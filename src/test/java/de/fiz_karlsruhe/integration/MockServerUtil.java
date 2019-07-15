@@ -34,10 +34,13 @@ public class MockServerUtil  implements ExpectationInitializer {
   }
 
   private void initGetItem(MockServerClient serverClient) {
+    
+
+    
     serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*").withQueryStringParameters(new Parameter("format", Arrays.asList("radar"))))
         .respond(response().withStatusCode(200)
             .withBody("{\n" + 
-                "  \"identifier\": \"10.0133/48320\",\n" + 
+                "  \"identifier\": \"10.0133/10000386\",\n" + 
                 "  \"datestamp\": \"2019-07-12T12:39:37Z\",\n" + 
                 "  \"deleteFlag\": false,\n" + 
                 "  \"tags\": null,\n" + 
@@ -45,16 +48,16 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "  \"formats\": null,\n" + 
                 "  \"ingestFormat\": \"radar\",\n" + 
                 "  \"content\": {\n" + 
-                "    \"identifier\": \"10.0133/48320\",\n" + 
+                "    \"identifier\": \"10.0133/10000386\",\n" + 
                 "    \"format\": \"radar\",\n" + 
-                "    \"content\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"yes\\\"?>\\n<ns2:radarDataset xmlns=\\\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-elements\\\" xmlns:ns2=\\\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-dataset\\\">\\n    <identifier identifierType=\\\"DOI\\\">10.0133/48320</identifier>\\n    <creators>\\n        <creator>\\n            <creatorName>Superuser, Generic1</creatorName>\\n            <givenName>Generic1</givenName>\\n            <familyName>Superuser</familyName>\\n        </creator>\\n    </creators>\\n    <title>Chart.js-2.7.1.zip</title>\\n    <publishers>\\n        <publisher>Radar4Kit</publisher>\\n    </publishers>\\n    <productionYear>2019</productionYear>\\n    <publicationYear>2019</publicationYear>\\n    <subjectAreas>\\n        <subjectArea>\\n            <controlledSubjectAreaName>Computer Science</controlledSubjectAreaName>\\n        </subjectArea>\\n    </subjectAreas>\\n    <resource resourceType=\\\"Dataset\\\"></resource>\\n    <rights>\\n        <controlledRights>CC BY-ND 4.0 Attribution-NoDerivs</controlledRights>\\n    </rights>\\n    <rightsHolders>\\n        <rightsHolder>Radar4Kit</rightsHolder>\\n    </rightsHolders>\\n</ns2:radarDataset>\\n\"\n" + 
+                "    \"content\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"yes\\\"?>\\n<ns2:radarDataset xmlns=\\\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-elements\\\" xmlns:ns2=\\\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-dataset\\\">\\n    <identifier identifierType=\\\"DOI\\\">10.0133/10000386</identifier>\\n    <creators>\\n        <creator>\\n            <creatorName>Superuser, Generic1</creatorName>\\n            <givenName>Generic1</givenName>\\n            <familyName>Superuser</familyName>\\n        </creator>\\n    </creators>\\n    <title>Chart.js-2.7.1.zip</title>\\n    <publishers>\\n        <publisher>Radar4Kit</publisher>\\n    </publishers>\\n    <productionYear>2019</productionYear>\\n    <publicationYear>2019</publicationYear>\\n    <subjectAreas>\\n        <subjectArea>\\n            <controlledSubjectAreaName>Computer Science</controlledSubjectAreaName>\\n        </subjectArea>\\n    </subjectAreas>\\n    <resource resourceType=\\\"Dataset\\\"></resource>\\n    <rights>\\n        <controlledRights>CC BY-ND 4.0 Attribution-NoDerivs</controlledRights>\\n    </rights>\\n    <rightsHolders>\\n        <rightsHolder>Radar4Kit</rightsHolder>\\n    </rightsHolders>\\n</ns2:radarDataset>\\n\"\n" + 
                 "  }\n" + 
                 "}"));
 
     serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*").withQueryStringParameters(new Parameter("format", Arrays.asList("oai_dc"))))
         .respond(response().withStatusCode(200)
             .withBody("{\n" + 
-                "  \"identifier\": \"10.0133/48320\",\n" + 
+                "  \"identifier\": \"10.0133/10000386\",\n" + 
                 "  \"datestamp\": \"2019-07-12T12:39:37Z\",\n" + 
                 "  \"deleteFlag\": false,\n" + 
                 "  \"tags\": null,\n" + 
@@ -62,11 +65,25 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "  \"formats\": null,\n" + 
                 "  \"ingestFormat\": \"radar\",\n" + 
                 "  \"content\": {\n" + 
-                "    \"identifier\": \"10.0133/48320\",\n" + 
+                "    \"identifier\": \"10.0133/10000386\",\n" + 
                 "    \"format\": \"oai_dc\",\n" + 
-                "    \"content\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><oai_dc:dc xsi:schemaLocation=\\\"http://www.openarchives.org/OAI/2.0/oai_dc/ oai_dc.xsd\\\" xmlns:dc=\\\"http://purl.org/dc/elements/1.1/\\\" xmlns:xsi=\\\"http://www.w3.org/2001/XMLSchema-instance\\\" xmlns:oai_dc=\\\"http://www.openarchives.org/OAI/2.0/oai_dc/\\\">\\n  <dc:identifier>10.0133/48320</dc:identifier>\\n  <dc:identifier>DOI</dc:identifier>\\n  <dc:creator>Superuser, Generic1</dc:creator>\\n  <dc:title>Chart.js-2.7.1.zip</dc:title>\\n  <dc:publisher>Radar4Kit</dc:publisher>\\n  <dc:date>2019</dc:date>\\n  <dc:subject>Computer Science</dc:subject>\\n  <dc:type/>\\n  <dc:type>Dataset</dc:type>\\n  <dc:rights>CC BY-ND 4.0 Attribution-NoDerivs</dc:rights>\\n  <dc:rights>Radar4Kit</dc:rights>\\n  <dc:language/>\\n  <dc:format>application/zip</dc:format>\\n</oai_dc:dc>\\n\"\n" + 
+                "    \"content\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><oai_dc:dc xsi:schemaLocation=\\\"http://www.openarchives.org/OAI/2.0/oai_dc/ oai_dc.xsd\\\" xmlns:dc=\\\"http://purl.org/dc/elements/1.1/\\\" xmlns:xsi=\\\"http://www.w3.org/2001/XMLSchema-instance\\\" xmlns:oai_dc=\\\"http://www.openarchives.org/OAI/2.0/oai_dc/\\\">\\n  <dc:identifier>10.0133/10000386</dc:identifier>\\n  <dc:identifier>DOI</dc:identifier>\\n  <dc:creator>Superuser, Generic1</dc:creator>\\n  <dc:title>Chart.js-2.7.1.zip</dc:title>\\n  <dc:publisher>Radar4Kit</dc:publisher>\\n  <dc:date>2019</dc:date>\\n  <dc:subject>Computer Science</dc:subject>\\n  <dc:type/>\\n  <dc:type>Dataset</dc:type>\\n  <dc:rights>CC BY-ND 4.0 Attribution-NoDerivs</dc:rights>\\n  <dc:rights>Radar4Kit</dc:rights>\\n  <dc:language/>\\n  <dc:format>application/zip</dc:format>\\n</oai_dc:dc>\\n\"\n" + 
                 "  }\n" + 
                 "}"));
+    
+    serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*"))
+    .respond(response().withStatusCode(200)
+        .withBody("{\n" + 
+            "  \"identifier\": \"10.0133/10000386\",\n" + 
+            "  \"datestamp\": \"2019-07-12T12:39:37Z\",\n" + 
+            "  \"deleteFlag\": false,\n" + 
+            "  \"tags\": null,\n" + 
+            "  \"sets\": null,\n" + 
+            "  \"formats\": null,\n" + 
+            "  \"ingestFormat\": \"radar\",\n" + 
+            "  \"content\": null" + 
+            "  }\n" + 
+            "}"));
   }
   
   private void initGetItemsNoContent(MockServerClient serverClient) {
@@ -77,7 +94,7 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "  \"offset\": 0,\n" + 
                 "  \"size\": 11,\n" + 
                 "  \"data\": [{\n" + 
-                "    \"identifier\": \"10.0133/48320\",\n" + 
+                "    \"identifier\": \"10.0133/10000386\",\n" + 
                 "    \"datestamp\": \"2019-07-19T08:28:20Z\",\n" + 
                 "    \"deleteFlag\": false,\n" + 
                 "    \"tags\": null,\n" + 
@@ -165,15 +182,15 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "  \"offset\": 0,\n" + 
                 "  \"size\": 11,\n" + 
                 "  \"data\": [{\n" + 
-                "    \"identifier\": \"10.0133/48320\",\n" + 
+                "    \"identifier\": \"10.0133/10000386\",\n" + 
                 "    \"datestamp\": \"2019-07-19T08:28:20Z\",\n" + 
                 "    \"deleteFlag\": false,\n" + 
                 "    \"tags\": null,\n" + 
                 "    \"ingestFormat\": \"radar\",\n" + 
                 "    \"content\": {\n" + 
-                "      \"identifier\": \"10.0133/48320\",\n" + 
+                "      \"identifier\": \"10.0133/10000386\",\n" + 
                 "      \"format\": \"radar\",\n" + 
-                "      \"content\": \"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\\n<ns2:radarDataset xmlns=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-elements\" xmlns:ns2=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-dataset\">\\n    <identifier identifierType=\"DOI\">10.0133/48320</identifier>\\n    <creators>\\n        <creator>\\n            <creatorName>Superuser, Generic1</creatorName>\\n            <givenName>Generic1</givenName>\\n            <familyName>Superuser</familyName>\\n        </creator>\\n    </creators>\\n    <title>Chart.js-2.7.1.zip</title>\\n    <publishers>\\n        <publisher>Radar4Kit</publisher>\\n    </publishers>\\n    <productionYear>2019</productionYear>\\n    <publicationYear>2019</publicationYear>\\n    <subjectAreas>\\n        <subjectArea>\\n            <controlledSubjectAreaName>Computer Science</controlledSubjectAreaName>\\n        </subjectArea>\\n    </subjectAreas>\\n    <resource resourceType=\"Dataset\"></resource>\\n    <rights>\\n        <controlledRights>CC BY-ND 4.0 Attribution-NoDerivs</controlledRights>\\n    </rights>\\n    <rightsHolders>\\n        <rightsHolder>Radar4Kit</rightsHolder>\\n    </rightsHolders>\\n</ns2:radarDataset>\\n\"\n" + 
+                "      \"content\": \"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\\n<ns2:radarDataset xmlns=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-elements\" xmlns:ns2=\"http://radar-service.eu/schemas/descriptive/radar/v09/radar-dataset\">\\n    <identifier identifierType=\"DOI\">10.0133/10000386</identifier>\\n    <creators>\\n        <creator>\\n            <creatorName>Superuser, Generic1</creatorName>\\n            <givenName>Generic1</givenName>\\n            <familyName>Superuser</familyName>\\n        </creator>\\n    </creators>\\n    <title>Chart.js-2.7.1.zip</title>\\n    <publishers>\\n        <publisher>Radar4Kit</publisher>\\n    </publishers>\\n    <productionYear>2019</productionYear>\\n    <publicationYear>2019</publicationYear>\\n    <subjectAreas>\\n        <subjectArea>\\n            <controlledSubjectAreaName>Computer Science</controlledSubjectAreaName>\\n        </subjectArea>\\n    </subjectAreas>\\n    <resource resourceType=\"Dataset\"></resource>\\n    <rights>\\n        <controlledRights>CC BY-ND 4.0 Attribution-NoDerivs</controlledRights>\\n    </rights>\\n    <rightsHolders>\\n        <rightsHolder>Radar4Kit</rightsHolder>\\n    </rightsHolders>\\n</ns2:radarDataset>\\n\"\n" + 
                 "    }\n" + 
                 "  }, {\n" + 
                 "    \"identifier\": \"10.0133/50699\",\n" + 
@@ -335,27 +352,25 @@ public class MockServerUtil  implements ExpectationInitializer {
   private void initGetAllFormats(MockServerClient serverClient) {
     serverClient.when(request().withMethod("GET").withPath("/format"))
         .respond(response().withStatusCode(200)
-            .withBody("[{\n" + 
-                "  \"metadataPrefix\":\"oaiDc\",\n" + 
-                "  \"schemaLocation\":\"http://www.openarchives.org/OAI/2.0/oai_dc.xsd\",\n" + 
-                "  \"schemaNamespace\":\"http://www.openarchives.org/OAI/2.0\",\n" + 
-                "  \"crosswalkStyleSheet\":\"http://localhost:1080/xslt/radar2oai\", \n" + 
-                "  \"identifierXpath\":\"/dc/identifier\"\n" + 
-                "},\n" +
-                "{\n" + 
-                "  \"metadataPrefix\":\"datacite\",\n" + 
-                "  \"schemaLocation\":\"http://schema.datacite.org/meta/kernel-4/metadata.xsd\",\n" + 
-                "  \"schemaNamespace\":\"http://datacite.org/schema/kernel-4\",\n" + 
-                "  \"crosswalkStyleSheet\":\"http://localhost:1080/xslt/radar2datacite\", \n" + 
-                "  \"identifierXpath\":\"/resource/identifier\"\n" + 
-                "},\n" + 
-                "{\n" + 
-                "  \"metadataPrefix\":\"radar\",\n" + 
-                "  \"schemaLocation\":\"https://www.radar-service.eu/en/radar-schema/radarDataset.xsd\",\n" + 
-                "  \"schemaNamespace\":\"https://www.radar-service.eu/en/radar-schema\",\n" + 
-                "  \"crosswalkStyleSheet\":\"\", \n" + 
-                "  \"identifierXpath\":\"/radarDataset/identifier\"\n" + 
-                "}\n" + 
+            .withBody("[\n" + 
+                "    {\n" + 
+                "        \"metadataPrefix\": \"radar\",\n" + 
+                "        \"schemaLocation\": \"https://www.radar-service.eu/schemas/descriptive/radar/v09/radar-dataset\",\n" + 
+                "        \"schemaNamespace\": \"http://radar-service.eu/schemas/descriptive/radar/v09/radar-dataset/\",\n" + 
+                "        \"identifierXpath\": \"/identifier\"\n" + 
+                "    },\n" + 
+                "    {\n" + 
+                "        \"metadataPrefix\": \"datacite\",\n" + 
+                "        \"schemaLocation\": \"https://schema.datacite.org/meta/kernel-4.0/metadata.xsd\",\n" + 
+                "        \"schemaNamespace\": \"http://datacite.org/schema/kernel-4\",\n" + 
+                "        \"identifierXpath\": \"/identifier\"\n" + 
+                "    },\n" + 
+                "    {\n" + 
+                "        \"metadataPrefix\": \"oai_dc\",\n" + 
+                "        \"schemaLocation\": \"http://www.openarchives.org/OAI/2.0/oai_dc.xsd\",\n" + 
+                "        \"schemaNamespace\": \"http://www.openarchives.org/OAI/2.0/oai_dc/\",\n" + 
+                "        \"identifierXpath\": \"/identifier\"\n" + 
+                "    }\n" + 
                 "]"));
   }
   

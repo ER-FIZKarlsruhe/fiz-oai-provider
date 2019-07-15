@@ -10,223 +10,148 @@
  */
 package ORG.oclc.oai.server.crosswalk;
 
-import java.lang.reflect.Constructor;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Properties;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
+import de.fiz_karlsruhe.model.Format;
+import de.fiz_karlsruhe.model.Transformation;
+
 /**
- * Crosswalks manages all the Crosswalk objects this
- * repository supports.
+ * Crosswalks manages all the Crosswalk objects this repository supports.
  *
  * @author Jeffrey A. Young
  */
 public class Crosswalks {
-    private static final boolean debug = true;
 
-    // map of metadataPrefix/CrosswalkItem
-    private Map crosswalksMap = new HashMap();
+  private List<Transformation> transformations;
 
-    /**
-     * Find out which metadataFormats this repository supports and create
-     * the corresponding Crosswalk objects for each.
-     *
-     * @param properties a properties object containing Crosswalks entries
-     */
-    public Crosswalks(Properties properties) {
-        String propertyPrefix = "Crosswalks.";
-        Enumeration propNames = properties.propertyNames();
-        while (propNames.hasMoreElements()) {
-            String propertyName = (String)propNames.nextElement();
-            if (propertyName.startsWith(propertyPrefix)) {
-                String schemaLabel = propertyName.substring(propertyPrefix.length());
-		String formatClassName = (String)properties.get(propertyName);
-		try {
-		    Class crosswalkClass = Class.forName(formatClassName);
-		    Crosswalk crosswalk = null;
-		    try {
-			Constructor crosswalkConstructor = crosswalkClass.getConstructor(new Class[] {String.class, Properties.class});
-			crosswalk = (Crosswalk)crosswalkConstructor.newInstance(new Object[] {schemaLabel, properties});
-		    } catch (NoSuchMethodException e) {
-			Constructor crosswalkConstructor = crosswalkClass.getConstructor(new Class[] {Properties.class});
-			crosswalk = (Crosswalk)crosswalkConstructor.newInstance(new Object[] {properties});
-		    }
-		    CrosswalkItem crosswalkItem = new CrosswalkItem(schemaLabel, crosswalk.getSchemaURL(), crosswalk.getNamespaceURL(), crosswalk);
-		    crosswalksMap.put(schemaLabel, crosswalkItem);
-                    if (debug) {
-                        System.out.println("Crosswalks.Crosswalks: " + schemaLabel + "=" + crosswalk);
-                    }
-		} catch (Exception e) {
-		    System.err.println("Crosswalks: couldn't construct: " + formatClassName);
-		    e.printStackTrace();
-		}
-            }
-        }
-        if (crosswalksMap.size() == 0) {
-            System.err.println("Crosswalks entries are missing from properties file");
-        }
-    }
-
-    public Crosswalks(Map crosswalkItemMap) {
-	Iterator iter = crosswalkItemMap.values().iterator();
-	while (iter.hasNext()) {
-	    CrosswalkItem crosswalkItem = (CrosswalkItem)iter.next();
-	    String schemaLabel = crosswalkItem.getMetadataPrefix();
-// 	    Crosswalk crosswalk = crosswalkItem.getCrosswalk();
-	    crosswalksMap.put(schemaLabel, crosswalkItem);
-	}
-	
-	if (crosswalksMap.size() == 0) {
-            System.err.println("Crosswalks entries are missing from properties file");
-	}
-    }
-
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        Iterator iterator = iterator();
-        while (iterator.hasNext()) {
-            Map.Entry entry = (Map.Entry)iterator.next();
-            sb.append(entry.getKey());
-	    sb.append("=");
-	    CrosswalkItem crosswalkItem = (CrosswalkItem)entry.getValue();
-	    sb.append(crosswalkItem.getCrosswalk().toString());
-	    sb.append("\n");
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Get the metadataPrefix associated with the specified namespace/schema
-     *
-     * @param namespaceURI the namespaceURI portion of the format specifier
-     * @param schemaURL the schemaURL portion of the format specifier
-     * @return a String containing the metadataPrefix value associated with this pair
-     */
-    public String getMetadataPrefix(String namespaceURI, String schemaURL) {
-        StringBuffer sb = new StringBuffer();
-        if (namespaceURI != null) {
-        	sb.append(namespaceURI);
-        }
-        sb.append(" ")
-        .append(schemaURL);
-	Iterator iterator = crosswalksMap.entrySet().iterator();
-	while (iterator.hasNext()) {
-	    Map.Entry entry = (Map.Entry)iterator.next();
-	    if (((CrosswalkItem)entry.getValue()).getCrosswalk().getSchemaLocation().equals(sb.toString())) {
-		return (String)entry.getKey();
-	    }
-	}
-        return null;
-    }
-
-    /**
-     * Get the schemaURL associated with the specified metadataPrefix
-     *
-     * @param metadataPrefix the prefix desired
-     * @return a String containing the schemaURL associated with the metadataPrefix
-     */
-    public String getSchemaURL(String metadataPrefix) {
-        String schemaLocation = getSchemaLocation(metadataPrefix);
-        StringTokenizer tokenizer = new StringTokenizer(schemaLocation);
-        String temp = tokenizer.nextToken();
-	try {
-	    return tokenizer.nextToken();
-	} catch (NoSuchElementException e) {
-	    return temp;
-	}
+  private List<Format> formats;
+  
+  public Crosswalks(List<Format> formats, List<Transformation> transformations) {
+    this.formats = formats;
+    this.transformations = transformations;
+   
+    if (formats.size() == 0) {
+      System.err.println("No formats have been initialized!");
     }
     
-    /**
-     * Get the namespaceURI associated with the specified metadataPrefix
-     *
-     * @param metadataPrefix the prefix desired
-     * @return a String containing the namespaceURI associated with the metadataPrefix
-     */
-    public String getNamespaceURI(String metadataPrefix) {
-        String schemaLocation = getSchemaLocation(metadataPrefix);
-        StringTokenizer tokenizer = new StringTokenizer(schemaLocation);
-        return tokenizer.nextToken();
+    if (transformations.size() == 0) {
+      System.err.println("No transformations have been initialized!");
     }
+  }
 
-    public String getNativeRecordSchema(String metadataPrefix) {
-	CrosswalkItem crosswalkItem = (CrosswalkItem)crosswalksMap.get(metadataPrefix);
-	if (crosswalkItem == null) {
-	    return null;
-	} else {
-	    return crosswalkItem.getNativeRecordSchema();
-	}
+
+  public List<Transformation> getTransformations() {
+    return transformations;
+  }
+
+
+  public void setTransformations(List<Transformation> transformations) {
+    this.transformations = transformations;
+  }
+
+
+  public List<Format> getFormats() {
+    return formats;
+  }
+
+
+  public void setFormats(List<Format> formats) {
+    this.formats = formats;
+  }
+
+
+  /**
+   * Get the metadataPrefix associated with the specified namespace/schema
+   *
+   * @param namespaceURI the namespaceURI portion of the format specifier
+   * @param schemaURL    the schemaURL portion of the format specifier
+   * @return a String containing the metadataPrefix value associated with this
+   *         pair
+   */
+  public String getMetadataPrefix(String namespaceURI, String schemaURL) {
+    StringBuffer sb = new StringBuffer();
+    if (namespaceURI != null) {
+      sb.append(namespaceURI);
+    }
+    sb.append(" ").append(schemaURL);
+//  TODO
+//    Iterator iterator = crosswalksMap.entrySet().iterator();
+//    while (iterator.hasNext()) {
+//      Map.Entry entry = (Map.Entry) iterator.next();
+//      if (((CrosswalkItem) entry.getValue()).getCrosswalk().getSchemaLocation().equals(sb.toString())) {
+//        return (String) entry.getKey();
+//      }
+//    }
+    return null;
+  }
+
+  /**
+   * Get the schemaURL associated with the specified metadataPrefix
+   *
+   * @param metadataPrefix the prefix desired
+   * @return a String containing the schemaURL associated with the metadataPrefix
+   */
+  public String getSchemaURL(String metadataPrefix) {
+    String schemaLocation = getSchemaLocation(metadataPrefix);
+
+    if (schemaLocation == null) {
+      return null;
     }
     
-    /**
-     * Get the namespaceURI/schemaURL associated with the specified metadataPrefix
-     *
-     * @param metadataPrefix the prefix desired
-     * @return a String containing the namespaceURI/schemaURL associated with the metadataPrefix
-     */
-    public String getSchemaLocation(String metadataPrefix) {
-	CrosswalkItem crosswalkItem = (CrosswalkItem)crosswalksMap.get(metadataPrefix);
-	if (crosswalkItem != null)
-	    return crosswalkItem.getCrosswalk().getSchemaLocation();
-	else
-	    return null;
+    StringTokenizer tokenizer = new StringTokenizer(schemaLocation);
+    String temp = tokenizer.nextToken();
+    try {
+      return tokenizer.nextToken();
+    } catch (NoSuchElementException e) {
+      return temp;
     }
+  }
 
-    /**
-     * Get the namespaceURI/schemaURL associated with the specified metadataPrefix
-     *
-     * @param metadataPrefix the prefix desired
-     * @return a String containing the namespaceURI/schemaURL associated with the metadataPrefix
-     */
-    public String getContentType(String metadataPrefix) {
-	CrosswalkItem crosswalkItem = (CrosswalkItem)crosswalksMap.get(metadataPrefix);
-	if (crosswalkItem != null)
-	    return crosswalkItem.getCrosswalk().getContentType();
-	else
-	    return null;
-    }
+  /**
+   * Get the namespaceURI associated with the specified metadataPrefix
+   *
+   * @param metadataPrefix the prefix desired
+   * @return a String containing the namespaceURI associated with the
+   *         metadataPrefix
+   */
+  public String getNamespaceURI(String metadataPrefix) {
+    String schemaLocation = getSchemaLocation(metadataPrefix);
+    StringTokenizer tokenizer = new StringTokenizer(schemaLocation);
+    return tokenizer.nextToken();
+  }
 
-    /**
-     * Get the DOCTYPE associated with the specified metadataPrefix
-     *
-     * @param metadataPrefix the prefix desired
-     * @return a String containing the DOCTYPE associated with the metadataPrefix
-     */
-    public String getDocType(String metadataPrefix) {
-	CrosswalkItem crosswalkItem = (CrosswalkItem)crosswalksMap.get(metadataPrefix);
-	if (crosswalkItem != null)
-	    return crosswalkItem.getCrosswalk().getDocType();
-	else
-	    return null;
+  /**
+   * Get the namespaceURI/schemaURL associated with the specified metadataPrefix
+   * E.g:
+   * xsi:schemaLocation="http://www.cafeconleche.org/namespaces/person http://www.elharo.com/person.xsd"
+   *
+   * @param metadataPrefix the prefix desired
+   * @return a String containing the namespaceURI/schemaURL associated with the
+   *         metadataPrefix
+   */
+  public String getSchemaLocation(String metadataPrefix) {
+    String location = null;
+    Optional<Format> format = this.formats.stream().filter(f -> f.getMetadataPrefix().equals(metadataPrefix)).findFirst();
+    if (format.isPresent()) {
+      location = format.get().getSchemaLocation(); 
     }
+    
+    return location;
+  }
 
-    public String getEncoding(String metadataPrefix) {
-	CrosswalkItem crosswalkItem = (CrosswalkItem)crosswalksMap.get(metadataPrefix);
-	if (crosswalkItem != null)
-	    return crosswalkItem.getCrosswalk().getEncoding();
-	else
-	    return null;
-    }
+  /**
+   * Does the specified metadataPrefix appears in the list of supportedFormats?
+   *
+   * @param metadataPrefix the prefix desired
+   * @return true if prefix is supported, false otherwise.
+   */
+  public boolean containsValue(String metadataPrefix) {
+    //return (crosswalkMap.get(metadataPrefix) != null);
+    //TODO
+    return true;
+  }
 
-    /**
-     * Does the specified metadataPrefix appears in the list of supportedFormats?
-     *
-     * @param metadataPrefix the prefix desired
-     * @return true if prefix is supported, false otherwise.
-     */
-    public boolean containsValue(String metadataPrefix) {
-        return (crosswalksMap.get(metadataPrefix) != null);
-    }
-
-    /**
-     * Get an iterator containing Map.Entry's for the supported formats.
-     *
-     * @return an Iterator containing Map.Entry's for each supported format.
-     */
-    public Iterator iterator() {
- 	return crosswalksMap.entrySet().iterator();
-    }
 }

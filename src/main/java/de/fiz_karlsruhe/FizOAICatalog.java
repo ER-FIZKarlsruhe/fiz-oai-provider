@@ -179,16 +179,21 @@ public class FizOAICatalog extends AbstractCatalog {
    *         identifier keys with corresponding values of "true" or null depending
    *         on whether the identifier is deleted or not.
    * @throws OAIInternalServerError
+   * @throws CannotDisseminateFormatException 
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   @Override
   public Map listIdentifiers(String from, String until, String set, String metadataPrefix)
-      throws NoItemsMatchException, OAIInternalServerError {
+      throws NoItemsMatchException, OAIInternalServerError, CannotDisseminateFormatException {
     Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
     ArrayList<String> headers = new ArrayList<String>();
     ArrayList<String> identifiers = new ArrayList<String>();
     SearchResult<Item> result = null;
-
+    String schemaLocation = getCrosswalks().getSchemaLocation(metadataPrefix);
+    if (schemaLocation == null) {
+      throw new CannotDisseminateFormatException("Unknown metadataPrefix");
+    }
+    
     try {
       result = backendService.getItems(false, 0, maxListSize, set, from, until, metadataPrefix);
 
@@ -303,7 +308,8 @@ public class FizOAICatalog extends AbstractCatalog {
     Iterator<String> setSpecs = getSetSpecs(nativeItem);
 
     if (metadataPrefix != null) {
-      if ((schemaURL = getCrosswalks().getSchemaURL(metadataPrefix)) == null)
+      schemaURL = getCrosswalks().getSchemaURL(metadataPrefix);
+      if (schemaURL == null)
         throw new CannotDisseminateFormatException(metadataPrefix);
     }
     return getRecordFactory().create(nativeItem, schemaURL, metadataPrefix, setSpecs, null);
@@ -343,6 +349,11 @@ public class FizOAICatalog extends AbstractCatalog {
     SearchResult<Item> result = null;
     Map<String, Object> listRecordsMap = new HashMap<String, Object>();
     ArrayList<String> records = new ArrayList<String>();
+
+    String schemaLocation = getCrosswalks().getSchemaLocation(metadataPrefix);
+    if (schemaLocation == null) {
+      throw new CannotDisseminateFormatException("Unknown metadataPrefix");
+    }
 
     try {
       result = backendService.getItems(true, 0, maxListSize, set, from, until, metadataPrefix);

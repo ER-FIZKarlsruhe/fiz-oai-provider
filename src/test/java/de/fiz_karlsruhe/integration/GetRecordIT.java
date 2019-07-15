@@ -85,18 +85,18 @@ public class GetRecordIT extends BaseIT {
 
   @Test
   public void testGetSingleRecordInvalidFormat() throws Exception {
-    logger.info("testGetRecord");
+    logger.info("testGetSingleRecordInvalidFormat");
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "GetRecord"));
-    params.add(new BasicNameValuePair("identifier", "oai:frlsruhe.de:1133/1003"));//Invalid ID
-    params.add(new BasicNameValuePair("metadataPrefix", "oc"));
+    params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/10000386"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oc"));//Invalid format
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      logger.debug("testGetSingleRecordInvalidIdentifier response: " + bodyAsString);
+      System.out.println("testGetSingleRecordInvalidFormat response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("cannotDisseminateFormat"));

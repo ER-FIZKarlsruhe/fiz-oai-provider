@@ -91,9 +91,6 @@ public class GetRecord extends ServerVerb {
         sb.append("<responseDate>");
         sb.append(createResponseDate(new Date()));
         sb.append("</responseDate>");
-//         sb.append("<requestURL>");
-//         sb.append(getRequestURL(request));
-//         sb.append("</requestURL>");
         Crosswalks crosswalks = abstractCatalog.getCrosswalks();
 	try {
 	    if (metadataPrefix == null || metadataPrefix.length() == 0
