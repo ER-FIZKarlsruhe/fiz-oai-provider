@@ -6,6 +6,7 @@ public class SearchResult<E> {
   int total;
   int offset;
   int size;
+  String scrollId;
   
   List<E> data;
 
@@ -39,6 +40,14 @@ public class SearchResult<E> {
 
   public void setData(List<E> data) {
     this.data = data;
+  }
+
+  public String getScrollId() {
+    return scrollId;
+  }
+
+  public void setScrollId(String scrollId) {
+    this.scrollId = scrollId;
   }
 
   

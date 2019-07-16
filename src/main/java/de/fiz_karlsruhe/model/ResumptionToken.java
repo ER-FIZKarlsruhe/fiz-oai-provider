@@ -24,6 +24,7 @@ public class ResumptionToken {
   private Integer offset;
   private Integer rows;
   private Integer total;
+  private String scrollId;
 
   public ResumptionToken() {
   }
