@@ -6,8 +6,7 @@ public class SearchResult<E> {
   int total;
   int offset;
   int size;
-  String scrollId;
-  
+
   List<E> data;
 
   public int getTotal() {
