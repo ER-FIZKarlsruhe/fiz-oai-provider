@@ -3,26 +3,19 @@ package de.fiz_karlsruhe.model;
 import java.util.List;
 
 public class SearchResult<E> {
-  int total;
-  int offset;
-  int size;
 
+  private long total;
+  private int size;
+  private String lastItemId;
+  
   List<E> data;
 
-  public int getTotal() {
+  public long getTotal() {
     return total;
   }
 
-  public void setTotal(int total) {
+  public void setTotal(long total) {
     this.total = total;
-  }
-
-  public int getOffset() {
-    return offset;
-  }
-
-  public void setOffset(int offset) {
-    this.offset = offset;
   }
 
   public int getSize() {
@@ -41,5 +34,12 @@ public class SearchResult<E> {
     this.data = data;
   }
 
-  
+  public String getLastItemId() {
+    return lastItemId;
+  }
+
+  public void setLastItemId(String lastItemId) {
+    this.lastItemId = lastItemId;
+  }
+
 }

@@ -10,11 +10,14 @@
  */
 package ORG.oclc.oai.server;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,6 +25,7 @@ import java.net.SocketException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
@@ -41,7 +45,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
-import ORG.oclc.oai.server.verb.BadVerb;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.server.verb.ServerVerb;
 
@@ -58,22 +61,15 @@ public class OAIHandler extends HttpServlet {
     
     public static final String PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE = OAIHandler.class.getName() + ".properties";
     
+    private static final String CONFIG_FILENAME = "oaicat.properties";
+    
     private static final String VERSION = "1.5.62";
     private static boolean debug = false;
 
-//    private Transformer transformer = null;
-//    private boolean serviceUnavailable = false;
-//    private boolean monitor = false;
-//    private boolean forceRender = false;
+    private Properties properties = new Properties();
+
     protected HashMap attributesMap = new HashMap();
-//    private HashMap serverVerbs = null;
-//    private HashMap extensionVerbs = null;
-//    private String extensionPath = null;
-    
-//    private static Logger logger = Logger.getLogger(OAIHandler.class);
-//    static {
-//        BasicConfigurator.configure();
-//    }
+
     
     private Log log = LogFactory.getLog(OAIHandler.class);
     
@@ -97,33 +93,10 @@ public class OAIHandler extends HttpServlet {
         try {
             HashMap attributes = null;
             ServletContext context = getServletContext();
-            Properties properties = (Properties) context.getAttribute(PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE);
-            if (properties == null) {
-                final String PROPERTIES_INIT_PARAMETER = "properties";
-                log.debug("OAIHandler.init(..): No '" + PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE + "' servlet context attribute. Trying to use init parameter '" + PROPERTIES_INIT_PARAMETER + "'");
-                
-                String fileName = config.getServletContext().getInitParameter(PROPERTIES_INIT_PARAMETER);
-                InputStream in;
-                try {
-                    log.debug("fileName=" + fileName);
-                    in = new FileInputStream(fileName);
-                } catch (FileNotFoundException e) {
-                    log.debug("file not found. Try the classpath: " + fileName);
-                    in = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
-                }
-                if (in != null) {
-                    log.debug("file was found: Load the properties");
-                    properties = new Properties();
-                    properties.load(in);
-                    attributes = getAttributes(properties);
-                    if (debug) System.out.println("OAIHandler.init: fileName=" + fileName);
-                }
-            } else {
-                log.debug("Load context properties");
-                attributes = getAttributes(properties);
-            }
 
-            log.debug("Store global properties");
+            loadConfiguration();
+            attributes = getAttributes(properties);
+
             attributesMap.put("global", attributes);
         } catch (FileNotFoundException e) {
             log.error(e);
@@ -142,6 +115,62 @@ public class OAIHandler extends HttpServlet {
             throw new ServletException(e.getMessage());
         }
     }
+    
+    private void loadConfiguration() {
+      if (readConfigFromFile(getConfigFolder(), CONFIG_FILENAME)) {
+          printConfiguration();
+      }
+  }
+    
+    protected String getConfigFolder() {
+      String confFolderPath = null;
+      
+      //Is a dedicated oai-backend conf folder defined?
+      String oaiBackendConfRoot = System.getProperty("oai.provider.conf.folder");
+
+      //Catalina conf is fallback
+      String tomcatRoot = System.getProperty("catalina.base");
+      
+      if (oaiBackendConfRoot != null && !oaiBackendConfRoot.isEmpty()) {
+        confFolderPath = new File(oaiBackendConfRoot).getAbsolutePath();
+      } else if (tomcatRoot != null && !tomcatRoot.isEmpty()) {
+        confFolderPath = new File(tomcatRoot, "conf").getAbsolutePath();
+      }
+
+      System.out.println("Use confFolderPath: " + confFolderPath);
+      
+      return confFolderPath;
+  }
+    
+    protected boolean readConfigFromFile(String folder, String filename) {
+
+      File file = new File(folder, filename);
+      try {
+          Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+          try {
+              properties.load(reader);
+              return true;
+          } finally {
+              reader.close();
+          }
+      } catch (Throwable e) {
+        System.err.println("Unable to read property file: " + file.getAbsolutePath());
+          return false;
+      }
+  }
+    
+    public void printConfiguration() {
+      StringBuilder builder = new StringBuilder();
+      for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+          if (entry.getKey().toString().toLowerCase().contains("password")) {
+              builder.append(entry.getKey() + " : ***********\n");
+          }
+          else {
+              builder.append(entry.getKey() + " : " + entry.getValue() + "\n");
+          }
+      }
+      log.info("Using the following configuration: \n" + builder.toString());
+  }
     
     public HashMap getAttributes(Properties properties)
     throws Throwable {

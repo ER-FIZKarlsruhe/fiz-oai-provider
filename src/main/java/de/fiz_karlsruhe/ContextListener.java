@@ -26,7 +26,7 @@ public class ContextListener implements ServletContextListener {
           PropertyConfigurator.configure(new URL(log4jConfigFile));
         } catch (MalformedURLException e) {
           // TODO Auto-generated catch block
-          e.printStackTrace();
+          //e.printStackTrace();
         }
          
     }

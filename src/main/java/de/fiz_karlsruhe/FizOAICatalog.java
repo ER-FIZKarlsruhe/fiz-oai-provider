@@ -211,22 +211,22 @@ public class FizOAICatalog extends AbstractCatalog {
       throw new OAIInternalServerError(e.getMessage());
     }
 
-    int cursorPosition = (result.getOffset() + result.getData().size());
+    int cursorPosition = (result.getData().size());
 
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
-    if (cursorPosition < result.getTotal()) {
+    if (result.getTotal() > maxListSize && result.getData().size() == maxListSize) {
       ResumptionToken resumptionToken = new ResumptionToken();
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
       resumptionToken.setUntil(until);
-      resumptionToken.setOffset(0);
+      resumptionToken.setOffset(-1);
       resumptionToken.setRows(maxListSize);
       resumptionToken.setMetadataPrefix(metadataPrefix);
 
       try {
-        listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionToken.getToken(), cursorPosition, result.getTotal()));
+        listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionToken.getToken(), (int)result.getTotal(), -1));
       } catch (BadResumptionTokenException e) {
        throw new OAIInternalServerError("An error occured while creating the ResumptionToken");
       }
@@ -261,8 +261,7 @@ public class FizOAICatalog extends AbstractCatalog {
 
     SearchResult<Item> result = null;
     try {
-      result = backendService.getItems(false, oldCursorPosition, maxListSize, restoken.getSet(), restoken.getFrom(),
-          restoken.getUntil(), restoken.getFrom());
+      result = backendService.getItems(false, oldCursorPosition, maxListSize, restoken.getSet(), restoken.getFrom(), restoken.getUntil(), restoken.getFrom());
 
       if (result == null || result.getData().isEmpty()) {
         throw new OAIInternalServerError("Empty resultSet");
@@ -285,7 +284,7 @@ public class FizOAICatalog extends AbstractCatalog {
       restoken.setRows(newCursorPosition);
 
       listIdentifiersMap.put("resumptionMap",
-          getResumptionMap(restoken.toString(), newCursorPosition, result.getTotal()));
+          getResumptionMap(restoken.toString(), (int)result.getTotal(),newCursorPosition));
     }
 
     listIdentifiersMap.put("headers", headers.iterator());
@@ -375,12 +374,12 @@ public class FizOAICatalog extends AbstractCatalog {
       throw new OAIInternalServerError(e.getMessage());
     }
 
-    int cursorPosition = (result.getOffset() + result.getData().size());
+    int cursorPosition = -1;
 
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
-    if (cursorPosition < result.getTotal()) {
+    if (result.getTotal() > maxListSize && result.getData().size() == maxListSize) {
       ResumptionToken resumptionToken = new ResumptionToken();
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
@@ -390,7 +389,7 @@ public class FizOAICatalog extends AbstractCatalog {
       resumptionToken.setMetadataPrefix(metadataPrefix);
 
       listRecordsMap.put("resumptionMap",
-          getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
+          getResumptionMap(resumptionToken.toString(), (int)result.getTotal(), cursorPosition));
     }
 
     listRecordsMap.put("records", records.iterator());
@@ -435,11 +434,11 @@ public class FizOAICatalog extends AbstractCatalog {
       e.printStackTrace();
     }
 
-    int cursorPosition = (result.getOffset() + result.getData().size());
+    int cursorPosition = -1;
 
-    if (cursorPosition < result.getTotal()) {
+    if (result.getTotal() > maxListSize && result.getData().size() == maxListSize) {
       listRecordsMap.put("resumptionMap",
-          getResumptionMap(resumptionToken.toString(), cursorPosition, result.getTotal()));
+          getResumptionMap(resumptionToken.toString(), (int)result.getTotal(), cursorPosition));
     }
 
     listRecordsMap.put("records", records.iterator());
