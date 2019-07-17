@@ -363,8 +363,12 @@ public class FizOAICatalog extends AbstractCatalog {
       }
 
       for (Item item : result.getData()) {
-        String record = constructRecord(item, metadataPrefix);
-        records.add(record);
+        if (item != null) {
+          String record = constructRecord(item, metadataPrefix);
+          records.add(record);
+        } else {
+          logger.info("Item is null. Skip it");
+        }
       }
 
     } catch (IOException e) {
