@@ -162,7 +162,6 @@ public class FizRecordFactory extends RecordFactory {
    */
   public Iterator getSetSpecs(Object nativeItem) throws IllegalArgumentException {
     // TODO return ((Item) nativeItem).getSets().iterator();
-
     return null;
   }
 
@@ -187,7 +186,11 @@ public class FizRecordFactory extends RecordFactory {
    * @exception IllegalArgumentException Something is wrong with the argument.
    */
   public boolean isDeleted(Object nativeItem) throws IllegalArgumentException {
-    return Boolean.valueOf(((Item) nativeItem).getDeleteFlag());
+    if (nativeItem != null) {
+      return Boolean.valueOf(((Item) nativeItem).getDeleteFlag());
+    }
+    
+    return false;
   }
 
   /**

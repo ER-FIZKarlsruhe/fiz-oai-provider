@@ -42,13 +42,5 @@ public class SearchResult<E> {
     this.data = data;
   }
 
-  public String getScrollId() {
-    return scrollId;
-  }
-
-  public void setScrollId(String scrollId) {
-    this.scrollId = scrollId;
-  }
-
   
 }
