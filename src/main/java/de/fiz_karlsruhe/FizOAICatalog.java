@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -189,7 +190,7 @@ public class FizOAICatalog extends AbstractCatalog {
     ArrayList<String> headers = new ArrayList<String>();
     ArrayList<String> identifiers = new ArrayList<String>();
     SearchResult<Item> result = null;
-    String schemaLocation = getCrosswalks().getSchemaLocation(metadataPrefix);
+    String schemaLocation = getFormatRegistry().getSchemaLocation(metadataPrefix);
     if (schemaLocation == null) {
       throw new CannotDisseminateFormatException("Unknown metadataPrefix");
     }
@@ -216,7 +217,7 @@ public class FizOAICatalog extends AbstractCatalog {
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
-    if (result.getTotal() > maxListSize && result.getData().size() == maxListSize) {
+    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
       ResumptionToken resumptionToken = new ResumptionToken();
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
@@ -307,7 +308,7 @@ public class FizOAICatalog extends AbstractCatalog {
     Iterator<String> setSpecs = getSetSpecs(nativeItem);
 
     if (metadataPrefix != null) {
-      schemaURL = getCrosswalks().getSchemaURL(metadataPrefix);
+      schemaURL = getFormatRegistry().getSchemaURL(metadataPrefix);
       if (schemaURL == null)
         throw new CannotDisseminateFormatException(metadataPrefix);
     }
@@ -349,7 +350,7 @@ public class FizOAICatalog extends AbstractCatalog {
     Map<String, Object> listRecordsMap = new HashMap<String, Object>();
     ArrayList<String> records = new ArrayList<String>();
 
-    String schemaLocation = getCrosswalks().getSchemaLocation(metadataPrefix);
+    String schemaLocation = getFormatRegistry().getSchemaLocation(metadataPrefix);
     if (schemaLocation == null) {
       throw new CannotDisseminateFormatException("Unknown metadataPrefix");
     }
@@ -379,7 +380,7 @@ public class FizOAICatalog extends AbstractCatalog {
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
-    if (result.getTotal() > maxListSize && result.getData().size() == maxListSize) {
+    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
       ResumptionToken resumptionToken = new ResumptionToken();
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
@@ -436,7 +437,7 @@ public class FizOAICatalog extends AbstractCatalog {
 
     int cursorPosition = -1;
 
-    if (result.getTotal() > maxListSize && result.getData().size() == maxListSize) {
+    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
       listRecordsMap.put("resumptionMap",
           getResumptionMap(resumptionToken.toString(), (int)result.getTotal(), cursorPosition));
     }

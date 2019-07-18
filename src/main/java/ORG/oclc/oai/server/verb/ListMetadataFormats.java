@@ -24,7 +24,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
-import ORG.oclc.oai.server.crosswalk.Crosswalks;
+import de.fiz_karlsruhe.FormatRegistry;
 import de.fiz_karlsruhe.model.Format;
 
 /**
@@ -85,9 +85,9 @@ public class ListMetadataFormats extends ServerVerb {
     if (hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
       sb.append(new BadArgumentException().getMessage());
     } else {
-      Crosswalks crosswalks = abstractCatalog.getCrosswalks();
+      FormatRegistry formatRegistry = abstractCatalog.getFormatRegistry();
       if (identifier == null || identifier.length() == 0) {
-        Iterator<Format> iterator = crosswalks.getFormats().iterator();
+        Iterator<Format> iterator = formatRegistry.getFormats().iterator();
         sb.append("<ListMetadataFormats>");
         while (iterator.hasNext()) {
           Format format = iterator.next();
@@ -118,7 +118,7 @@ public class ListMetadataFormats extends ServerVerb {
         sb.append("</ListMetadataFormats>");
       } else {
         try {
-          //TODO implement getSchemaLocations!
+          // TODO implement getSchemaLocations!
           Vector schemaLocations = abstractCatalog.getSchemaLocations(identifier);
           sb.append("<ListMetadataFormats>");
           for (int i = 0; i < schemaLocations.size(); ++i) {
@@ -135,7 +135,7 @@ public class ListMetadataFormats extends ServerVerb {
             sb.append("<metadataFormat>");
             sb.append("<metadataPrefix>");
             // make sure it's a space that separates them
-            sb.append(crosswalks.getMetadataPrefix(namespaceURI, schemaURL));
+            sb.append(formatRegistry.getMetadataPrefix(namespaceURI, schemaURL));
             sb.append("</metadataPrefix>");
             sb.append("<schema>");
             sb.append(schemaURL);

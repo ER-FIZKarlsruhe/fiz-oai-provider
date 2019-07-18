@@ -23,7 +23,6 @@ import java.util.Vector;
 
 import javax.servlet.ServletContext;
 
-import ORG.oclc.oai.server.crosswalk.Crosswalks;
 import ORG.oclc.oai.server.verb.BadArgumentException;
 import ORG.oclc.oai.server.verb.BadResumptionTokenException;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
@@ -33,6 +32,7 @@ import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.server.verb.ServerVerb;
+import de.fiz_karlsruhe.FormatRegistry;
 
 /**
  * AbstractCatalog is the generic interface between OAICat and any arbitrary
@@ -321,12 +321,11 @@ public abstract class AbstractCatalog {
     }
 
     /**
-     * Retrieve the Crosswalks property
+     * Retrieve the FormatRegistry property
      *
-     * @return the Crosswalks object containing a detailed list of oai
-     * formats supported by this application.
+     * @return the FormatRegistry object containing a detailed list of oai formats supported by this application.
      */
-    public Crosswalks getCrosswalks() { return recordFactory.getCrosswalks(); }
+    public FormatRegistry getFormatRegistry() { return recordFactory.getFormatRegistry(); }
 
     /**
      * Retrieve the list of supported Sets. This should probably be initialized

@@ -20,7 +20,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import ORG.oclc.oai.server.catalog.RecordFactory;
-import ORG.oclc.oai.server.crosswalk.Crosswalks;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
 import de.fiz_karlsruhe.model.Transformation;
@@ -53,7 +52,7 @@ public class FizRecordFactory extends RecordFactory {
     List<Transformation> transformations = initTransformations(properties);
     System.out.println(formats);
     System.out.println(transformations);
-    this.crosswalks = new Crosswalks(formats, transformations);
+    this.formatRegistry = new FormatRegistry(formats, transformations);
     
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
     if (repositoryIdentifier == null) {

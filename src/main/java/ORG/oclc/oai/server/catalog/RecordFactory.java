@@ -15,10 +15,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import ORG.oclc.oai.server.crosswalk.Crosswalks;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.util.OAIUtil;
+import de.fiz_karlsruhe.FormatRegistry;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
 import de.fiz_karlsruhe.model.Transformation;
@@ -36,7 +36,7 @@ public abstract class RecordFactory {
   /**
    * Container for the crosswalk(s) supported by this factory
    */
-  protected Crosswalks crosswalks;
+  protected FormatRegistry formatRegistry;
 
   public RecordFactory() {
   }
@@ -46,8 +46,8 @@ public abstract class RecordFactory {
    *
    * @return Crosswalk(s) container
    */
-  public Crosswalks getCrosswalks() {
-    return crosswalks;
+  public FormatRegistry getFormatRegistry() {
+    return formatRegistry;
   }
 
   /**
@@ -55,8 +55,8 @@ public abstract class RecordFactory {
    *
    * @param Crosswalk(s) container
    */
-  public void setCrosswalks(Crosswalks crosswalks) {
-    this.crosswalks = crosswalks;
+  public void setFormatRegistry(FormatRegistry formatRegistry) {
+    this.formatRegistry = formatRegistry;
   }
   
   /**
@@ -81,8 +81,8 @@ public abstract class RecordFactory {
       throw new NoMetadataFormatsException();
     }
     Vector<String> v = new Vector<String>();
-    List<Format> formats = this.crosswalks.getFormats();
-    List<Transformation> transformations = this.crosswalks.getTransformations();
+    List<Format> formats = this.formatRegistry.getFormats();
+    List<Transformation> transformations = this.formatRegistry.getTransformations();
     
     Item item = (Item) nativeItem;
     String itemNativeFormat = item.getIngestFormat();

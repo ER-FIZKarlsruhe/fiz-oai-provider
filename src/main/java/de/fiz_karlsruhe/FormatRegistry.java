@@ -8,7 +8,7 @@
  * or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ORG.oclc.oai.server.crosswalk;
+package de.fiz_karlsruhe;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,17 +19,18 @@ import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Transformation;
 
 /**
- * Crosswalks manages all the Crosswalk objects this repository supports.
+ * FormatRegistry manages all the formats and transformations that are suppported by the provider.
  *
  * @author Jeffrey A. Young
+ * @author Stefan Hofmann
  */
-public class Crosswalks {
+public class FormatRegistry {
 
   private List<Transformation> transformations;
 
   private List<Format> formats;
   
-  public Crosswalks(List<Format> formats, List<Transformation> transformations) {
+  public FormatRegistry(List<Format> formats, List<Transformation> transformations) {
     this.formats = formats;
     this.transformations = transformations;
    
