@@ -121,7 +121,6 @@ public class BackendService {
     StringBuffer url = new StringBuffer();
     url.append(backendBaseUrl + "/item?content=" + withContent);
     url.append("&format=" + URLEncoder.encode(metadataPrefix));
-    url.append("&offset=" + offset);
     url.append("&rows=" + rows);
 
     if (!StringUtils.isEmpty(set)) {

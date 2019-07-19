@@ -357,9 +357,12 @@ public class FizOAICatalog extends AbstractCatalog {
 
     try {
       result = backendService.getItems(true, 0, maxListSize, set, from, until, metadataPrefix);
-
+      
       if (result == null || result.getData().isEmpty()) {
+        logger.info("No items found ");
         throw new NoItemsMatchException();
+      } else {
+        logger.info("Number of items found: " + result.getData().size());
       }
 
       for (Item item : result.getData()) {
