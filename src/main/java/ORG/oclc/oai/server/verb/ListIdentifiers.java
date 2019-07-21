@@ -22,7 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
+import de.fiz_karlsruhe.FizOAICatalog;
 import de.fiz_karlsruhe.FormatRegistry;
 
 /**
@@ -32,8 +36,11 @@ import de.fiz_karlsruhe.FormatRegistry;
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
  */
 public class ListIdentifiers extends ServerVerb {
+  
+  final static Logger logger = LogManager.getLogger(ListIdentifiers.class);
   private static final boolean debug = false;
   private static ArrayList validParamNames1 = new ArrayList();
+  
   static {
     validParamNames1.add("verb");
     validParamNames1.add("from");
@@ -41,16 +48,19 @@ public class ListIdentifiers extends ServerVerb {
     validParamNames1.add("set");
     validParamNames1.add("metadataPrefix");
   }
+  
   private static ArrayList validParamNames2 = new ArrayList();
   static {
     validParamNames2.add("verb");
     validParamNames2.add("resumptionToken");
   }
+  
   private static ArrayList requiredParamNames1 = new ArrayList();
   static {
     requiredParamNames1.add("verb");
     requiredParamNames1.add("metadataPrefix");
   }
+  
   private static ArrayList requiredParamNames2 = new ArrayList();
   static {
     requiredParamNames2.add("verb");
@@ -73,6 +83,8 @@ public class ListIdentifiers extends ServerVerb {
     }
     StringBuffer sb = new StringBuffer();
     String oldResumptionToken = request.getParameter("resumptionToken");
+    logger.info("ListIdentifiers construct: " + oldResumptionToken);
+    
     String metadataPrefix = request.getParameter("metadataPrefix");
 
     if (metadataPrefix != null && metadataPrefix.length() == 0)
@@ -164,6 +176,7 @@ public class ListIdentifiers extends ServerVerb {
         validParamNames = validParamNames2;
         requiredParamNames = requiredParamNames2;
         if (hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
+          logger.info("BadArgument1");
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(new BadArgumentException().getMessage());
         } else {
@@ -179,6 +192,7 @@ public class ListIdentifiers extends ServerVerb {
       if (listIdentifiersMap != null) {
         sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
         if (hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
+          logger.info("BadArgument2");
           sb.append(new BadArgumentException().getMessage());
         } else {
           sb.append("<ListIdentifiers>");

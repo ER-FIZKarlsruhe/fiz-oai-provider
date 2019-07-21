@@ -50,8 +50,6 @@ public class FizRecordFactory extends RecordFactory {
     super();
     List<Format> formats = initFormats(properties);
     List<Transformation> transformations = initTransformations(properties);
-    System.out.println(formats);
-    System.out.println(transformations);
     this.formatRegistry = new FormatRegistry(formats, transformations);
     
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
@@ -64,7 +62,7 @@ public class FizRecordFactory extends RecordFactory {
     logger.info("initFormats");
 
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
-    System.out.println("backendBaseUrl: " + backendBaseUrl);
+    logger.info("backendBaseUrl: " + backendBaseUrl);
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
@@ -76,7 +74,6 @@ public class FizRecordFactory extends RecordFactory {
       e.printStackTrace();
     }
 
-    System.out.println("formats: " + formats);
     return formats;
   }
   

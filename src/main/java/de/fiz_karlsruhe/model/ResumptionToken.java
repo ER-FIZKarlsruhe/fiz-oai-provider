@@ -14,16 +14,16 @@ public class ResumptionToken {
   final static Logger logger = LogManager.getLogger(ResumptionToken.class);
 
   enum ResumptionTokenParameters {
-    METADATAPREFIX, FROM, UNTIL, SET, OFFSET, ROWS, TOTAL
+    METADATAPREFIX, FROM, UNTIL, SET, LASTITEMID, ROWS, TOTAL
   }
 
   private String metadataPrefix;
   private String from;
   private String until;
   private String set;
-  private Integer offset;
   private Integer rows;
-  private Integer total;
+  private Long total;
+  private String lastItemId;
 
   public ResumptionToken() {
   }
@@ -34,7 +34,7 @@ public class ResumptionToken {
       throw new BadResumptionTokenException();
     }
 
-    String[] parameterSplits = token.split("&");
+    String[] parameterSplits = token.split("@@");
 
     for (String keyValueSplit : parameterSplits) {
       try {
@@ -57,6 +57,14 @@ public class ResumptionToken {
 
     validate();
 
+  }
+
+  public String getLastItemId() {
+    return lastItemId;
+  }
+
+  public void setLastItemId(String lastItemId) {
+    this.lastItemId = lastItemId;
   }
 
   public String getMetadataPrefix() {
@@ -91,14 +99,6 @@ public class ResumptionToken {
     this.set = set;
   }
 
-  public Integer getOffset() {
-    return offset;
-  }
-
-  public void setOffset(Integer offset) {
-    this.offset = offset;
-  }
-
   public Integer getRows() {
     return rows;
   }
@@ -107,11 +107,11 @@ public class ResumptionToken {
     this.rows = cursor;
   }
 
-  public Integer getTotal() {
+  public Long getTotal() {
     return total;
   }
 
-  public void setTotal(Integer total) {
+  public void setTotal(Long total) {
     this.total = total;
   }
 
@@ -119,55 +119,57 @@ public class ResumptionToken {
     validate();
 
     StringBuffer tokenSb = new StringBuffer();
-    tokenSb.append("offset=" + offset);
-    tokenSb.append("&rows=" + rows);
+    tokenSb.append("rows=" + rows);
 
+    tokenSb.append("@@lastItemId=" + lastItemId);
+    
     if (set != null) {
-      tokenSb.append("&set=" + set);
+      tokenSb.append("@@set=" + set);
     }
 
     if (from != null) {
-      tokenSb.append("&from=" + from);
+      tokenSb.append("@@from=" + from);
     }
 
     if (total != null) {
-      tokenSb.append("&total=" + total);
+      tokenSb.append("@@total=" + total);
     }
 
     if (until != null) {
-      tokenSb.append("&until=" + until);
+      tokenSb.append("@@until=" + until);
     }
 
     if (metadataPrefix != null) {
-      tokenSb.append("&metadataPrefix=" + metadataPrefix);
+      tokenSb.append("@@metadataPrefix=" + metadataPrefix);
     }
 
     return tokenSb.toString();
   }
 
   public void validate() throws BadResumptionTokenException {
-    if (offset == null || rows == null || total == null) {
+    if (lastItemId == null || rows == null || total == null) {
       logger.error("token offset, rows and tola must not be null");
       throw new BadResumptionTokenException();
     }
 
-    if (offset < 0 || rows <= 0 || total < 0) {
+    if (rows <= 0 || total < 0) {
       logger.error("offset, rows and total must have positive values");
       throw new BadResumptionTokenException();
     }
 
     Instant frominstant = null;
     Instant untilinstant = null;
+
     try {
-      
+
       if (from != null && !from.isEmpty()) {
-        frominstant = Instant.parse ( from );
+        frominstant = Instant.parse(from);
       }
-      
+
       if (until != null && !until.isEmpty()) {
-        untilinstant = Instant.parse ( until );
+        untilinstant = Instant.parse(until);
       }
-      
+
     } catch (DateTimeParseException e) {
       throw new BadResumptionTokenException();
     }
@@ -177,7 +179,16 @@ public class ResumptionToken {
         throw new BadResumptionTokenException();
       }
     }
-    
+
+  }
+
+  @Override
+  public String toString() {
+    try {
+      return getToken();
+    } catch (BadResumptionTokenException e) {
+      return "InvalidToken";
+    }
   }
 
 }

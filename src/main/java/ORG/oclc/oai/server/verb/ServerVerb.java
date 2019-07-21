@@ -33,6 +33,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.util.OAIUtil;
 //import javax.servlet.http.HttpUtils;
@@ -44,7 +47,7 @@ import ORG.oclc.oai.util.OAIUtil;
  */
 public abstract class ServerVerb {
     private static final boolean debug = false;
-
+    final static Logger logger = LogManager.getLogger(ServerVerb.class);
     private int statusCode = HttpServletResponse.SC_OK; // http status
     private String message = null; // http response message
 
@@ -179,11 +182,11 @@ public abstract class ServerVerb {
             String name = (String)params.nextElement();
             String[] values = request.getParameterValues(name);
             if (!validParamNames.contains(name)) {
-                return true;
+              return true;
             } else if (values.length > 1) {
-                return true;
+              return true;
             } else if (values.length == 1 && !catalog.isValidParam(name, values[0])) {
-            	return true;
+              return true;
             }
         }
         String identifier = request.getParameter("identifier");

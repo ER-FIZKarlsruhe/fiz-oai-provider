@@ -66,7 +66,7 @@ public class BackendService {
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier) + "?format=" + URLEncoder.encode(metadataPrefix) + "&content=true";
 
-    logger.info("getItem url: " + url.toString());
+    logger.debug("getItem url: " + url.toString());
     
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {
@@ -92,7 +92,7 @@ public class BackendService {
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier);
 
-    logger.info("getItem url: " + url.toString());
+    logger.debug("getItem url: " + url.toString());
     
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {
@@ -109,7 +109,7 @@ public class BackendService {
   }
   
   
-  public SearchResult<Item> getItems(boolean withContent, long offset, long rows, String set, String from, String until, String metadataPrefix)
+  public SearchResult<Item> getItems(boolean withContent, String lastItemId, long rows, String set, String from, String until, String metadataPrefix)
       throws IOException {
     if (metadataPrefix == null || metadataPrefix.isEmpty()) {
       throw new IllegalArgumentException("metadataPrefix must not be null");
@@ -121,8 +121,8 @@ public class BackendService {
     StringBuffer url = new StringBuffer();
     url.append(backendBaseUrl + "/item?content=" + withContent);
     url.append("&format=" + URLEncoder.encode(metadataPrefix));
+    url.append("&lastItemId=" + lastItemId);
     url.append("&rows=" + rows);
-
     if (!StringUtils.isEmpty(set)) {
       url.append("&set=" + set);
     }

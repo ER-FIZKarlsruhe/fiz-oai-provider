@@ -290,12 +290,8 @@ public class OAIHandler extends HttpServlet {
             forceRender = true;
         }
         
-//      try {
         request.setCharacterEncoding("UTF-8");
-//      } catch (UnsupportedEncodingException e) {
-//      e.printStackTrace();
-//      throw new IOException(e.getMessage());
-//      }
+
         Date then = null;
         if (monitor) then = new Date();
         if (debug) {
@@ -332,20 +328,7 @@ public class OAIHandler extends HttpServlet {
                     }
                 }
                 String result = getResult(attributes, request, response, serverTransformer, serverVerbs, extensionVerbs, extensionPath);
-//              log.debug("result=" + result);
-                
-//              if (serverTransformer) { // render on the server
-//              response.setContentType("text/html; charset=UTF-8");
-//              StringReader stringReader = new StringReader(getResult(request));
-//              StreamSource streamSource = new StreamSource(stringReader);
-//              StringWriter stringWriter = new StringWriter();
-//              transformer.transform(streamSource, new StreamResult(stringWriter));
-//              result = stringWriter.toString();
-//              } else { // render on the client
-//              response.setContentType("text/xml; charset=UTF-8");
-//              result = getResult(request);
-//              }
-                
+
                 Writer out = getWriter(request, response);
                 out.write(result);
                 out.close();

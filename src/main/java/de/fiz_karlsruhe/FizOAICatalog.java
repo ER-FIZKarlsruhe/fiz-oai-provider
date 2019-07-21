@@ -64,7 +64,7 @@ public class FizOAICatalog extends AbstractCatalog {
     String temp;
 
     temp = properties.getProperty("FizOAICatalog.maxListSize");
-
+    setParamRegex("(.*?)");
     if (temp == null) {
       throw new IllegalArgumentException("FizOAICatalog." + "maxListSize is missing from the properties file");
     }
@@ -180,7 +180,7 @@ public class FizOAICatalog extends AbstractCatalog {
    *         identifier keys with corresponding values of "true" or null depending
    *         on whether the identifier is deleted or not.
    * @throws OAIInternalServerError
-   * @throws CannotDisseminateFormatException 
+   * @throws CannotDisseminateFormatException
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   @Override
@@ -194,9 +194,9 @@ public class FizOAICatalog extends AbstractCatalog {
     if (schemaLocation == null) {
       throw new CannotDisseminateFormatException("Unknown metadataPrefix");
     }
-    
+
     try {
-      result = backendService.getItems(false, 0, maxListSize, set, from, until, metadataPrefix);
+      result = backendService.getItems(false, null, maxListSize, set, from, until, metadataPrefix);
 
       if (result == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
@@ -212,24 +212,24 @@ public class FizOAICatalog extends AbstractCatalog {
       throw new OAIInternalServerError(e.getMessage());
     }
 
-    int cursorPosition = (result.getData().size());
-
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
     if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
       ResumptionToken resumptionToken = new ResumptionToken();
+      resumptionToken.setLastItemId(result.getLastItemId());
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
       resumptionToken.setUntil(until);
-      resumptionToken.setOffset(-1);
       resumptionToken.setRows(maxListSize);
+      resumptionToken.setTotal(result.getTotal());
       resumptionToken.setMetadataPrefix(metadataPrefix);
 
       try {
-        listIdentifiersMap.put("resumptionMap", getResumptionMap(resumptionToken.getToken(), (int)result.getTotal(), -1));
+        listIdentifiersMap.put("resumptionMap",
+            getResumptionMap(resumptionToken.getToken(), (int) result.getTotal(), -1));
       } catch (BadResumptionTokenException e) {
-       throw new OAIInternalServerError("An error occured while creating the ResumptionToken");
+        throw new OAIInternalServerError("An error occured while creating the ResumptionToken");
       }
     }
     listIdentifiersMap.put("headers", headers.iterator());
@@ -241,7 +241,7 @@ public class FizOAICatalog extends AbstractCatalog {
   /**
    * Retrieve the next set of Identifiers associated with the resumptionToken
    *
-   * @param resumptionToken implementation-dependent format taken from the
+   * @param resumptionTokenParam implementation-dependent format taken from the
    *                        previous listIdentifiers() Map result.
    * @return a Map object containing an optional "resumptionToken" key/value pair
    *         and an "identifiers" Map object. The "identifiers" Map contains OAI
@@ -251,18 +251,17 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   @Override
-  public Map listIdentifiers(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
+  public Map listIdentifiers(String resumptionTokenParam) throws BadResumptionTokenException, OAIInternalServerError {
     Map<String, Object> listIdentifiersMap = new HashMap<String, Object>();
     ArrayList<String> headers = new ArrayList<String>();
     ArrayList<String> identifiers = new ArrayList<String>();
 
-    ResumptionToken restoken = new ResumptionToken(resumptionToken);
-
-    int oldCursorPosition = restoken.getRows();
+    ResumptionToken restoken = new ResumptionToken(resumptionTokenParam);
 
     SearchResult<Item> result = null;
     try {
-      result = backendService.getItems(false, oldCursorPosition, maxListSize, restoken.getSet(), restoken.getFrom(), restoken.getUntil(), restoken.getFrom());
+      result = backendService.getItems(false, restoken.getLastItemId(), maxListSize, restoken.getSet(),
+          restoken.getFrom(), restoken.getUntil(), restoken.getMetadataPrefix());
 
       if (result == null || result.getData().isEmpty()) {
         throw new OAIInternalServerError("Empty resultSet");
@@ -278,14 +277,10 @@ public class FizOAICatalog extends AbstractCatalog {
       throw new OAIInternalServerError(e.getMessage());
     }
 
-    int newCursorPosition = restoken.getRows() + result.getData().size();
+    if (StringUtils.isNotBlank(result.getLastItemId())) {
+      restoken.setLastItemId(result.getLastItemId());
 
-    if (newCursorPosition < result.getTotal()) {
-      restoken.setOffset(restoken.getRows());
-      restoken.setRows(newCursorPosition);
-
-      listIdentifiersMap.put("resumptionMap",
-          getResumptionMap(restoken.toString(), (int)result.getTotal(),newCursorPosition));
+      listIdentifiersMap.put("resumptionMap", getResumptionMap(restoken.toString(), (int) result.getTotal(), -1));
     }
 
     listIdentifiersMap.put("headers", headers.iterator());
@@ -322,11 +317,10 @@ public class FizOAICatalog extends AbstractCatalog {
    * @return an Iterator containing the list of setSpec values for this nativeItem
    */
   private Iterator<String> getSetSpecs(Object nativeItem) throws IllegalArgumentException {
-    //return ((Item) nativeItem).getSets().iterator();
-    //TODO 
+    // return ((Item) nativeItem).getSets().iterator();
+    // TODO
     return null;
   }
-
 
   /**
    * Retrieve a list of records that satisfy the specified criteria
@@ -356,8 +350,8 @@ public class FizOAICatalog extends AbstractCatalog {
     }
 
     try {
-      result = backendService.getItems(true, 0, maxListSize, set, from, until, metadataPrefix);
-      
+      result = backendService.getItems(true, null, maxListSize, set, from, until, metadataPrefix);
+
       if (result == null || result.getData().isEmpty()) {
         logger.info("No items found ");
         throw new NoItemsMatchException();
@@ -378,22 +372,20 @@ public class FizOAICatalog extends AbstractCatalog {
       throw new OAIInternalServerError(e.getMessage());
     }
 
-    int cursorPosition = -1;
-
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
     if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
       ResumptionToken resumptionToken = new ResumptionToken();
+      resumptionToken.setLastItemId(result.getLastItemId());
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
       resumptionToken.setUntil(until);
-      resumptionToken.setOffset(0);
-      resumptionToken.setRows(maxListSize - 1);
+      resumptionToken.setTotal(result.getTotal());
+      resumptionToken.setRows(result.getSize());
       resumptionToken.setMetadataPrefix(metadataPrefix);
 
-      listRecordsMap.put("resumptionMap",
-          getResumptionMap(resumptionToken.toString(), (int)result.getTotal(), cursorPosition));
+      listRecordsMap.put("resumptionMap", getResumptionMap(resumptionToken.toString(), (int) result.getTotal(), -1));
     }
 
     listRecordsMap.put("records", records.iterator());
@@ -403,7 +395,7 @@ public class FizOAICatalog extends AbstractCatalog {
   /**
    * Retrieve the next set of records associated with the resumptionToken
    *
-   * @param resumptionToken implementation-dependent format taken from the
+   * @param resumptionTokenParam implementation-dependent format taken from the
    *                        previous listRecords() Map result.
    * @return a Map object containing an optional "resumptionToken" key/value pair
    *         and a "records" Iterator object. The "records" Iterator contains a
@@ -412,16 +404,17 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception OAIBadRequestException signals an http status code 400 problem
    */
   @Override
-  public Map listRecords(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
+  public Map listRecords(String resumptionTokenParam) throws BadResumptionTokenException, OAIInternalServerError {
+    logger.info("listRecords resumptionToken: " + resumptionTokenParam);
     Map<String, Object> listRecordsMap = new HashMap<String, Object>();
     ArrayList<String> records = new ArrayList<String>();
     SearchResult<Item> result = null;
 
-    ResumptionToken token = new ResumptionToken(resumptionToken);
-    token.setOffset(token.getRows());
+    ResumptionToken token = new ResumptionToken(resumptionTokenParam);
 
     try {
-      result = backendService.getItems(true, token.getOffset(), maxListSize, token.getSet(), token.getFrom(), token.getUntil(), token.getMetadataPrefix());
+      result = backendService.getItems(true, token.getLastItemId(), maxListSize, token.getSet(), token.getFrom(),
+          token.getUntil(), token.getMetadataPrefix());
 
       if (result == null || result.getData().isEmpty()) {
         throw new OAIInternalServerError("There is a problem wit the resumption token. Cannot retrieve any results!");
@@ -438,11 +431,11 @@ public class FizOAICatalog extends AbstractCatalog {
       e.printStackTrace();
     }
 
-    int cursorPosition = -1;
 
     if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
+      token.setLastItemId(result.getLastItemId());
       listRecordsMap.put("resumptionMap",
-          getResumptionMap(resumptionToken.toString(), (int)result.getTotal(), cursorPosition));
+          getResumptionMap(token.toString(), (int) result.getTotal(), -1));
     }
 
     listRecordsMap.put("records", records.iterator());
