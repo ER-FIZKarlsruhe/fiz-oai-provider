@@ -20,85 +20,85 @@ import java.util.Map;
 
 public class Set {
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((spec == null) ? 0 : spec.hashCode());
-    return result;
-  }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((spec == null) ? 0 : spec.hashCode());
+		return result;
+	}
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    Set other = (Set) obj;
-    if (spec == null) {
-      if (other.spec != null)
-        return false;
-    } else if (!spec.equals(other.spec))
-      return false;
-    return true;
-  }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Set other = (Set) obj;
+		if (spec == null) {
+			if (other.spec != null)
+				return false;
+		} else if (!spec.equals(other.spec))
+			return false;
+		return true;
+	}
 
-  private String name;
-  
-  private String spec;
-  
-  private String description;
-  
-  private Map<String, String> xPaths;
+	private String name;
 
-  private String status;
+	private String spec;
 
-  public String getName() {
-    return name;
-  }
+	private String description;
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	private Map<String, String> xPaths;
 
-  public Map<String, String> getxPaths() {
-	return xPaths;
-}
+	private String status;
 
-public void setxPaths(Map<String, String> xPaths) {
-	this.xPaths = xPaths;
-}
+	public String getName() {
+		return name;
+	}
 
-public String getStatus() {
-	return status;
-}
+	public void setName(String name) {
+		this.name = name;
+	}
 
-public void setStatus(String status) {
-	this.status = status;
-}
+	public Map<String, String> getxPaths() {
+		return xPaths;
+	}
 
-public String getSpec() {
-    return spec;
-  }
+	public void setxPaths(Map<String, String> xPaths) {
+		this.xPaths = xPaths;
+	}
 
-  public void setSpec(String spec) {
-    this.spec = spec;
-  }
+	public String getStatus() {
+		return status;
+	}
 
-  public String getDescription() {
-    return description;
-  }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public String getSpec() {
+		return spec;
+	}
 
-  @Override
-  public String toString() {
-    return "Set [name=" + name + ", spec=" + spec + ", description=" + description + ", xPaths=" + xPaths + ", status=" + status + "]";
-  }
-  
-  
+	public void setSpec(String spec) {
+		this.spec = spec;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@Override
+	public String toString() {
+		return "Set [name=" + name + ", spec=" + spec + ", description=" + description + ", xPaths=" + xPaths
+				+ ", status=" + status + "]";
+	}
+
 }
