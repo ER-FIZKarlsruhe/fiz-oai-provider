@@ -24,6 +24,8 @@ public class Format {
   private String schemaNamespace;
   
   private String identifierXpath;
+  
+  private String status;
 
   public String getMetadataPrefix() {
     return metadataPrefix;
@@ -57,11 +59,18 @@ public class Format {
     this.identifierXpath = identifierXpath;
   }
 
-  @Override
+  public String getStatus() {
+	return status;
+}
+
+public void setStatus(String status) {
+	this.status = status;
+}
+
+@Override
   public String toString() {
     return "Format [metadataPrefix=" + metadataPrefix + ", schemaLocation=" + schemaLocation + ", schemaNamespace="
-        + schemaNamespace + ", identifierXpath=" + identifierXpath
-        + "]";
+        + schemaNamespace + ", identifierXpath=" + identifierXpath + ", status=" + status + "]";
   }
 
   @Override

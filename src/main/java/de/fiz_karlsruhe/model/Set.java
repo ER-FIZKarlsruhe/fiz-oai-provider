@@ -97,7 +97,7 @@ public String getSpec() {
 
   @Override
   public String toString() {
-    return "Set [name=" + name + ", spec=" + spec + ", description=" + description + "]";
+    return "Set [name=" + name + ", spec=" + spec + ", description=" + description + ", xPaths=" + xPaths + ", status=" + status + "]";
   }
   
   
