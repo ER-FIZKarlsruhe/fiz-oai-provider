@@ -16,6 +16,8 @@
 
 package de.fiz_karlsruhe.model;
 
+import java.util.Map;
+
 public class Set {
 
   @Override
@@ -48,6 +50,10 @@ public class Set {
   private String spec;
   
   private String description;
+  
+  private Map<String, String> xPaths;
+
+  private String status;
 
   public String getName() {
     return name;
@@ -57,7 +63,23 @@ public class Set {
     this.name = name;
   }
 
-  public String getSpec() {
+  public Map<String, String> getxPaths() {
+	return xPaths;
+}
+
+public void setxPaths(Map<String, String> xPaths) {
+	this.xPaths = xPaths;
+}
+
+public String getStatus() {
+	return status;
+}
+
+public void setStatus(String status) {
+	this.status = status;
+}
+
+public String getSpec() {
     return spec;
   }
 
