@@ -21,7 +21,7 @@ limitations under the License.
 
   <xs:import namespace="http://datacite.org/schema/kernel-3" schemaLocation="http://schema.datacite.org/meta/kernel-3/include/datacite-resourceType-v3.xsd" />
   <xs:import namespace="http://radar-service.eu/schemas/descriptive/radar/v09/radar-types" schemaLocation="RadarTypes.xsd" />
-  <xs:import namespace="http://purl.org/dc/terms/" schemaLocation="http://dublincore.org/schemas/xmls/qdc/dcterms.xsd" />
+  <xs:import namespace="http://purl.org/dc/terms/" schemaLocation="https://dublincore.org/schemas/xmls/qdc/dcterms.xsd" />
 
   <xs:element name="identifier">
     <xs:annotation>

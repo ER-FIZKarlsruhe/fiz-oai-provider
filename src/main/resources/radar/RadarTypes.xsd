@@ -20,7 +20,7 @@ limitations under the License.
 	elementFormDefault="unqualified">
 
 	<xs:import namespace="http://purl.org/dc/elements/1.1/"
-		schemaLocation="http://dublincore.org/schemas/xmls/qdc/dc.xsd"/>
+		schemaLocation="https://dublincore.org/schemas/xmls/qdc/dc.xsd"/>
 
 	<!-- ********************** TYPE DECLARATIONS ********************** -->
 	<!-- define possible values for identifierType attribute -->
