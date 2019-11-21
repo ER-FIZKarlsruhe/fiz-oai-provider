@@ -123,7 +123,9 @@ public class FizOAICatalog extends AbstractCatalog {
     Item nativeItem = null;
     try {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
-      logger.info("local identifier: " + localIdentifier);
+      if (localIdentifier == null) {
+        throw new IdDoesNotExistException(oaiIdentifier);
+      } 
 
       nativeItem = backendService.getItem(localIdentifier, metadataPrefix);
       logger.debug(nativeItem);

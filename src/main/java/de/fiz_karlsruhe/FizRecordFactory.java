@@ -115,7 +115,8 @@ public class FizRecordFactory extends RecordFactory {
       tokenizer.nextToken();
       return tokenizer.nextToken();
     } catch (Exception e) {
-      throw new IllegalArgumentException("Invalid local identifier: " + identifier);
+      logger.error("Cannot parse identifier " + identifier, e);
+      return null;
     }
   }
 
