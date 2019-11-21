@@ -77,7 +77,7 @@ public class FizRecordFactory extends RecordFactory {
     try {
       formats = BackendService.getInstance(backendBaseUrl).getFormats();
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error("Cannot read supported formats from backend", e);
     }
 
     return formats;
@@ -96,7 +96,7 @@ public class FizRecordFactory extends RecordFactory {
     try {
       transformations = BackendService.getInstance(backendBaseUrl).getTransformations();
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error("Cannot read supported transformations from backend", e);
     }
     
     return transformations;
@@ -115,7 +115,7 @@ public class FizRecordFactory extends RecordFactory {
       tokenizer.nextToken();
       return tokenizer.nextToken();
     } catch (Exception e) {
-      return null;
+      throw new IllegalArgumentException("Invalid local identifier: " + identifier);
     }
   }
 
