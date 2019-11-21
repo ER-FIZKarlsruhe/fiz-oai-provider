@@ -20,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import de.fiz_karlsruhe.FormatRegistry;
 
@@ -30,7 +33,9 @@ import de.fiz_karlsruhe.FormatRegistry;
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
  */
 public class GetRecord extends ServerVerb {
-  private static final boolean debug = false;
+
+  final static Logger logger = LogManager.getLogger(GetRecord.class);
+
   private static ArrayList validParamNames = new ArrayList();
   static {
     validParamNames.add("verb");
@@ -64,10 +69,9 @@ public class GetRecord extends ServerVerb {
     String identifier = request.getParameter("identifier");
     String metadataPrefix = request.getParameter("metadataPrefix");
 
-    if (debug) {
-      System.out.println("GetRecord.constructGetRecord: identifier=" + identifier);
-      System.out.println("GetRecord.constructGetRecord: metadataPrefix=" + metadataPrefix);
-    }
+    logger.info("GetRecord.constructGetRecord: identifier=" + identifier);
+    logger.info("GetRecord.constructGetRecord: metadataPrefix=" + metadataPrefix);
+
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
     String styleSheet = properties.getProperty("OAIHandler.styleSheet");
     if (styleSheet != null) {
