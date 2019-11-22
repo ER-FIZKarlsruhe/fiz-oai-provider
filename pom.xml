@@ -5,7 +5,7 @@
 	<groupId>de.fiz-karlsruhe</groupId>
 	<artifactId>fiz-oai-provider</artifactId>
 	<packaging>war</packaging>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.2-SNAPSHOT</version>
 	<name>fiz-oai-provider</name>
 	<url>http://maven.apache.org</url>
 
