@@ -16,13 +16,16 @@
 
 package de.fiz_karlsruhe.integration;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -39,6 +42,8 @@ public class ListIdentifiersIT extends BaseIT {
   @Test
   public void testListIdentifiers() throws Exception {
     logger.info("testListIdentifiers");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -49,7 +54,22 @@ public class ListIdentifiersIT extends BaseIT {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
@@ -59,6 +79,8 @@ public class ListIdentifiersIT extends BaseIT {
   @Test
   public void testListIdentifiersWithDateRange() throws Exception {
     logger.info("testListIdentifiersWithDateRange");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -71,7 +93,22 @@ public class ListIdentifiersIT extends BaseIT {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
@@ -81,6 +118,8 @@ public class ListIdentifiersIT extends BaseIT {
   @Test
   public void testListIdentifiersWithDatetimeRange() throws Exception {
     logger.info("testListIdentifiersWithDatetimeRange");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -93,63 +132,115 @@ public class ListIdentifiersIT extends BaseIT {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
-  
-  
+
   @Test
   public void testListIdentifiersWithInvalidDateRange() throws Exception {
     logger.info("testListIdentifiersWithInvalidDateRange");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
     params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
     params.add(new BasicNameValuePair("set", "fiz"));
-    params.add(new BasicNameValuePair("until", "1970-01-01"));//until is smaller than from
+    params.add(new BasicNameValuePair("until", "1970-01-01"));// until is smaller than from
     params.add(new BasicNameValuePair("from", "9999-12-31"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("testListIdentifiersWithInvalidRange response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
-  
+
   @Test
   public void testListIdentifiersWithInvalidDatetimeRange() throws Exception {
     logger.info("testListIdentifiersWithInvalidDatetimeRange");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
     params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
     params.add(new BasicNameValuePair("set", "fiz"));
-    params.add(new BasicNameValuePair("until", "1970-01-01T11:12:12Z"));//until is 1s smaller than from
+    params.add(new BasicNameValuePair("until", "1970-01-01T11:12:12Z"));// until is 1s smaller than from
     params.add(new BasicNameValuePair("from", "1970-01-01T11:12:13Z"));
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("testListIdentifiersWithInvalidRange response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
-  
+
   @Test
   public void testListIdentifiersMissingMetadataArgument() throws Exception {
     logger.info("testListIdentifiersMissingMetadataArgument");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -158,38 +249,74 @@ public class ListIdentifiersIT extends BaseIT {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
-  
+
   @Test
   public void testListIdentifiersBadFromArgument() throws Exception {
     logger.info("testListIdentifiersBadFromArgument");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
     params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
-    params.add(new BasicNameValuePair("from", "abc"));//Must be like '2019-12-12'
+    params.add(new BasicNameValuePair("from", "abc"));// Must be like '2019-12-12'
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("badArgument"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("badArgument"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
-  
+
   @Test
   public void testListIdentifiersCannotDisseminateFormat() throws Exception {
     logger.info("testListIdentifiersCannotDisseminateFormat");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
@@ -199,7 +326,23 @@ public class ListIdentifiersIT extends BaseIT {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("cannotDisseminateFormat"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("cannotDisseminateFormat"));
@@ -210,22 +353,40 @@ public class ListIdentifiersIT extends BaseIT {
   @Test
   public void testListIdentifiersEmptySet() throws Exception {
     logger.info("testListIdentifiersEmptySet");
+
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListIdentifiers"));
     params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
-    params.add(new BasicNameValuePair("set", "empty"));//Returns an empty resultSet from the backend
+    params.add(new BasicNameValuePair("set", "empty"));// Returns an empty resultSet from the backend
     httpPost.setEntity(new UrlEncodedFormEntity(params));
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      System.out.println("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("noRecordsMatch"));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpGet)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("noRecordsMatch"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
   }
-  
+
 }

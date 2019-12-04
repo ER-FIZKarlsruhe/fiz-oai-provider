@@ -16,13 +16,16 @@
 
 package de.fiz_karlsruhe.integration;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -38,7 +41,9 @@ public class ListSetsIT extends BaseIT {
 
   @Test
   public void testListSets() throws Exception {
-    logger.info("testGetRecord");
+    logger.info("testListSets");
+    
+    // POST
     HttpPost httpPost = new HttpPost(TEST_OAI_URL);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     params.add(new BasicNameValuePair("verb", "ListSets"));
@@ -47,11 +52,27 @@ public class ListSetsIT extends BaseIT {
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpPost)) {
       String bodyAsString = EntityUtils.toString(response.getEntity());
-      logger.debug("response: " + bodyAsString);
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
+    
+    // GET
+    URI getUri = new URIBuilder(TEST_OAI_URL).addParameters(params).build();
+    HttpGet httpGet = new HttpGet(getUri.toString());
+    
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("GET URL: " + httpGet.getURI().toString());
+      logger.info("GET response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+    
   }
 
 
