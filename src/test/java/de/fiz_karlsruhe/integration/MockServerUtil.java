@@ -19,6 +19,9 @@ package de.fiz_karlsruhe.integration;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.apache.log4j.LogManager;
@@ -50,8 +53,20 @@ public class MockServerUtil  implements ExpectationInitializer {
 
   private void initGetItem(MockServerClient serverClient) {
     
+    serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133%2Fdeleted").withQueryStringParameters(new Parameter("format", Arrays.asList("oai_dc")),new Parameter("content", "true")))
+    .respond(response().withStatusCode(200)
+    .withBody("{\n" + 
+        "  \"identifier\": \"10.0133/deleted\",\n" + 
+        "  \"datestamp\": \"2019-07-12T12:39:37Z\",\n" + 
+        "  \"deleteFlag\": true,\n" + 
+        "  \"tags\": null,\n" + 
+        "  \"sets\": null,\n" + 
+        "  \"formats\": null,\n" + 
+        "  \"ingestFormat\": \"oai_dc\",\n" + 
+        "  \"content\": null" + 
+        "  }\n" + 
+        "}"));
 
-    
     serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*").withQueryStringParameters(new Parameter("format", Arrays.asList("radar"))))
         .respond(response().withStatusCode(200)
             .withBody("{\n" + 
@@ -99,6 +114,8 @@ public class MockServerUtil  implements ExpectationInitializer {
             "  \"content\": null" + 
             "  }\n" + 
             "}"));
+    
+
   }
   
   private void initGetItemsNoContent(MockServerClient serverClient) {

@@ -82,8 +82,7 @@ public class BackendService {
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier) + "?format=" + URLEncoder.encode(metadataPrefix) + "&content=true";
 
-    logger.debug("getItem url: " + url.toString());
-    
+    logger.info("getItem localIdentifier + metadataPrefix  url: " + url.toString());
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
@@ -108,7 +107,7 @@ public class BackendService {
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier);
 
-    logger.debug("getItem url: " + url.toString());
+    logger.debug("getItem localIdentifier url: " + url.toString());
     
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url))) {

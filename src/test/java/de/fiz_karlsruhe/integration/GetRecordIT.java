@@ -39,7 +39,7 @@ import org.junit.Test;
 public class GetRecordIT extends BaseIT {
 
   final static Logger logger = LogManager.getLogger(GetRecordIT.class);
-
+  
   @Test
   public void testGetSingleRecordRadarFormat() throws Exception {
     //POST
@@ -263,6 +263,31 @@ public class GetRecordIT extends BaseIT {
       Assert.assertTrue(bodyAsString.contains("badArgument"));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
     }
+  }
+  
+  @Test
+  public void testGetSingleDeletedRecord() throws Exception {
+    //POST
+    logger.info("testGetSingleDeletedRecord");
+    HttpPost httpPost = new HttpPost(TEST_OAI_URL);
+    List<NameValuePair> params = new ArrayList<NameValuePair>();
+    params.add(new BasicNameValuePair("verb", "GetRecord"));
+    params.add(new BasicNameValuePair("metadataPrefix", "oai_dc"));
+    params.add(new BasicNameValuePair("identifier", "oai:fiz-karlsruhe.de:10.0133/deleted"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(httpPost)) {
+      String bodyAsString = EntityUtils.toString(response.getEntity());
+      logger.info("POST URL: " + httpPost.getURI().toString());
+      logger.info("POST response: " + bodyAsString);
+      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertNotNull(bodyAsString);
+      Assert.assertTrue(bodyAsString.contains("status=\"deleted\""));
+      Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+    }
+    
+   
   }  
   
 }

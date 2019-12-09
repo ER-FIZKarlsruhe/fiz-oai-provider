@@ -25,7 +25,7 @@ public class Item {
 
   private String datestamp;
   
-  private String deleteFlag;
+  private Boolean deleteFlag;
   
   private Content content;
   
@@ -53,11 +53,11 @@ public class Item {
     this.datestamp = datestamp;
   }
   
-  public String getDeleteFlag() {
+  public Boolean getDeleteFlag() {
     return deleteFlag;
   }
   
-  public void setDeleteFlag(String deleteFlag) {
+  public void setDeleteFlag(Boolean deleteFlag) {
     this.deleteFlag = deleteFlag;
   }
   

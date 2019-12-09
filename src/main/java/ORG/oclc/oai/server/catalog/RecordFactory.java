@@ -15,6 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
 import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.util.OAIUtil;
@@ -31,8 +34,9 @@ import de.fiz_karlsruhe.service.BackendService;
  * &lt;metadata&gt; part of the response from native records.
  */
 public abstract class RecordFactory {
-  public static final boolean debug = false;
 
+  final static Logger logger = LogManager.getLogger(RecordFactory.class);
+  
   /**
    * Container for the crosswalk(s) supported by this factory
    */
@@ -274,8 +278,7 @@ public abstract class RecordFactory {
   public String create(Object nativeItem, String schemaURL, String metadataPrefix, String identifier, String datestamp,
       Iterator setSpecs, Iterator abouts, boolean isDeleted)
       throws IllegalArgumentException, CannotDisseminateFormatException {
-    if (debug)
-      System.out.println("RecordFactory.create");
+    logger.info("RecordFactory.create");
     StringBuffer xmlRec = new StringBuffer();
     xmlRec.append("<record><header");
     if (isDeleted) {
@@ -294,11 +297,10 @@ public abstract class RecordFactory {
       }
     }
     xmlRec.append("</header>");
-    if (debug)
-      System.out.println("RecordFactory.create: header finished");
+    
+    logger.info("RecordFactory.create: header finished");
     if (!isDeleted) {
-      if (debug)
-        System.out.println("RecordFactory.create: starting metadata");
+      logger.info("RecordFactory.create: starting metadata");
       xmlRec.append("<metadata>");
       //TODO
       try {
@@ -314,8 +316,8 @@ public abstract class RecordFactory {
       }
       
       xmlRec.append("</metadata>");
-      if (debug)
-        System.out.println("RecordFactory.create: finished metadata");
+      logger.info("RecordFactory.create: finished metadata");
+      
       if (abouts != null) {
         while (abouts.hasNext()) {
           xmlRec.append("<about>");
@@ -324,9 +326,9 @@ public abstract class RecordFactory {
         }
       }
     }
+    
     xmlRec.append("</record>");
-    if (debug)
-      System.out.println("RecordFactory.create: return=" + xmlRec.toString());
+    logger.info("RecordFactory.create: return=" + xmlRec.toString());
     return xmlRec.toString();
   }
 
@@ -417,6 +419,7 @@ public abstract class RecordFactory {
    */
   public String createMetadata(Object nativeItem, String schemaURL, boolean isDeleted)
       throws IllegalArgumentException, CannotDisseminateFormatException {
+    logger.info("createMetadata");
     StringBuffer xmlRec = new StringBuffer();
     if (isDeleted) {
       throw new CannotDisseminateFormatException("Record is deleted");
@@ -432,7 +435,7 @@ public abstract class RecordFactory {
 //    }
     //TODO
     try {
-      Item item = BackendService.getInstance().getItem("", "");
+      Item item = BackendService.getInstance().getItem(getLocalIdentifier(nativeItem));
       xmlRec.append(item.getContent().getContent());
     } catch (IOException e) {
       // TODO Auto-generated catch block
