@@ -156,6 +156,7 @@ public class BackendService {
         CloseableHttpResponse response = client.execute(new HttpGet(url.toString()))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
+        logger.debug("json " + json);
         JavaType type = objectMapper.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
         result = objectMapper.readValue(json, type);
       }

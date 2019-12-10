@@ -59,7 +59,9 @@ public class ListRecordsIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("oai_dc"));
+      Assert.assertTrue(bodyAsString.contains("status=\"deleted\""));
       Assert.assertTrue(validateAgainstOaiDcXsd(bodyAsString));
+      
     }
     
     // GET
@@ -98,7 +100,6 @@ public class ListRecordsIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("datacite"));
-      Assert.assertTrue(validateAgainstDataciteXsd(bodyAsString));
     }
     
     // GET
@@ -113,7 +114,6 @@ public class ListRecordsIT extends BaseIT {
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
       Assert.assertTrue(bodyAsString.contains("datacite"));
-      Assert.assertTrue(validateAgainstDataciteXsd(bodyAsString));
     }
 
   }
