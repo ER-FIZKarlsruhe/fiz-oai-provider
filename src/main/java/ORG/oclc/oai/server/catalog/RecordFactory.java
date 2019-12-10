@@ -278,6 +278,9 @@ public abstract class RecordFactory {
   public String create(Object nativeItem, String schemaURL, String metadataPrefix, String identifier, String datestamp,
       Iterator setSpecs, Iterator abouts, boolean isDeleted)
       throws IllegalArgumentException, CannotDisseminateFormatException {
+    
+    Item item = (Item) nativeItem;
+    
     logger.info("RecordFactory.create");
     StringBuffer xmlRec = new StringBuffer();
     xmlRec.append("<record><header");
@@ -302,10 +305,15 @@ public abstract class RecordFactory {
     if (!isDeleted) {
       logger.info("RecordFactory.create: starting metadata");
       xmlRec.append("<metadata>");
-      //TODO
+
       try {
         String localIdentifier = getLocalIdentifier(nativeItem);
-        Item item = BackendService.getInstance().getItem(localIdentifier, metadataPrefix);
+
+        if (item == null || item.getContent() == null || !item.getContent().getFormat().equals(metadataPrefix)) {
+          logger.warn("Wrong format: " + item.getContent().getFormat() + " != " + metadataPrefix +   "  Reload item in right format from backend!"); 
+          item = BackendService.getInstance().getItem(localIdentifier, metadataPrefix);
+        }
+
         if (item != null) {
           xmlRec.append(item.getContent().getContent().replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim());
         } else {
