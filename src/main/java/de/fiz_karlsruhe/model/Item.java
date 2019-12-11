@@ -16,6 +16,7 @@
 
 package de.fiz_karlsruhe.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,9 +34,9 @@ public class Item {
 
   private List<String> tags;
 
-  private List<Set> sets;
+  private List<String> sets;
   
-  private List<Format> formats;
+  private List<String> formats;
   
   public String getIdentifier() {
     return identifier;
@@ -78,11 +79,11 @@ public class Item {
   }
   
   
-  public List<Format> getFormats() {
+  public List<String> getFormats() {
     return formats;
   }
 
-  public void setFormats(List<Format> formats) {
+  public void setFormats(List<String> formats) {
     this.formats = formats;
   }
 
@@ -94,11 +95,13 @@ public class Item {
     this.ingestFormat = ingestFormat;
   }
 
-  public List<Set> getSets() {
+  public List<String> getSets() {
+    if (sets == null) return new ArrayList<String>();
+    
     return sets;
   }
 
-  public void setSets(List<Set> sets) {
+  public void setSets(List<String> sets) {
     this.sets = sets;
   }
 

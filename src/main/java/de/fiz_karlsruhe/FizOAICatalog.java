@@ -325,9 +325,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @return an Iterator containing the list of setSpec values for this nativeItem
    */
   private Iterator<String> getSetSpecs(Object nativeItem) throws IllegalArgumentException {
-    // return ((Item) nativeItem).getSets().iterator();
-    // TODO
-    return null;
+    return ((Item) nativeItem).getSets().iterator();
   }
 
   /**

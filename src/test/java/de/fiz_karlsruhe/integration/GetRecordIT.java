@@ -58,7 +58,9 @@ public class GetRecordIT extends BaseIT {
       logger.info("POST response: " + bodyAsString);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
       Assert.assertNotNull(bodyAsString);
-      Assert.assertTrue(bodyAsString.contains("radarDataset"));
+      Assert.assertTrue(bodyAsString.contains("<ns2:radarDataset"));
+      Assert.assertTrue(bodyAsString.contains("<setSpec>dataset</setSpec>"));
+      Assert.assertTrue(bodyAsString.contains("<setSpec>fiz</setSpec>"));
       Assert.assertTrue(validateAgainstRadarXsd(bodyAsString));
     }
     

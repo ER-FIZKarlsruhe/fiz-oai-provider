@@ -164,8 +164,7 @@ public class FizRecordFactory extends RecordFactory {
    * @exception IllegalArgumentException Something is wrong with the argument.
    */
   public Iterator getSetSpecs(Object nativeItem) throws IllegalArgumentException {
-    // TODO return ((Item) nativeItem).getSets().iterator();
-    return null;
+    return ((Item) nativeItem).getSets().iterator();
   }
 
   /**
