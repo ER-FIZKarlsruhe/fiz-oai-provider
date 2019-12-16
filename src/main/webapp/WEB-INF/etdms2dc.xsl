@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                               xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
                               xmlns:etdms="http://www.ndltd.org/standards/metadata/etdms/1.0/"
