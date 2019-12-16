@@ -101,9 +101,6 @@
             <td bgcolor="#F9DD50" height="10"></td>
           </tr>
           <tr valign="top">
-            <td><a href="http://www.oclc.org/research/software/oai/cat.shtm"><img border="0" src="/fiz-oai-provider/oaicat_icon.gif" alt="OAICat - An OAI-PMH v2 Repository Framework" width="120" height="60"/></a>&#160;&#160;&#160;&#160;<a href="http://www.openarchives.org"><img border="0" src="http://www.openarchives.org/images/OA100.gif"/></a></td>
-          </tr>
-          <tr valign="top">
             <td><address><a href="mailto:stefan.hofmann@fiz-karlsruhe.de">Stefan Hofmann</a></address></td>
           </tr>
         </table>
