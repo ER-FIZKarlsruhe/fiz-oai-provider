@@ -131,4 +131,9 @@
       <session-timeout>30</session-timeout>    <!-- 30 minutes -->
     </session-config>
 
+    <mime-mapping>
+       <extension>xsl</extension>
+       <mime-type>application/xslt+xml</mime-type>
+    </mime-mapping>
+
 </web-app>
