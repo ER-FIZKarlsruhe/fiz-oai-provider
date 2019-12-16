@@ -93,7 +93,7 @@ public class ListIdentifiers extends ServerVerb {
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
     String styleSheet = properties.getProperty("OAIHandler.styleSheet");
     if (styleSheet != null) {
-      sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
+      sb.append("<?xml-stylesheet type=\"application/xslt+xml\" href=\"");
       sb.append(styleSheet);
       sb.append("\"?>");
     }
