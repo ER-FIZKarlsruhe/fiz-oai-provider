@@ -71,6 +71,9 @@
             }
           </xsl:comment>
         </style>
+          <script src="js/vendor/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+          <script src="js/vendor/autosize/autosize.min.js"></script>
+          <script src="js/fiz-oai-provider.js"></script>
       </head>
       <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
         <table width="100%" border="0" cellpadding="0" cellspacing="20">
@@ -176,20 +179,29 @@
   <xsl:template match="oai:metadata">
     <tr valign="top">
       <td>
-        <xsl:apply-templates/>
+      <textarea>
+        <xsl:copy-of select="node()" />
+      </textarea>
       </td>
     </tr>
   </xsl:template>
 
-  <xsl:template match="oai:set">
+  <xsl:template match="oai:set" >
     <tr valign="top">
       <xsl:apply-templates/>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:setSpec">
-    <td width="150"><strong><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></strong></td>
+    <tr valign="top">
+      <td><strong><xsl:value-of select="name()"/></strong></td>
+      <td><strong><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></strong></td>
+    </tr>
   </xsl:template>
+
+<!--   <xsl:template match="oai:setSpec"> -->
+<!--     <td width="150"><strong><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></strong></td> -->
+<!--   </xsl:template> -->
 
   <xsl:template match="oai:setName">
     <td><xsl:value-of select="."/></td>
