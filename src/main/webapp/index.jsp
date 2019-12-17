@@ -13,15 +13,15 @@
   <div>
     <h2>Protocol Request Forms</h2>
     <ol>
-      <li><a href="identify.html">Identify</a></li>
-      <li><a href="getRecord.html">GetRecord</a></li>
-      <li><a href="listIdentifiers.html">ListIdentifiers</a> (<a
-        href="listIdentifiersResumption.html">Resumption</a>)</li>
-      <li><a href="listMetadataFormats.html">ListMetadataFormats</a></li>
-      <li><a href="listRecords.html">ListRecords</a> (<a
-        href="listRecordsResumption.html">Resumption</a>)</li>
-      <li><a href="listSets.html">ListSets</a> (<a
-        href="listSetsResumption.html">Resumption</a>)</li>
+      <li><a href="identify">Identify</a></li>
+      <li><a href="getRecord">GetRecord</a></li>
+      <li><a href="listIdentifiers">ListIdentifiers</a> (<a
+        href="listIdentifiersResumption">Resumption</a>)</li>
+      <li><a href="listMetadataFormats">ListMetadataFormats</a></li>
+      <li><a href="listRecords">ListRecords</a> (<a
+        href="listRecordsResumption">Resumption</a>)</li>
+      <li><a href="listSets">ListSets</a> (<a
+        href="listSetsResumption">Resumption</a>)</li>
     </ol>
   </div>
   <div>
