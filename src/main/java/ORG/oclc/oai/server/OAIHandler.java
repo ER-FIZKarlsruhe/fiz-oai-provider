@@ -47,6 +47,7 @@ import org.apache.commons.logging.LogFactory;
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.server.verb.ServerVerb;
+import de.fiz_karlsruhe.service.ConfigurationService;
 
 /**
  * OAIHandler is the primary Servlet for OAICat.
@@ -149,6 +150,10 @@ public class OAIHandler extends HttpServlet {
           Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
           try {
               properties.load(reader);
+              
+              //Init ConfigurationService as singleton
+              ConfigurationService configService = ConfigurationService.getInstance(properties);
+
               return true;
           } finally {
               reader.close();

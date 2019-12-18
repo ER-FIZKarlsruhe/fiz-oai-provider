@@ -9,10 +9,10 @@
 
     <!-- General description of your web application -->
 
-    <display-name>OAICat</display-name>
+    <display-name>fiz-oai-provider</display-name>
     <description>
-      This is version 2.0 of an application to demonstrate
-      an OAI Repository based on servlets. It was written
+      This is the version 1.0 of the fiz-oai-provider.
+      It is based on the OAICat framwork which was written
       by Jeffrey Young (jyoung@oclc.org), who should be
       contacted for more information.
     </description>
@@ -47,6 +47,19 @@
         <servlet-name>OAIHandler</servlet-name>
         <url-pattern>/servlet/OAIHandler</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+      <servlet-name>LogoServlet</servlet-name>
+      <servlet-class>de.fiz_karlsruhe.LogoServlet</servlet-class>
+      <!-- Load this servlet at server startup time -->
+      <load-on-startup>5</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>LogoServlet</servlet-name>
+      <url-pattern>/logo</url-pattern>
+    </servlet-mapping>
+
 
 
     <servlet>
@@ -145,6 +158,7 @@
         <servlet-name>ListSetsResumptionServlet</servlet-name>
         <url-pattern>/listSetsResumption</url-pattern>
     </servlet-mapping>
+
 
 
     <!-- Define the default session timeout for your application,
