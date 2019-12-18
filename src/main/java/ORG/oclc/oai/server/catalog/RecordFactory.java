@@ -281,7 +281,7 @@ public abstract class RecordFactory {
     
     Item item = (Item) nativeItem;
     
-    logger.info("RecordFactory.create");
+    logger.debug("RecordFactory.create");
     StringBuffer xmlRec = new StringBuffer();
     xmlRec.append("<record><header");
     if (isDeleted) {
@@ -301,9 +301,9 @@ public abstract class RecordFactory {
     }
     xmlRec.append("</header>");
     
-    logger.info("RecordFactory.create: header finished");
+    logger.debug("RecordFactory.create: header finished");
     if (!isDeleted) {
-      logger.info("RecordFactory.create: starting metadata");
+      logger.debug("RecordFactory.create: starting metadata");
       xmlRec.append("<metadata>");
 
       try {
@@ -324,7 +324,7 @@ public abstract class RecordFactory {
       }
       
       xmlRec.append("</metadata>");
-      logger.info("RecordFactory.create: finished metadata");
+      logger.debug("RecordFactory.create: finished metadata");
       
       if (abouts != null) {
         while (abouts.hasNext()) {
@@ -336,7 +336,7 @@ public abstract class RecordFactory {
     }
     
     xmlRec.append("</record>");
-    logger.info("RecordFactory.create: return=" + xmlRec.toString());
+    logger.debug("RecordFactory.create: return=" + xmlRec.toString());
     return xmlRec.toString();
   }
 
