@@ -93,5 +93,15 @@ public class ConfigurationService {
 
     return color;
   }
+  
+  public String getBrandingWelcomeText() {
+    String text = properties.getProperty("branding.welcome.text");
+
+    if (StringUtils.isEmpty(text)) {
+      text = "This is the OAI provider for FIZ Karlsruhe";
+    }
+
+    return text;
+  }
 
 }
