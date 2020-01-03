@@ -130,33 +130,34 @@ public class BackendService {
       throw new IllegalArgumentException("metadataPrefix must not be null");
     }
     
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    SearchResult<Item> result = null;
-    StringBuffer url = new StringBuffer();
+    StringBuilder url = new StringBuilder();
     url.append(backendBaseUrl + "/item?content=" + withContent);
     url.append("&format=" + URLEncoder.encode(metadataPrefix));
-    url.append("&lastItemId=" + lastItemId);
+    if (StringUtils.isNotEmpty(lastItemId)) {
+      url.append("&lastItemId=" + lastItemId);
+    }
     url.append("&rows=" + rows);
-    if (!StringUtils.isEmpty(set)) {
+    if (StringUtils.isNotEmpty(set)) {
       url.append("&set=" + set);
     }
     
-    if (!StringUtils.isEmpty(from)) {
+    if (StringUtils.isNotEmpty(from)) {
       url.append("&from=" + from);
     }
 
-    if (!StringUtils.isEmpty(until)) {
+    if (StringUtils.isNotEmpty(until)) {
       url.append("&until=" + until);
     }
     
     logger.info("getItems url: " + url.toString());
-    
+    SearchResult<Item> result = null;
+
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(new HttpGet(url.toString()))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         logger.debug("json " + json);
+        ObjectMapper objectMapper = new ObjectMapper();
         JavaType type = objectMapper.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
         result = objectMapper.readValue(json, type);
       }
