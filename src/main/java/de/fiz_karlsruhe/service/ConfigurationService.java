@@ -104,4 +104,25 @@ public class ConfigurationService {
     return text;
   }
 
+  public String getBrandingImpressum() {
+    String url = properties.getProperty("branding.imprint.url");
+
+    if (StringUtils.isEmpty(url)) {
+      url = "https://www.fiz-karlsruhe.de/de/ueber-uns/impressum-rechtliches";
+    }
+
+    return url;
+  }
+  
+  public String getBrandingPrivacy() {
+    String url = properties.getProperty("branding.privacy.url");
+
+    if (StringUtils.isEmpty(url)) {
+      url = "https://www.fiz-karlsruhe.de/de/ueber-uns/datenschutzerklaerung";
+    }
+
+    return url;
+  }
+  
+  
 }
