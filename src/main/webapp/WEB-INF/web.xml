@@ -149,7 +149,7 @@
     </servlet-mapping>
     
     
-        <servlet>
+    <servlet>
         <servlet-name>ListSetsResumptionServlet</servlet-name>
         <jsp-file>/listSetsResumption.jsp</jsp-file>
     </servlet>
@@ -157,6 +157,17 @@
     <servlet-mapping>
         <servlet-name>ListSetsResumptionServlet</servlet-name>
         <url-pattern>/listSetsResumption</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>StylesheetServlet</servlet-name>
+        <jsp-file>/stylesheet.jsp</jsp-file>
+    </servlet>
+    <!--mapping-->
+    <servlet-mapping>
+        <servlet-name>StylesheetServlet</servlet-name>
+        <url-pattern>/stylesheet</url-pattern>
     </servlet-mapping>
 
 
