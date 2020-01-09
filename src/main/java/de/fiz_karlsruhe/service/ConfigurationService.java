@@ -18,6 +18,8 @@ package de.fiz_karlsruhe.service;
 
 import java.util.Properties;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -74,21 +76,21 @@ public class ConfigurationService {
     return url;
   }
   
-  public String getBrandingLogo() {
+  public String getBrandingLogo(ServletContext context) {
     String url = properties.getProperty("branding.logo");
 
     if (StringUtils.isEmpty(url)) {
-      url = "banner02.gif";
+      url = context.getRealPath("/banner02.gif");
     }
 
     return url;
   }
   
   public String getBrandingColor() {
-    String color = properties.getProperty("branding.color");
+    String color = properties.getProperty("branding.header.color");
 
     if (StringUtils.isEmpty(color)) {
-      color = "#876234";
+      color = "#659932";
     }
 
     return color;
@@ -122,6 +124,26 @@ public class ConfigurationService {
     }
 
     return url;
+  }
+  
+  public String getBrandingFontFamily() {
+    String family = properties.getProperty("branding.font.family");
+
+    if (StringUtils.isEmpty(family)) {
+      family = "Arial, Helvetica, Geneva, Verdana, sans-serif;";
+    }
+
+    return family;
+  }
+
+  public String getBrandingFontColor() {
+    String color = properties.getProperty("branding.font.color");
+
+    if (StringUtils.isEmpty(color)) {
+      color = "#000;";
+    }
+
+    return color;
   }
   
   

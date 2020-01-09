@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
-<!-- Edited with emacs -->
+
+<%@ page isELIgnored="false" %> 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="de.fiz_karlsruhe.service.ConfigurationService" %>
+
 <!-- New Namespace -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                               xmlns:oai="http://www.openarchives.org/OAI/2.0/"
@@ -18,56 +22,19 @@
         <title><xsl:value-of select="oai:request/@verb"/> Response FIZ-OAI-Provider</title>
         <style type="text/css">
           <xsl:comment>
-            ADDRESS {
-              FONT-SIZE: x-small
+            body {
+                color:${ConfigurationService.getInstance().getBrandingFontColor()};
+                font-family:${ConfigurationService.getInstance().getBrandingFontFamily()};
             }
-            BODY {
-              FONT-SIZE: x-small; COLOR: #000000
-            }
-            BUTTON {
-              CURSOR: auto
-            }
-            H2 {
-              FONT: bold 18px helvetica, arial, sans-serif; COLOR: #00527c
-            }
-            HR {
-              COLOR: #cccccc; HEIGHT: 1px
-            }
-            INPUT {
-              CURSOR: auto; COLOR: #000000
-            }
-            SELECT {
-              FONT-SIZE: x-small; COLOR: #000000
-            }
-            TD {
-              FONT-SIZE: x-small; MARGIN-LEFT: 0px
-            }
-            TEXTAREA {
-              CURSOR: text; COLOR: #000000; BACKGROUND-COLOR: #ffffff
-            }
-            TH {
-              FONT-WEIGHT: bold; FONT-SIZE: x-small; MARGIN-LEFT: 0px; TEXT-ALIGN: center
-            }
-            A.footer:link {
-              COLOR: #336600; TEXT-DECORATION: none
-            }
-            A.footer:link {
-              COLOR: #336600; TEXT-DECORATION: none
-            }
-            A.footer:visited {
-              COLOR: #669933; TEXT-DECORATION: none
-            }
-            A.footer:active {
-              COLOR: #99cc33; TEXT-DECORATION: none
-            }
-            A.footer:hover {
-              COLOR: #ff0000; TEXT-DECORATION: underline
+            a { text-decoration: none; }
+            a:visited {
+              color: ${ConfigurationService.getInstance().getBrandingFontColor()};
             }
             .divider {
-              COLOR: #999999
+                COLOR: ${ConfigurationService.getInstance().getBrandingFontColor()};
             }
             .nospace {
-            MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px
+                MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px
             }
           </xsl:comment>
         </style>
@@ -77,21 +44,11 @@
       </head>
       <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
         <table width="100%" border="0" cellpadding="0" cellspacing="20">
+
+          <jsp:include page="header.jsp"></jsp:include>
+
           <tr valign="top">
-            <td bgcolor="#669933">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tr valign="top">
-                  <td width="50%"><a href="/fiz-oai-provider/index"><img src="/fiz-oai-provider/banner01.gif" alt="OAICat - OAI Repository Framework" width="388" height="120" border="0"/></a></td>
-                  <td width="50%" align="right"><a href="http://www.oclc.org/research/"><img src="/fiz-oai-provider/banner02.gif" alt="A Project of OCLC Research" width="202" height="120" border="0"/></a></td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr valign="top">
-            <td><a href="/fiz-oai-provider/identify">Identify</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/getRecord">GetRecord</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listIdentifiers">ListIdentifiers</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text>(<a href="/fiz-oai-provider/listIdentifiersResumption">Resumption</a>)<xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listMetadataFormats">ListMetadataFormats</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listRecords">ListRecords</a><xsl:text disable-output-escaping="yes">&#160;</xsl:text>(<a href="/fiz-oai-provider/listRecordsResumption">Resumption</a>)<xsl:text disable-output-escaping="yes">&#160;</xsl:text><span class="divider">|</span><xsl:text disable-output-escaping="yes">&#160;</xsl:text><a href="/fiz-oai-provider/listSets">ListSets</a></td>
-          </tr>
-          <tr valign="top">
-            <td bgcolor="#cccccc">
+            <td bgcolor="${ConfigurationService.getInstance().getBrandingColor()}">
               <table width="100%" border="0" cellpadding="4" cellspacing="0">
                 <xsl:apply-templates select="oai:responseDate|oai:request"/>
               </table>
@@ -100,12 +57,9 @@
           <tr valign="top">
             <td><xsl:apply-templates select="oai:Identify|oai:GetRecord|oai:ListIdentifiers|oai:ListMetadataFormats|oai:ListRecords|oai:ListSets|oai:error"/></td>
           </tr>
-          <tr valign="top">
-            <td bgcolor="#F9DD50" height="10"></td>
-          </tr>
-          <tr valign="top">
-            <td><address><a href="mailto:stefan.hofmann@fiz-karlsruhe.de">Stefan Hofmann</a></address></td>
-          </tr>
+          
+          <jsp:include page="footer.jsp"></jsp:include>
+          
         </table>
       </body>
     </html>

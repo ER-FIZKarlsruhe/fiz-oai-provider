@@ -37,7 +37,7 @@ public class LogoServlet extends HttpServlet {
     
     ServletOutputStream out;
     out = response.getOutputStream();
-    FileInputStream fin = new FileInputStream(configurationService.getBrandingLogo());
+    FileInputStream fin = new FileInputStream(configurationService.getBrandingLogo(request.getServletContext()));
 
     BufferedInputStream bin = new BufferedInputStream(fin);
     BufferedOutputStream bout = new BufferedOutputStream(out);
