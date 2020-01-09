@@ -18,10 +18,13 @@ package de.fiz_karlsruhe.service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -47,6 +50,9 @@ public class BackendService {
   private static BackendService INSTANCE;
 
   final static Logger logger = LogManager.getLogger(BackendService.class);
+
+  final static int SOCKET_TIMEOUT = 15000;
+  final static int CONNECTION_TIMEOUT = 15000;
 
   private BackendService(String backendBaseUrl) {
     BackendService.backendBaseUrl = backendBaseUrl;
@@ -80,11 +86,12 @@ public class BackendService {
     ObjectMapper objectMapper = new ObjectMapper();
 
     Item item = null;
-    String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier) + "?format=" + URLEncoder.encode(metadataPrefix) + "&content=true";
+    String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8)
+            + "?format=" + URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8) + "&content=true";
 
     logger.info("getItem localIdentifier + metadataPrefix  url: " + url.toString());
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
 
@@ -105,12 +112,12 @@ public class BackendService {
     ObjectMapper objectMapper = new ObjectMapper();
 
     Item item = null;
-    String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier);
+    String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8);
 
     logger.debug("getItem localIdentifier url: " + url.toString());
     
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
 
@@ -131,29 +138,29 @@ public class BackendService {
     }
     
     StringBuilder url = new StringBuilder();
-    url.append(backendBaseUrl + "/item?content=" + withContent);
-    url.append("&format=" + URLEncoder.encode(metadataPrefix));
+    url.append(backendBaseUrl).append("/item?content=").append(withContent);
+    url.append("&format=").append(URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8));
     if (StringUtils.isNotEmpty(lastItemId)) {
-      url.append("&lastItemId=" + lastItemId);
+      url.append("&lastItemId=").append(lastItemId);
     }
-    url.append("&rows=" + rows);
+    url.append("&rows=").append(rows);
     if (StringUtils.isNotEmpty(set)) {
-      url.append("&set=" + set);
+      url.append("&set=").append(set);
     }
     
     if (StringUtils.isNotEmpty(from)) {
-      url.append("&from=" + from);
+      url.append("&from=").append(from);
     }
 
     if (StringUtils.isNotEmpty(until)) {
-      url.append("&until=" + until);
+      url.append("&until=").append(until);
     }
-    
+
     logger.info("getItems url: " + url.toString());
     SearchResult<Item> result = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url.toString()))) {
+        CloseableHttpResponse response = client.execute(getHttpGet(url.toString()))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         logger.debug("json " + json);
@@ -177,7 +184,7 @@ public class BackendService {
     List<Format> formatList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         formatList = Arrays.asList(mapper.readValue(json, Format[].class));
@@ -198,7 +205,7 @@ public class BackendService {
     Format format = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         format = mapper.readValue(json, Format.class);
@@ -220,7 +227,7 @@ public class BackendService {
     List<Transformation> transformationList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         transformationList = Arrays.asList(mapper.readValue(json, Transformation[].class));
@@ -237,10 +244,11 @@ public class BackendService {
     ObjectMapper mapper = new ObjectMapper();
     String url = backendBaseUrl + "/set";
     logger.info("getSets url " + url);
+
     List<Set> setObjects = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         setObjects = Arrays.asList(mapper.readValue(json, Set[].class));
@@ -250,6 +258,15 @@ public class BackendService {
     }
 
     return setObjects;
+  }
+
+  private HttpGet getHttpGet(String url) {
+    HttpGet httpGet = new HttpGet(url);
+    httpGet.setConfig(RequestConfig.custom()
+            .setSocketTimeout(SOCKET_TIMEOUT)
+            .setConnectTimeout(CONNECTION_TIMEOUT)
+            .build());
+    return httpGet;
   }
 
 }
