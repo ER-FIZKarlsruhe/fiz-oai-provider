@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -60,7 +61,7 @@ public class FizRecordFactory extends RecordFactory {
     
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
     if (repositoryIdentifier == null) {
-      throw new IllegalArgumentException("FizRecordFactory.repositoryIdentifier is missing from the properties file");
+      logger.warn("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
   }
 
@@ -109,6 +110,10 @@ public class FizRecordFactory extends RecordFactory {
    * @return local identifier (e.g. ID/12345).
    */
   public String fromOAIIdentifier(String identifier) {
+    if (StringUtils.isEmpty(repositoryIdentifier)) {
+      return identifier;
+    }
+
     try {
       StringTokenizer tokenizer = new StringTokenizer(identifier, ":");
       tokenizer.nextToken();
@@ -128,9 +133,11 @@ public class FizRecordFactory extends RecordFactory {
    */
   public String getOAIIdentifier(Object nativeItem) {
     StringBuffer sb = new StringBuffer();
-    sb.append("oai:");
-    sb.append(repositoryIdentifier);
-    sb.append(":");
+    if (StringUtils.isNotEmpty(repositoryIdentifier)) {
+      sb.append("oai:");
+      sb.append(repositoryIdentifier);
+      sb.append(":");
+    }
     sb.append(getLocalIdentifier(nativeItem));
     return sb.toString();
   }
