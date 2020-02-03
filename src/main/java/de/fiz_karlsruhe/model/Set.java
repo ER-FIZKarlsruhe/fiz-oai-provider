@@ -16,6 +16,7 @@
 
 package de.fiz_karlsruhe.model;
 
+import java.util.List;
 import java.util.Map;
 
 public class Set {
@@ -54,6 +55,8 @@ public class Set {
 	private Map<String, String> xPaths;
 
 	private String status;
+	
+	private List<String> tags;
 
 	public String getName() {
 		return name;
@@ -95,7 +98,15 @@ public class Set {
 		this.description = description;
 	}
 
-	@Override
+	public List<String> getTags() {
+    return tags;
+  }
+
+  public void setTags(List<String> tags) {
+    this.tags = tags;
+  }
+
+  @Override
 	public String toString() {
 		return "Set [name=" + name + ", spec=" + spec + ", description=" + description + ", xPaths=" + xPaths
 				+ ", status=" + status + "]";
