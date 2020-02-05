@@ -2,7 +2,6 @@
 <!DOCTYPE xml>
 
 <%@ page isELIgnored="false" %> 
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="de.fiz_karlsruhe.service.ConfigurationService" %>
 
 <!-- New Namespace -->

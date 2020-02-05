@@ -1,5 +1,4 @@
 <%@ page isELIgnored="false" %> 
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="de.fiz_karlsruhe.service.ConfigurationService" %>
 
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
