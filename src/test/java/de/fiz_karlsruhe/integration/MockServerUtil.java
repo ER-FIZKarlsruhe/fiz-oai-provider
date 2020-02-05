@@ -21,8 +21,8 @@ import static org.mockserver.model.HttpResponse.response;
 
 import java.util.Arrays;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.client.initialize.ExpectationInitializer;
 import org.mockserver.configuration.ConfigurationProperties;

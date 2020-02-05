@@ -17,13 +17,10 @@
 package de.fiz_karlsruhe;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-
-import org.apache.log4j.PropertyConfigurator;
 
 @WebListener("fiz-oai-provider context listener")
 public class ContextListener implements ServletContextListener {
@@ -48,14 +45,6 @@ public class ContextListener implements ServletContextListener {
     }
 
     System.out.println("ContextListener confFolderPath: " + confFolderPath);
-    File file = new File(confFolderPath, "fiz-oai-provider-log4j.properties");
-    
-    try(FileInputStream fis = new FileInputStream(file)) {
-      PropertyConfigurator.configure(fis);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
   }
 
   @Override
