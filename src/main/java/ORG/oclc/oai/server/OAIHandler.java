@@ -64,7 +64,7 @@ public class OAIHandler extends HttpServlet {
      */
     private static final long serialVersionUID = 1L;
     
-    final static Logger logger = LogManager.getLogger(OAIHandlers.class);
+    final static Logger logger = LogManager.getLogger(OAIHandler.class);
     
     public static final String PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE = OAIHandler.class.getName() + ".properties";
     
@@ -371,7 +371,7 @@ public class OAIHandler extends HttpServlet {
                 reqUri.append("?").append(queryString);
             }
             Runtime rt = Runtime.getRuntime();
-            LOGGER.info(rt.freeMemory() + "/" + rt.totalMemory() + " "
+            logger.info(rt.freeMemory() + "/" + rt.totalMemory() + " "
                     + ((new Date()).getTime()-then.getTime()) + "ms: "
                     + reqUri.toString());
         }

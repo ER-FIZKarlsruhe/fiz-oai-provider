@@ -68,9 +68,7 @@ public abstract class ServerVerb {
      * @param xmlText complete XML response string
      */
     protected void init(String xmlText) {
-        if (debug) {
-            System.out.println("ServerVerb.init: xmlText=" + xmlText);
-        }
+        LOGGER.info("ServerVerb.init: xmlText=" + xmlText);
         this.xmlText = xmlText;
     }
 
