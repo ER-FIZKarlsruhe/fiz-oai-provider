@@ -89,7 +89,7 @@ public class BackendService {
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8)
             + "?format=" + URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8) + "&content=true";
 
-    logger.info("getItem localIdentifier + metadataPrefix  url: " + url);
+    logger.info("getItem localIdentifier + metadataPrefix  url: {}", url);
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
@@ -114,7 +114,7 @@ public class BackendService {
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8);
 
-    logger.debug("getItem localIdentifier url: " + url);
+    logger.debug("getItem localIdentifier url: {}", url);
     
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
@@ -156,14 +156,14 @@ public class BackendService {
       url.append("&until=").append(until);
     }
 
-    logger.info("getItems url: " + url.toString());
+    logger.info("getItems url: {}", url.toString());
     SearchResult<Item> result = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url.toString()))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        logger.debug("json " + json);
+        logger.debug("json {}", json);
         ObjectMapper objectMapper = new ObjectMapper();
         JavaType type = objectMapper.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
         result = objectMapper.readValue(json, type);
@@ -180,7 +180,7 @@ public class BackendService {
 
     String url = backendBaseUrl + "/format";
 
-    logger.info("getFormats url: " + url);
+    logger.info("getFormats url: {}", url);
     List<Format> formatList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -201,7 +201,7 @@ public class BackendService {
 
     String url = backendBaseUrl + "/format/" + metadataPrefix;
 
-    logger.info("getFormat url: " + url);
+    logger.info("getFormat url: {}", url);
     Format format = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -223,7 +223,7 @@ public class BackendService {
 
     String url = backendBaseUrl + "/crosswalk";
 
-    logger.info("getTransformations url: " + url);
+    logger.info("getTransformations url: {}", url);
     List<Transformation> transformationList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -243,7 +243,7 @@ public class BackendService {
   public List<Set> getSets() throws OAIInternalServerError, IOException {
     ObjectMapper mapper = new ObjectMapper();
     String url = backendBaseUrl + "/set";
-    logger.info("getSets url " + url);
+    logger.info("getSets url {}", url);
 
     List<Set> setObjects = null;
 

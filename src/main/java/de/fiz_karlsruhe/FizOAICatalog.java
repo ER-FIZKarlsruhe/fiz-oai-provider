@@ -55,8 +55,6 @@ public class FizOAICatalog extends AbstractCatalog {
 
   final static Logger logger = LogManager.getLogger(FizOAICatalog.class);
 
-  static final boolean debug = false;
-
   private int maxListSize;
 
   private String backendBaseUrl;
@@ -74,13 +72,13 @@ public class FizOAICatalog extends AbstractCatalog {
     }
     maxListSize = Integer.parseInt(temp);
 
-    logger.info("in FizOAICatalog(): maxListSize=" + maxListSize);
+    logger.info("in FizOAICatalog(): maxListSize={}", maxListSize);
 
     backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
-    logger.info("FizOaiBackend.baseURL: " + backendBaseUrl);
+    logger.info("FizOaiBackend.baseURL: {}", backendBaseUrl);
 
     backendService = BackendService.getInstance(backendBaseUrl);
   }
@@ -361,7 +359,7 @@ public class FizOAICatalog extends AbstractCatalog {
         logger.info("No items found ");
         throw new NoItemsMatchException();
       } else {
-        logger.info("Number of items found: " + result.getData().size());
+        logger.info("Number of items found: {}", result.getData().size());
       }
 
       for (Item item : result.getData()) {
@@ -411,7 +409,7 @@ public class FizOAICatalog extends AbstractCatalog {
    */
   @Override
   public Map listRecords(String resumptionTokenParam) throws BadResumptionTokenException, OAIInternalServerError {
-    logger.info("listRecords resumptionToken: " + resumptionTokenParam);
+    logger.info("listRecords resumptionToken: {}", resumptionTokenParam);
     Map<String, Object> listRecordsMap = new HashMap<>();
     ArrayList<String> records = new ArrayList<>();
     SearchResult<Item> result = null;
@@ -493,7 +491,7 @@ public class FizOAICatalog extends AbstractCatalog {
     }
     sb.append("</set>");
 
-    logger.info("getSetXML: " + sb.toString());
+    logger.info("getSetXML: {}", sb.toString());
     return sb.toString();
   }
 

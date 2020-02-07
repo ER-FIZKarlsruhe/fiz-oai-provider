@@ -59,12 +59,9 @@ import de.fiz_karlsruhe.service.ConfigurationService;
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
  */
 public class OAIHandler extends HttpServlet {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     
-    final static Logger logger = LogManager.getLogger(OAIHandler.class);
+    final static Logger LOGGER = LogManager.getLogger(OAIHandler.class);
     
     public static final String PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE = OAIHandler.class.getName() + ".properties";
     
@@ -73,12 +70,10 @@ public class OAIHandler extends HttpServlet {
     private static final String VERSION = "1.5.62";
     private static boolean debug = false;
 
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
 
-    protected HashMap attributesMap = new HashMap();
+    protected final HashMap attributesMap = new HashMap();
 
-    
-    private Log log = LogFactory.getLog(OAIHandler.class);
     
     /**
      * Get the VERSION number
@@ -100,26 +95,24 @@ public class OAIHandler extends HttpServlet {
         
         try {
             HashMap attributes = null;
-            ServletContext context = getServletContext();
-
             loadConfiguration();
             attributes = getAttributes(properties);
 
             attributesMap.put("global", attributes);
         } catch (FileNotFoundException e) {
-            log.error(e);
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (ClassNotFoundException e) {
-            log.error(e);
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.error(e);
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (IOException e) {
-            log.error(e);
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (Throwable e) {
-            log.error(e);
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         }
     }
@@ -145,7 +138,7 @@ public class OAIHandler extends HttpServlet {
         confFolderPath = new File(tomcatRoot, "conf").getAbsolutePath();
       }
 
-      System.out.println("Use confFolderPath: " + confFolderPath);
+      LOGGER.info("Use confFolderPath: {}", confFolderPath);
       
       return confFolderPath;
   }
@@ -165,8 +158,8 @@ public class OAIHandler extends HttpServlet {
           } finally {
               reader.close();
           }
-      } catch (Throwable e) {
-        System.err.println("Unable to read property file: " + file.getAbsolutePath());
+      } catch (Exception e) {
+          LOGGER.error("Unable to read property file: " + file.getAbsolutePath(),e);
           return false;
       }
   }
@@ -181,7 +174,7 @@ public class OAIHandler extends HttpServlet {
               builder.append(entry.getKey() + " : " + entry.getValue() + "\n");
           }
       }
-      log.info("Using the following configuration: \n" + builder.toString());
+      LOGGER.info("Using the following configuration: \n" + builder.toString());
   }
     
     public HashMap getAttributes(Properties properties)
@@ -231,36 +224,36 @@ public class OAIHandler extends HttpServlet {
     
     public HashMap getAttributes(String pathInfo) {
         HashMap attributes = null;
-        log.debug("pathInfo=" + pathInfo);
+        LOGGER.debug("pathInfo=" + pathInfo);
         if (pathInfo != null && pathInfo.length() > 0) {
             if (attributesMap.containsKey(pathInfo)) {
-                log.debug("attributesMap containsKey");
+                LOGGER.debug("attributesMap containsKey");
                 attributes = (HashMap) attributesMap.get(pathInfo);
             } else {
-                log.debug("!attributesMap containsKey");
+                LOGGER.debug("!attributesMap containsKey");
                 try {
                     String fileName = pathInfo.substring(1) + ".properties";
-                    log.debug("attempting load of " + fileName);
+                    LOGGER.debug("attempting load of " + fileName);
                     InputStream in = Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream(fileName);
                     if (in != null) {
-                        log.debug("file found");
-                        Properties properties = new Properties();
-                        properties.load(in);
-                        attributes = getAttributes(properties);
+                        LOGGER.debug("file found");
+                        Properties fileProperties = new Properties();
+                        fileProperties.load(in);
+                        attributes = getAttributes(fileProperties);
                     } else {
-                        log.debug("file not found");
+                        LOGGER.debug("file not found");
                     }
                     attributesMap.put(pathInfo, attributes);
                 } catch (Throwable e) {
-                    log.debug("Couldn't load file", e);
+                    LOGGER.debug("Couldn't load file", e);
                     // do nothing
                 }
             }
         }
         if (attributes == null) {
-            log.debug("use global attributes");
+            LOGGER.debug("use global attributes");
             attributes = (HashMap) attributesMap.get("global");
         }
         return attributes;
@@ -283,7 +276,7 @@ public class OAIHandler extends HttpServlet {
         if (!filterRequest(request, response)) {
             return;
         }
-        log.debug("attributes=" + attributes);
+        LOGGER.debug("attributes=" + attributes);
         Properties properties =
             (Properties) attributes.get("OAIHandler.properties");
         boolean monitor = false;
@@ -307,17 +300,19 @@ public class OAIHandler extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         Date then = null;
-        if (monitor) then = new Date();
-        if (debug) {
-            Enumeration headerNames = request.getHeaderNames();
-            System.out.println("OAIHandler.doGet: ");
-            while (headerNames.hasMoreElements()) {
-                String headerName = (String)headerNames.nextElement();
-                System.out.print(headerName);
-                System.out.print(": ");
-                System.out.println(request.getHeader(headerName));
-            }
+        if (monitor) {
+          then = new Date();
         }
+        
+        Enumeration headerNames = request.getHeaderNames();
+        LOGGER.debug("OAIHandler.doGet: ");
+        while (headerNames.hasMoreElements()) {
+            String headerName = (String)headerNames.nextElement();
+            LOGGER.debug(headerName);
+            LOGGER.debug(": ");
+            LOGGER.debug(request.getHeader(headerName));
+        }
+            
         if (serviceUnavailable) {
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
             "Sorry. This server is down for maintenance");
@@ -347,17 +342,14 @@ public class OAIHandler extends HttpServlet {
                 out.write(result);
                 out.close();
             } catch (FileNotFoundException e) {
-                if (debug) {
-                    e.printStackTrace();
-                    System.out.println("SC_NOT_FOUND: " + e.getMessage());
-                }
+                LOGGER.warn("SC_NOT_FOUND: " + e.getMessage(),e);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
             } catch (TransformerException e) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (OAIInternalServerError e) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (SocketException e) {
-                System.out.println(e.getMessage());
+                LOGGER.error(e.getMessage(),e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (Throwable e) {
                 e.printStackTrace();
@@ -371,7 +363,7 @@ public class OAIHandler extends HttpServlet {
                 reqUri.append("?").append(queryString);
             }
             Runtime rt = Runtime.getRuntime();
-            logger.info(rt.freeMemory() + "/" + rt.totalMemory() + " "
+            LOGGER.info(rt.freeMemory() + "/" + rt.totalMemory() + " "
                     + ((new Date()).getTime()-then.getTime()) + "ms: "
                     + reqUri.toString());
         }
@@ -415,9 +407,8 @@ public class OAIHandler extends HttpServlet {
         try {
             boolean isExtensionVerb = extensionPath.equals(request.getPathInfo());
             String verb = request.getParameter("verb");
-            if (debug) {
-                System.out.println("OAIHandler.g<etResult: verb=>" + verb + "<");
-            }
+            LOGGER.debug("OAIHandler.g<etResult: verb=>" + verb + "<");
+            
             String result;
             Class verbClass = null;
             if (isExtensionVerb) {
@@ -442,9 +433,9 @@ public class OAIHandler extends HttpServlet {
             } catch (InvocationTargetException e) {
                 throw e.getTargetException();
             }
-            if (debug) {
-                System.out.println(result);
-            }
+
+            LOGGER.debug(result);
+
             return result;
         } catch (NoSuchMethodException e) {
             throw new OAIInternalServerError(e.getMessage());
@@ -463,29 +454,15 @@ public class OAIHandler extends HttpServlet {
     throws IOException {
         Writer out;
         String encodings = request.getHeader("Accept-Encoding");
-        if (debug) {
-            System.out.println("encodings=" + encodings);
-        }
+        LOGGER.debug("encodings={}", encodings);
+
         if (encodings != null && encodings.indexOf("gzip") != -1) {
-//          System.out.println("using gzip encoding");
-//          log.debug("using gzip encoding");
-            response.setHeader("Content-Encoding", "gzip");
-            out = new OutputStreamWriter(new GZIPOutputStream(response.getOutputStream()),
-            "UTF-8");
-//          } else if (encodings != null && encodings.indexOf("compress") != -1) {
-//          //  	    System.out.println("using compress encoding");
-//          response.setHeader("Content-Encoding", "compress");
-//          ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
-//          zos.putNextEntry(new ZipEntry("dummy name"));
-//          out = new OutputStreamWriter(zos, "UTF-8");
+          response.setHeader("Content-Encoding", "gzip");
+          out = new OutputStreamWriter(new GZIPOutputStream(response.getOutputStream()), "UTF-8");
         } else if (encodings != null && encodings.indexOf("deflate") != -1) {
-//          System.out.println("using deflate encoding");
-//          log.debug("using deflate encoding");
             response.setHeader("Content-Encoding", "deflate");
-            out = new OutputStreamWriter(new DeflaterOutputStream(response.getOutputStream()),
-            "UTF-8");
+            out = new OutputStreamWriter(new DeflaterOutputStream(response.getOutputStream()), "UTF-8");
         } else {
-//          log.debug("using no encoding");
             out = response.getWriter();
         }
         return out;

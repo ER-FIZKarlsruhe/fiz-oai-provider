@@ -37,8 +37,7 @@ import de.fiz_karlsruhe.FormatRegistry;
  */
 public class ListIdentifiers extends ServerVerb {
   
-  final static Logger logger = LogManager.getLogger(ListIdentifiers.class);
-  private static final boolean debug = false;
+  private final static Logger LOGGER = LogManager.getLogger(ListIdentifiers.class);
   private static ArrayList validParamNames1 = new ArrayList();
   
   static {
@@ -83,7 +82,7 @@ public class ListIdentifiers extends ServerVerb {
     }
     StringBuffer sb = new StringBuffer();
     String oldResumptionToken = request.getParameter("resumptionToken");
-    logger.info("ListIdentifiers construct: " + oldResumptionToken);
+    LOGGER.info("ListIdentifiers construct: {}", oldResumptionToken);
     
     String metadataPrefix = request.getParameter("metadataPrefix");
 
@@ -176,7 +175,7 @@ public class ListIdentifiers extends ServerVerb {
         validParamNames = validParamNames2;
         requiredParamNames = requiredParamNames2;
         if (hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
-          logger.info("BadArgument1");
+          LOGGER.info("BadArgument1");
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(new BadArgumentException().getMessage());
         } else {
@@ -192,7 +191,7 @@ public class ListIdentifiers extends ServerVerb {
       if (listIdentifiersMap != null) {
         sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
         if (hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
-          logger.info("BadArgument2");
+          LOGGER.info("BadArgument2");
           sb.append(new BadArgumentException().getMessage());
         } else {
           sb.append("<ListIdentifiers>");
@@ -234,9 +233,8 @@ public class ListIdentifiers extends ServerVerb {
       }
     }
     sb.append("</OAI-PMH>");
-    if (debug) {
-      System.out.println("ListIdentifiers.constructListIdentifiers: returning: " + sb.toString());
-    }
+    LOGGER.debug("ListIdentifiers.constructListIdentifiers: returning: {}", sb.toString());
+
     return render(response, "text/xml; charset=UTF-8", sb.toString(), serverTransformer);
   }
 }

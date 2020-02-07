@@ -32,7 +32,6 @@ import de.fiz_karlsruhe.FormatRegistry;
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
  */
 public class ListRecords extends ServerVerb {
-  private static final boolean debug = false;
   private static ArrayList validParamNames1 = new ArrayList();
   static {
     validParamNames1.add("verb");
@@ -61,9 +60,8 @@ public class ListRecords extends ServerVerb {
    * Server-side method to construct an xml response to a ListRecords verb.
    */
   public static String construct(HashMap context, HttpServletRequest request, HttpServletResponse response,
-      Transformer serverTransformer) throws OAIInternalServerError, TransformerException {
-    if (debug)
-      System.out.println("ListRecords.construct: entered");
+    Transformer serverTransformer) throws OAIInternalServerError, TransformerException {
+    LOGGER.debug("ListRecords.construct: entered");
 
     Properties properties = (Properties) context.get("OAIHandler.properties");
     AbstractCatalog abstractCatalog = (AbstractCatalog) context.get("OAIHandler.catalog");
@@ -228,9 +226,8 @@ public class ListRecords extends ServerVerb {
       }
     }
     sb.append("</OAI-PMH>");
-    if (debug) {
-      System.out.println("ListRecords.constructListRecords: returning: " + sb.toString());
-    }
+    LOGGER.debug("ListRecords.constructListRecords: returning: {}", sb.toString());
+    
     return render(response, "text/xml; charset=UTF-8", sb.toString(), serverTransformer);
   }
 }

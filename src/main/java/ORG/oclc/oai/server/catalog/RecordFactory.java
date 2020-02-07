@@ -35,7 +35,7 @@ import de.fiz_karlsruhe.service.BackendService;
  */
 public abstract class RecordFactory {
 
-  final static Logger logger = LogManager.getLogger(RecordFactory.class);
+  private final static Logger LOGGER = LogManager.getLogger(RecordFactory.class);
   
   /**
    * Container for the crosswalk(s) supported by this factory
@@ -152,7 +152,7 @@ public abstract class RecordFactory {
    */
   public static String[] createHeader(String identifier, String datestamp, Iterator setSpecs, boolean isDeleted)
       throws IllegalArgumentException {
-    StringBuffer xmlHeader = new StringBuffer();
+    StringBuilder xmlHeader = new StringBuilder();
     xmlHeader.append("<header");
     if (isDeleted) {
       xmlHeader.append(" status=\"deleted\"");
@@ -281,8 +281,8 @@ public abstract class RecordFactory {
     
     Item item = (Item) nativeItem;
     
-    logger.debug("RecordFactory.create");
-    StringBuffer xmlRec = new StringBuffer();
+    LOGGER.debug("RecordFactory.create");
+    StringBuilder xmlRec = new StringBuilder();
     xmlRec.append("<record><header");
     if (isDeleted) {
       xmlRec.append(" status=\"deleted\"");
@@ -301,16 +301,16 @@ public abstract class RecordFactory {
     }
     xmlRec.append("</header>");
     
-    logger.debug("RecordFactory.create: header finished");
+    LOGGER.debug("RecordFactory.create: header finished");
     if (!isDeleted) {
-      logger.debug("RecordFactory.create: starting metadata");
+      LOGGER.debug("RecordFactory.create: starting metadata");
       xmlRec.append("<metadata>");
 
       try {
         String localIdentifier = getLocalIdentifier(nativeItem);
 
         if (item == null || item.getContent() == null || !item.getContent().getFormat().equals(metadataPrefix)) {
-          logger.warn("Wrong format: " + item.getContent().getFormat() + " != " + metadataPrefix +   "  Reload item in right format from backend!"); 
+          LOGGER.warn("Wrong format! Reload item in right format from backend!"); 
           item = BackendService.getInstance().getItem(localIdentifier, metadataPrefix);
         }
 
@@ -324,7 +324,7 @@ public abstract class RecordFactory {
       }
       
       xmlRec.append("</metadata>");
-      logger.debug("RecordFactory.create: finished metadata");
+      LOGGER.debug("RecordFactory.create: finished metadata");
       
       if (abouts != null) {
         while (abouts.hasNext()) {
@@ -336,7 +336,7 @@ public abstract class RecordFactory {
     }
     
     xmlRec.append("</record>");
-    logger.debug("RecordFactory.create: return=" + xmlRec.toString());
+    LOGGER.debug("RecordFactory.create: return={}", xmlRec.toString());
     return xmlRec.toString();
   }
 
@@ -427,7 +427,7 @@ public abstract class RecordFactory {
    */
   public String createMetadata(Object nativeItem, String schemaURL, boolean isDeleted)
       throws IllegalArgumentException, CannotDisseminateFormatException {
-    logger.info("createMetadata");
+    LOGGER.info("createMetadata");
     StringBuilder xmlRec = new StringBuilder();
     if (isDeleted) {
       throw new CannotDisseminateFormatException("Record is deleted");

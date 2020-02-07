@@ -69,7 +69,7 @@ public class FizRecordFactory extends RecordFactory {
     logger.info("initFormats");
 
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
-    logger.info("backendBaseUrl: " + backendBaseUrl);
+    logger.info("backendBaseUrl: {}", backendBaseUrl);
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }
@@ -88,7 +88,7 @@ public class FizRecordFactory extends RecordFactory {
     logger.info("initTransformations");
 
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
-    logger.info("backendBaseUrl: " + backendBaseUrl);
+    logger.info("backendBaseUrl: {}", backendBaseUrl);
     if (backendBaseUrl == null) {
       throw new IllegalArgumentException("FizOaiBackend.baseURL is missing from the properties file");
     }

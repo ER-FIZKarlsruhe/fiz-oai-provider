@@ -23,6 +23,9 @@ import java.util.Vector;
 
 import javax.servlet.ServletContext;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ORG.oclc.oai.server.verb.BadArgumentException;
 import ORG.oclc.oai.server.verb.BadResumptionTokenException;
 import ORG.oclc.oai.server.verb.CannotDisseminateFormatException;
@@ -41,8 +44,10 @@ import de.fiz_karlsruhe.FormatRegistry;
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
  */
 public abstract class AbstractCatalog {
-    private static final boolean debug = false;
-    /**
+  
+  private final static Logger LOGGER = LogManager.getLogger(AbstractCatalog.class);
+  
+  /**
      * The RecordFactory that understands how to convert this database's
      * native "item" to the various metadataFormats to be supported.
      */
@@ -124,13 +129,13 @@ public abstract class AbstractCatalog {
      */
     public String toFinestFrom(String from)
     throws BadArgumentException {
-        if (debug) {
-            System.out.println("AbstractCatalog.toFinestFrom: from=" + from);
-            System.out.println("                            target=" + VALID_GRANULARITIES[supportedGranularityOffset]);
-        }
+        LOGGER.debug("AbstractCatalog.toFinestFrom: from={}", from);
+        LOGGER.debug("                            target={}", VALID_GRANULARITIES[supportedGranularityOffset]);
+
         if (from.length() > VALID_GRANULARITIES[supportedGranularityOffset].length()) {
             throw new BadArgumentException();
         }
+
         if (from.length() != VALID_GRANULARITIES[supportedGranularityOffset].length()) {
           StringBuilder sb = new StringBuilder(from);
             if (sb.charAt(sb.length()-1) == 'Z')
@@ -399,18 +404,16 @@ public abstract class AbstractCatalog {
                     (AbstractCatalog)oaiCatalogConstructor.newInstance(new Object[]
                                                                                   {properties});
             }
-            if (debug) {
-                System.out.println("AbstractCatalog.factory: recordFactoryClassName="
-                        + recordFactoryClassName);
-            }
+
+            LOGGER.debug("AbstractCatalog.factory: recordFactoryClassName={}", recordFactoryClassName);
+
             Class recordFactoryClass = Class.forName(recordFactoryClassName);
             Constructor recordFactoryConstructor =
                 recordFactoryClass.getConstructor(new Class[] {Properties.class});
             oaiCatalog.recordFactory =
                 (RecordFactory)recordFactoryConstructor.newInstance(new Object[] {properties});
-            if (debug) {
-                System.out.println("AbstractCatalog.factory: recordFactory=" + oaiCatalog.recordFactory);
-            }
+            LOGGER.debug("AbstractCatalog.factory: recordFactory={}", oaiCatalog.recordFactory);
+
             String harvestable = properties.getProperty("AbstractCatalog.harvestable");
             if (harvestable != null && harvestable.equals("false")) {
                 oaiCatalog.harvestable = false;
@@ -429,7 +432,7 @@ public abstract class AbstractCatalog {
             }
             if (oaiCatalog.supportedGranularityOffset == -1) {
                 oaiCatalog.supportedGranularityOffset = 0;
-                System.err.println("AbstractCatalog.factory: Invalid or missing AbstractCatalog.granularity property. Setting value to default: " +
+                LOGGER.info("AbstractCatalog.factory: Invalid or missing AbstractCatalog.granularity property. Setting value to default: " +
                         VALID_GRANULARITIES[oaiCatalog.supportedGranularityOffset]);
             }
         } catch (InvocationTargetException e) {
@@ -547,9 +550,8 @@ public abstract class AbstractCatalog {
     public Map listRecords(String from, String until, String set, String metadataPrefix)
     throws BadArgumentException, CannotDisseminateFormatException, NoItemsMatchException,
     NoSetHierarchyException, OAIInternalServerError {
-        if (debug) {
-            System.out.println("in AbstractCatalog.listRecords");
-        }
+        LOGGER.debug("in AbstractCatalog.listRecords");
+
         Map listIdentifiersMap = listIdentifiers(from, until, set, metadataPrefix);
         String resumptionToken = (String)listIdentifiersMap.get("resumptionToken");
         Iterator identifiers = (Iterator)listIdentifiersMap.get("identifiers");

@@ -21,6 +21,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import ORG.oclc.oai.server.OAIHandler;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Transformation;
 
@@ -33,6 +37,8 @@ import de.fiz_karlsruhe.model.Transformation;
  */
 public class FormatRegistry {
 
+  final static Logger LOGGER = LogManager.getLogger(FormatRegistry.class);
+  
   private List<Transformation> transformations;
 
   private List<Format> formats;
@@ -42,11 +48,11 @@ public class FormatRegistry {
     this.transformations = transformations;
 
     if (formats.size() == 0) {
-      System.err.println("No formats have been initialized!");
+      LOGGER.warn("No formats have been initialized!");
     }
 
     if (transformations.size() == 0) {
-      System.err.println("No transformations have been initialized!");
+      LOGGER.warn("No transformations have been initialized!");
     }
   }
 

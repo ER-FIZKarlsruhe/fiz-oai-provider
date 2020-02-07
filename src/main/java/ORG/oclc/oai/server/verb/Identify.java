@@ -45,7 +45,6 @@ public class Identify extends ServerVerb {
    */
   public static String construct(HashMap context, HttpServletRequest request, HttpServletResponse response,
       Transformer serverTransformer) throws TransformerException {
-    String version = (String) context.get("OAIHandler.version");
     AbstractCatalog abstractCatalog = (AbstractCatalog) context.get("OAIHandler.catalog");
     Properties properties = (Properties) context.get("OAIHandler.properties");
     String baseURL = properties.getProperty("OAIHandler.baseURL");

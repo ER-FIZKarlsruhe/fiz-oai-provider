@@ -38,7 +38,6 @@ import org.apache.logging.log4j.Logger;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.util.OAIUtil;
-//import javax.servlet.http.HttpUtils;
 
 /**
  * ServerVerb is the parent class for each of the server-side OAI verbs.
@@ -46,7 +45,7 @@ import ORG.oclc.oai.util.OAIUtil;
  * @author Jefffrey A. Young, OCLC Online Computer Library Center
  */
 public abstract class ServerVerb {
-    final static Logger LOGGER = LogManager.getLogger(ServerVerb.class);
+    protected final static Logger LOGGER = LogManager.getLogger(ServerVerb.class);
     private int statusCode = HttpServletResponse.SC_OK; // http status
     private String message = null; // http response message
 
@@ -68,7 +67,7 @@ public abstract class ServerVerb {
      * @param xmlText complete XML response string
      */
     protected void init(String xmlText) {
-        LOGGER.info("ServerVerb.init: xmlText=" + xmlText);
+        LOGGER.info("ServerVerb.init: xmlText={}", xmlText);
         this.xmlText = xmlText;
     }
 
@@ -270,8 +269,8 @@ public abstract class ServerVerb {
             if (propertyName.startsWith(propertyPrefix)) {
                 String verb = propertyName.substring(propertyPrefix.length());
                 String verbClassName = (String)properties.get(propertyName);
-                LOGGER.debug("ExtensionVerb.getVerbs: verb=" + verb);
-                LOGGER.debug("ExtensionVerb.verbClassName=" + verbClassName);
+                LOGGER.debug("ExtensionVerb.getVerbs: verb={}", verb);
+                LOGGER.debug("ExtensionVerb.verbClassName={}", verbClassName);
                 
                 try {
                     Class serverVerbClass = Class.forName(verbClassName);
@@ -286,8 +285,7 @@ public abstract class ServerVerb {
                     extensionVerbsMap.put(verb, serverVerbClass);
                     LOGGER.debug("ExtensionVerb.getVerbs: " + verb + "=" + verbClassName);
                 } catch (Throwable e) {
-                    System.err.println("ExtensionVerb: couldn't construct: " + verbClassName);
-                    e.printStackTrace();
+                    LOGGER.error("ExtensionVerb: couldn't construct: " + verbClassName, e);
                 }
             }
         }

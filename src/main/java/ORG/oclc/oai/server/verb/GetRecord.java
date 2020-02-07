@@ -34,9 +34,10 @@ import de.fiz_karlsruhe.FormatRegistry;
  */
 public class GetRecord extends ServerVerb {
 
-  final static Logger logger = LogManager.getLogger(GetRecord.class);
+  private final static Logger LOGGER = LogManager.getLogger(GetRecord.class);
 
   private static ArrayList validParamNames = new ArrayList();
+  
   static {
     validParamNames.add("verb");
     validParamNames.add("identifier");
@@ -69,8 +70,8 @@ public class GetRecord extends ServerVerb {
     String identifier = request.getParameter("identifier");
     String metadataPrefix = request.getParameter("metadataPrefix");
 
-    logger.info("GetRecord.constructGetRecord: identifier=" + identifier);
-    logger.info("GetRecord.constructGetRecord: metadataPrefix=" + metadataPrefix);
+    LOGGER.info("GetRecord.constructGetRecord: identifier={}", identifier);
+    LOGGER.info("GetRecord.constructGetRecord: metadataPrefix={}", metadataPrefix);
 
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
     String styleSheet = properties.getProperty("OAIHandler.styleSheet");
