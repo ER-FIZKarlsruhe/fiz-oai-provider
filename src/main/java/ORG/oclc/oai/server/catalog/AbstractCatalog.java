@@ -132,7 +132,7 @@ public abstract class AbstractCatalog {
             throw new BadArgumentException();
         }
         if (from.length() != VALID_GRANULARITIES[supportedGranularityOffset].length()) {
-            StringBuffer sb = new StringBuffer(from);
+          StringBuilder sb = new StringBuilder(from);
             if (sb.charAt(sb.length()-1) == 'Z')
                 sb.setLength(sb.length()-1);
 
@@ -163,7 +163,7 @@ public abstract class AbstractCatalog {
             throw new BadArgumentException();
         }
 
-        StringBuffer sb = new StringBuffer(until);
+        StringBuilder sb = new StringBuilder(until);
         if (sb.charAt(sb.length()-1) == 'Z')
             sb.setLength(sb.length()-1);
 

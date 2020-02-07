@@ -221,7 +221,7 @@ public abstract class RecordFactory {
   public String create(Object nativeItem, String schemaURL, String metadataPrefix, Iterator setSpecs, Iterator abouts)
       throws IllegalArgumentException, CannotDisseminateFormatException {
     if (isDeleted(nativeItem)) {
-      StringBuffer sb = new StringBuffer("<record>");
+      StringBuilder sb = new StringBuilder("<record>");
       sb.append(createHeader(nativeItem)[0]);
       sb.append("</record>");
       return sb.toString();
@@ -428,7 +428,7 @@ public abstract class RecordFactory {
   public String createMetadata(Object nativeItem, String schemaURL, boolean isDeleted)
       throws IllegalArgumentException, CannotDisseminateFormatException {
     logger.info("createMetadata");
-    StringBuffer xmlRec = new StringBuffer();
+    StringBuilder xmlRec = new StringBuilder();
     if (isDeleted) {
       throw new CannotDisseminateFormatException("Record is deleted");
     }

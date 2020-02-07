@@ -89,7 +89,7 @@ public class BackendService {
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8)
             + "?format=" + URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8) + "&content=true";
 
-    logger.info("getItem localIdentifier + metadataPrefix  url: " + url.toString());
+    logger.info("getItem localIdentifier + metadataPrefix  url: " + url);
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
@@ -114,7 +114,7 @@ public class BackendService {
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8);
 
-    logger.debug("getItem localIdentifier url: " + url.toString());
+    logger.debug("getItem localIdentifier url: " + url);
     
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
@@ -180,7 +180,7 @@ public class BackendService {
 
     String url = backendBaseUrl + "/format";
 
-    logger.info("getFormats url: " + url.toString());
+    logger.info("getFormats url: " + url);
     List<Format> formatList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -201,7 +201,7 @@ public class BackendService {
 
     String url = backendBaseUrl + "/format/" + metadataPrefix;
 
-    logger.info("getFormat url: " + url.toString());
+    logger.info("getFormat url: " + url);
     Format format = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -223,7 +223,7 @@ public class BackendService {
 
     String url = backendBaseUrl + "/crosswalk";
 
-    logger.info("getTransformations url: " + url.toString());
+    logger.info("getTransformations url: " + url);
     List<Transformation> transformationList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();

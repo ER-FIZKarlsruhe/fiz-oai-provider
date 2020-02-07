@@ -134,7 +134,7 @@ public class ResumptionToken {
   public String getToken() throws BadResumptionTokenException {
     validate();
 
-    StringBuffer tokenSb = new StringBuffer();
+    StringBuilder tokenSb = new StringBuilder();
     tokenSb.append("rows=" + rows);
 
     tokenSb.append("@@lastItemId=" + lastItemId);

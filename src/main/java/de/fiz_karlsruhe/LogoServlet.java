@@ -30,26 +30,21 @@ import de.fiz_karlsruhe.service.ConfigurationService;
 
 public class LogoServlet extends HttpServlet {
 
+  @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     response.setContentType("image/jpeg");
     
     ConfigurationService configurationService = ConfigurationService.getInstance();
     
-    ServletOutputStream out;
-    out = response.getOutputStream();
-    FileInputStream fin = new FileInputStream(configurationService.getBrandingLogo(request.getServletContext()));
-
-    BufferedInputStream bin = new BufferedInputStream(fin);
-    BufferedOutputStream bout = new BufferedOutputStream(out);
+    try(ServletOutputStream out = response.getOutputStream(); 
+        FileInputStream fin = new FileInputStream(configurationService.getBrandingLogo(request.getServletContext()));
+        BufferedInputStream bin = new BufferedInputStream(fin); 
+        BufferedOutputStream bout = new BufferedOutputStream(out);) {
     int ch = 0;
-    ;
+    
     while ((ch = bin.read()) != -1) {
       bout.write(ch);
     }
-
-    bin.close();
-    fin.close();
-    bout.close();
-    out.close();
+  }
   }
 }

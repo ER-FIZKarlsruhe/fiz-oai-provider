@@ -75,7 +75,7 @@ public class FormatRegistry {
    *         pair
    */
   public String getMetadataPrefix(String namespaceURI, String schemaURL) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     if (namespaceURI != null) {
       sb.append(namespaceURI);
     }

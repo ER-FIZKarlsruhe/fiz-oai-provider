@@ -36,6 +36,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.XMLConstants;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -43,10 +44,13 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.server.verb.ServerVerb;
+import de.fiz_karlsruhe.FizRecordFactory;
 import de.fiz_karlsruhe.service.ConfigurationService;
 
 /**
@@ -59,6 +63,8 @@ public class OAIHandler extends HttpServlet {
      * 
      */
     private static final long serialVersionUID = 1L;
+    
+    final static Logger logger = LogManager.getLogger(OAIHandlers.class);
     
     public static final String PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE = OAIHandler.class.getName() + ".properties";
     
@@ -88,6 +94,7 @@ public class OAIHandler extends HttpServlet {
      * @param config servlet configuration information
      * @exception ServletException there was a problem with initialization
      */
+    @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         
@@ -215,6 +222,7 @@ public class OAIHandler extends HttpServlet {
             }
             StreamSource xslSource = new StreamSource(is);
             TransformerFactory tFactory = TransformerFactory.newInstance();
+            tFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             Transformer transformer = tFactory.newTransformer(xslSource);
             attributes.put("OAIHandler.transformer", transformer);
         }
@@ -267,6 +275,7 @@ public class OAIHandler extends HttpServlet {
      * @param response the servlet's response information
      * @exception IOException an I/O error occurred
      */
+    @Override
     public void doGet(HttpServletRequest request,
             HttpServletResponse response)
     throws IOException {
@@ -356,13 +365,13 @@ public class OAIHandler extends HttpServlet {
             }
         }
         if (monitor) {
-            StringBuffer reqUri = new StringBuffer(request.getRequestURI().toString());
+            StringBuilder reqUri = new StringBuilder(request.getRequestURI().toString());
             String queryString = request.getQueryString();   // d=789
             if (queryString != null) {
                 reqUri.append("?").append(queryString);
             }
             Runtime rt = Runtime.getRuntime();
-            System.out.println(rt.freeMemory() + "/" + rt.totalMemory() + " "
+            LOGGER.info(rt.freeMemory() + "/" + rt.totalMemory() + " "
                     + ((new Date()).getTime()-then.getTime()) + "ms: "
                     + reqUri.toString());
         }
@@ -489,6 +498,7 @@ public class OAIHandler extends HttpServlet {
      * @param response the servlet's response information
      * @exception IOException an I/O error occurred
      */
+    @Override
     public void doPost(HttpServletRequest request,
             HttpServletResponse response)
     throws IOException {

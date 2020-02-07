@@ -132,7 +132,7 @@ public class FizRecordFactory extends RecordFactory {
    * @return OAI identifier
    */
   public String getOAIIdentifier(Object nativeItem) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     if (StringUtils.isNotEmpty(repositoryIdentifier)) {
       sb.append("oai:");
       sb.append(repositoryIdentifier);
@@ -148,6 +148,7 @@ public class FizRecordFactory extends RecordFactory {
    * @param nativeItem native Item object
    * @return local identifier
    */
+  @Override
   public String getLocalIdentifier(Object nativeItem) {
     return ((Item) nativeItem).getIdentifier();
   }

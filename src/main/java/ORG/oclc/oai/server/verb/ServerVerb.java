@@ -46,8 +46,7 @@ import ORG.oclc.oai.util.OAIUtil;
  * @author Jefffrey A. Young, OCLC Online Computer Library Center
  */
 public abstract class ServerVerb {
-    private static final boolean debug = false;
-    final static Logger logger = LogManager.getLogger(ServerVerb.class);
+    final static Logger LOGGER = LogManager.getLogger(ServerVerb.class);
     private int statusCode = HttpServletResponse.SC_OK; // http status
     private String message = null; // http response message
 
@@ -116,7 +115,7 @@ public abstract class ServerVerb {
      * @return a String representation of the OAI response Date.
      */
     public static String createResponseDate(Date date) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         TimeZone tz = TimeZone.getTimeZone("UTC");
         formatter.setTimeZone(tz);
@@ -134,7 +133,7 @@ public abstract class ServerVerb {
             List validParamNames,
             String baseURL,
             boolean xmlEncodeSetSpec) {
-        StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
         sb.append("<request");
         Enumeration params = request.getParameterNames();
         while (params.hasMoreElements()) {
@@ -273,10 +272,9 @@ public abstract class ServerVerb {
             if (propertyName.startsWith(propertyPrefix)) {
                 String verb = propertyName.substring(propertyPrefix.length());
                 String verbClassName = (String)properties.get(propertyName);
-                if (debug) {
-                    System.out.println("ExtensionVerb.getVerbs: verb=" + verb);
-                    System.out.println("ExtensionVerb.verbClassName=" + verbClassName);
-                }
+                LOGGER.debug("ExtensionVerb.getVerbs: verb=" + verb);
+                LOGGER.debug("ExtensionVerb.verbClassName=" + verbClassName);
+                
                 try {
                     Class serverVerbClass = Class.forName(verbClassName);
                     Method init =
@@ -288,9 +286,7 @@ public abstract class ServerVerb {
                         throw e.getTargetException();
                     }
                     extensionVerbsMap.put(verb, serverVerbClass);
-                    if (debug) {
-                        System.out.println("ExtensionVerb.getVerbs: " + verb + "=" + verbClassName);
-                    }
+                    LOGGER.debug("ExtensionVerb.getVerbs: " + verb + "=" + verbClassName);
                 } catch (Throwable e) {
                     System.err.println("ExtensionVerb: couldn't construct: " + verbClassName);
                     e.printStackTrace();
