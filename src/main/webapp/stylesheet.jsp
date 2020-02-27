@@ -153,7 +153,7 @@
 <!--   </xsl:template> -->
 
   <xsl:template match="oai:setSpec">
-    <td width="150"><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+    <td width="150"><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
   </xsl:template>
 
   <xsl:template match="oai:setName">
@@ -190,14 +190,14 @@
 
   <xsl:template match="oai:resumptionToken">
     <tr valign="top">
-      <td>ResumptionToken: <a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=<xsl:value-of select="//oai:OAI-PMH/oai:request/@verb"/>&amp;resumptionToken=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+      <td>ResumptionToken: <a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=<xsl:value-of select="//oai:OAI-PMH/oai:request/@verb"/>&amp;resumptionToken=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:identifier">
     <tr valign="top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
-      <td><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=GetRecord&amp;metadataPrefix=<xsl:choose><xsl:when test="/oai:OAI-PMH/oai:request/@metadataPrefix"><xsl:value-of select="/oai:OAI-PMH/oai:request/@metadataPrefix"/></xsl:when><xsl:otherwise>oai_dc</xsl:otherwise></xsl:choose>&amp;identifier=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+      <td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=GetRecord&amp;metadataPrefix=<xsl:choose><xsl:when test="/oai:OAI-PMH/oai:request/@metadataPrefix"><xsl:value-of select="/oai:OAI-PMH/oai:request/@metadataPrefix"/></xsl:when><xsl:otherwise>oai_dc</xsl:otherwise></xsl:choose>&amp;identifier=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
@@ -276,9 +276,6 @@
     <tr valign="top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td>
-        <!--
-        <a href="/fiz-oai-provider/index.html"><img src="/fiz-oai-provider/oaicat_icon.gif" alt="Testing"/></a>
-        -->
         <a>
           <xsl:attribute name="href">
             <xsl:value-of select="oai_branding:link"/>
@@ -311,7 +308,7 @@
 
   <xsl:template match="oai:metadataFormat">
     <table width="100%" border="0" cellspacing="0" cellpadding="4">
-      <tr valign="top"><td width="150"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
+      <tr valign="top"><td width="150"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
         <tr valign="top"><td width="150"><strong>schema</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:schema"/></xsl:attribute><xsl:value-of select="oai:schema"/></a></td></tr>
         <tr valign="top"><td width="150"><strong>metadataNamespace</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:metadataNamespace"/></xsl:attribute><xsl:value-of select="oai:metadataNamespace"/></a></td></tr>
     </table>

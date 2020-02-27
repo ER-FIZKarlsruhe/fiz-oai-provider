@@ -13,7 +13,7 @@
 <tr valign="top">
 <td>
 <h2>OAI ListSets (Resumption) Request Form</h2>
-<form class="nospace" action="/fiz-oai-providerat/OAIHandler" method="POST">
+<form class="nospace" action="<%=request.getContextPath()%>/OAIHandler" method="POST">
 <input type="hidden" name="verb" value="ListSets">
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
 <tr valign="top">
