@@ -32,7 +32,7 @@ public class BaseIT {
 
   final static Logger logger = LogManager.getLogger(ListMetadataFormatsIT.class);
 
-  public static String TEST_OAI_URL = "http://localhost:8999/fiz-oai-provider/OAIHandler";
+  public static String TEST_OAI_URL = "http://localhost:8999/oai/OAIHandler";
 
   protected boolean validateAgainstOaiDcXsd(String xml) {
     

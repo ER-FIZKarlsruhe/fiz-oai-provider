@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
 <head>
-<title>OAI Identify Request Form [fiz-oai-provider]</title>
+<title>OAI Identify Request Form [oai-provider]</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link href="oaicat.css" rel="stylesheet" type="text/css">
 </head>

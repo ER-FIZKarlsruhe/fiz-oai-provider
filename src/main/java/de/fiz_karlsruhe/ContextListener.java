@@ -22,7 +22,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-@WebListener("fiz-oai-provider context listener")
+@WebListener("oai context listener")
 public class ContextListener implements ServletContextListener {
 
   /**

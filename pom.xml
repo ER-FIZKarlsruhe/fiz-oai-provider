@@ -168,17 +168,17 @@
           <stopKey>quit</stopKey>
           <stopPort>9000</stopPort>
           <webApp>
-            <contextPath>/fiz-oai-provider</contextPath>
-            <descriptor>${project.build.directory}/fiz-oai-provider/WEB-INF/web.xml</descriptor>
+            <contextPath>/oai</contextPath>
+            <descriptor>${project.build.directory}/oai/WEB-INF/web.xml</descriptor>
           </webApp>
           <systemProperties>
             <systemProperty>
               <name>oai.provider.conf.folder</name>
-              <value>${project.build.directory}/fiz-oai-provider/WEB-INF/</value>
+              <value>${project.build.directory}/oai/WEB-INF/</value>
             </systemProperty>
             <systemProperty>
               <name>logback.configurationFile</name>
-              <value>${project.build.directory}/fiz-oai-provider/WEB-INF/fiz-oai-provider-log4j.properties</value>
+              <value>${project.build.directory}/oai/WEB-INF/fiz-oai-provider-log4j.properties</value>
             </systemProperty>
           </systemProperties>
         </configuration>

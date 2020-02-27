@@ -18,7 +18,7 @@
   <xsl:template match="/oai:OAI-PMH">
     <html>
       <head>
-        <title><xsl:value-of select="oai:request/@verb"/> Response FIZ-OAI-Provider</title>
+        <title><xsl:value-of select="oai:request/@verb"/> Response OAI-Provider</title>
         <style type="text/css">
           <xsl:comment>
             body {

@@ -9,7 +9,7 @@
 
     <!-- General description of your web application -->
 
-    <display-name>fiz-oai-provider</display-name>
+    <display-name>oai</display-name>
     <description>
       This is the version 1.0 of the fiz-oai-provider.
       It is based on the OAICat framwork which was written
