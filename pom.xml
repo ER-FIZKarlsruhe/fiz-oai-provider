@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.fiz-karlsruhe</groupId>
-  <artifactId>fiz-oai-provider</artifactId>
+  <artifactId>oai</artifactId>
   <packaging>war</packaging>
-  <version>0.2-SNAPSHOT</version>
-  <name>fiz-oai-provider</name>
+  <version>1.0</version>
+  <name>oai</name>
   <url>http://maven.apache.org</url>
 
   <dependencies>
@@ -82,7 +82,7 @@
   </dependencies>
 
   <build>
-    <finalName>${project.name}</finalName>
+    <finalName>oai</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
