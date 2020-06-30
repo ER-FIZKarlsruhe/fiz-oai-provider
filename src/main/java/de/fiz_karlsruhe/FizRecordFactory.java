@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -55,6 +57,7 @@ public class FizRecordFactory extends RecordFactory {
    */
   public FizRecordFactory(Properties properties) throws IllegalArgumentException, Exception {
     super();
+    
     List<Format> formats = initFormats(properties);
     List<Transformation> transformations = initTransformations(properties);
     this.formatRegistry = new FormatRegistry(formats, transformations);
@@ -63,9 +66,13 @@ public class FizRecordFactory extends RecordFactory {
     if (repositoryIdentifier == null) {
       logger.warn("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
+    
+    
+    ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(2);    
+    stpe.scheduleAtFixedRate(new RefreshFormatRegistry(this.formatRegistry, properties), 0, 1, TimeUnit.MINUTES);
   }
 
-  private List<Format> initFormats(Properties properties) {
+  public static List<Format> initFormats(Properties properties) {
     logger.info("initFormats");
 
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
@@ -84,7 +91,7 @@ public class FizRecordFactory extends RecordFactory {
     return formats;
   }
   
-  private List<Transformation> initTransformations(Properties properties) {
+  public static List<Transformation> initTransformations(Properties properties) {
     logger.info("initTransformations");
 
     String backendBaseUrl = properties.getProperty("FizOaiBackend.baseURL");
@@ -217,4 +224,7 @@ public class FizRecordFactory extends RecordFactory {
     // Don't perform quick creates
     return null;
   }
+  
+  
+  
 }

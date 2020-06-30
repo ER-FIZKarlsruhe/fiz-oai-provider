@@ -17,10 +17,17 @@
 package de.fiz_karlsruhe;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.ConfigurationFactory;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory;
 
 @WebListener("oai context listener")
 public class ContextListener implements ServletContextListener {
@@ -44,7 +51,9 @@ public class ContextListener implements ServletContextListener {
       confFolderPath = new File(tomcatRoot, "conf").getAbsolutePath();
     }
 
-    System.out.println("ContextListener confFolderPath: " + confFolderPath);
+//    File file = new File(confFolderPath, "fiz-oai-provider-log4j.properties");
+//    System.out.println("ContextListener confFolderPath: " + confFolderPath);
+//    System.out.println("log4j2 configuration: " + file.getAbsolutePath());
   }
 
   @Override

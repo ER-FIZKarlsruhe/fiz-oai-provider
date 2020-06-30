@@ -16,15 +16,17 @@
 
 package de.fiz_karlsruhe;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import ORG.oclc.oai.server.OAIHandler;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Transformation;
 
@@ -39,9 +41,11 @@ public class FormatRegistry {
 
   final static Logger LOGGER = LogManager.getLogger(FormatRegistry.class);
   
-  private List<Transformation> transformations;
+  //Use a synchronized list that can be filled from another thread (RefreshFormatRegistry)
+  private List<Transformation> transformations = Collections.synchronizedList(new ArrayList<Transformation>());
 
-  private List<Format> formats;
+  //Use a synchronized list that can be filled from another thread (RefreshFormatRegistry)
+  private List<Format> formats = Collections.synchronizedList(new ArrayList<Format>());
 
   public FormatRegistry(List<Format> formats, List<Transformation> transformations) {
     this.formats = formats;
@@ -61,7 +65,15 @@ public class FormatRegistry {
   }
 
   public void setTransformations(List<Transformation> transformations) {
-    this.transformations = transformations;
+	if (transformations == null || transformations.isEmpty()) {
+		LOGGER.warn("No transformations set. Do nothing!");
+	}
+	  
+    if (!CollectionUtils.isEqualCollection(this.transformations, transformations)) {
+      LOGGER.warn("Transformations differs in backend and registy! Set new value in transformation list!");
+	  this.transformations.clear();
+	  this.transformations.addAll(transformations);
+    }
   }
 
   public List<Format> getFormats() {
@@ -69,7 +81,15 @@ public class FormatRegistry {
   }
 
   public void setFormats(List<Format> formats) {
-    this.formats = formats;
+	if (formats == null || formats.isEmpty()) {
+		LOGGER.warn("No formats set. Do nothing!");
+	}
+	  
+	if (!CollectionUtils.isEqualCollection(this.transformations, transformations)) {
+		  LOGGER.warn("Transformations differs in backend and registy! Set new value in transformation list!");
+  	  this.transformations.clear();
+  	  this.transformations.addAll(transformations);
+    }
   }
 
   /**
