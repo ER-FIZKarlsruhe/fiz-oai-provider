@@ -11,11 +11,11 @@ import de.fiz_karlsruhe.model.Transformation;
 
 public class RefreshFormatRegistry implements Runnable {
 
-	final static Logger logger = LogManager.getLogger(RefreshFormatRegistry.class);
+	private final static Logger logger = LogManager.getLogger(RefreshFormatRegistry.class);
 
-	FormatRegistry formatRegistry;
+	private final FormatRegistry formatRegistry;
 
-	Properties properties;
+	private final Properties properties;
 
 	RefreshFormatRegistry(FormatRegistry formatRegistry, Properties properties) {
 		logger.info("Create new RefreshFormatRegistry object");
