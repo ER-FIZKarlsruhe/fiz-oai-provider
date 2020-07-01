@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,26 +85,13 @@ public abstract class RecordFactory {
     if (isDeleted(nativeItem)) {
       throw new NoMetadataFormatsException();
     }
-    Vector<String> v = new Vector<String>();
-    List<Format> formats = this.formatRegistry.getFormats();
-    List<Transformation> transformations = this.formatRegistry.getTransformations();
-    
     Item item = (Item) nativeItem;
-    String itemNativeFormat = item.getIngestFormat();
-    
-    //Add native format
-    Format nativeFormat = formats.stream().filter(f -> f.getMetadataPrefix().equals(itemNativeFormat)).findFirst().get();
-    v.add(nativeFormat.getSchemaLocation());
-    
-    //Add tranformation formats
-    for (Transformation t : transformations) {
-      if (t.getFormatFrom().equals(itemNativeFormat)) {
-        Format format = formats.stream().filter(f -> f.getMetadataPrefix().equals(t.getFormatTo())).findFirst().get();
-        v.add(format.getSchemaLocation());
-      }
-    }
 
-    return v;
+    //Filter the formats that are available for the item
+    List<Format> filteredFormats = getFormatRegistry().getFormats().stream().
+    		filter(element -> item.getFormats().contains(element.getMetadataPrefix())).collect(Collectors.toList());
+    
+    return new Vector(filteredFormats);
   }
 
   /**

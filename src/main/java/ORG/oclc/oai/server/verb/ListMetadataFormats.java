@@ -86,27 +86,26 @@ public class ListMetadataFormats extends ServerVerb {
       sb.append(new BadArgumentException().getMessage());
     } else {
       FormatRegistry formatRegistry = abstractCatalog.getFormatRegistry();
+      
+      //Print all formats
       if (identifier == null || identifier.length() == 0) {
         Iterator<Format> iterator = formatRegistry.getFormats().iterator();
         sb.append("<ListMetadataFormats>");
         while (iterator.hasNext()) {
           Format format = iterator.next();
+          
           String oaiSchemaLabel = format.getMetadataPrefix();
-          String[] tokenizer = split(format.getSchemaLocation());
-          String namespaceURI = null;
-          String schemaURL = null;
-          if (tokenizer.length == 1) {
-            schemaURL = tokenizer[0];
-          } else if (tokenizer.length > 1) {
-            namespaceURI = tokenizer[0];
-            schemaURL = tokenizer[1];
-          }
+          String namespaceURI = format.getSchemaNamespace();
+          String schemaURL = format.getSchemaLocation();
+          
           sb.append("<metadataFormat>");
           sb.append("<metadataPrefix>");
           sb.append(oaiSchemaLabel);
           sb.append("</metadataPrefix>");
           sb.append("<schema>");
-          sb.append(schemaURL);
+          if (schemaURL != null) {
+        	  sb.append(schemaURL);
+          }
           sb.append("</schema>");
           sb.append("<metadataNamespace>");
           if (namespaceURI != null) {
@@ -118,27 +117,23 @@ public class ListMetadataFormats extends ServerVerb {
         sb.append("</ListMetadataFormats>");
       } else {
         try {
-          // TODO implement getSchemaLocations!
-          Vector schemaLocations = abstractCatalog.getSchemaLocations(identifier);
+          Vector itemFormats = abstractCatalog.getSchemaLocations(identifier);
           sb.append("<ListMetadataFormats>");
-          for (int i = 0; i < schemaLocations.size(); ++i) {
-            String schemaLocation = (String) schemaLocations.elementAt(i);
-            String[] tokenizer = split(schemaLocation);
-            String namespaceURI = null;
-            String schemaURL = null;
-            if (tokenizer.length == 1) {
-              schemaURL = tokenizer[0];
-            } else if (tokenizer.length > 1) {
-              namespaceURI = tokenizer[0];
-              schemaURL = tokenizer[1];
-            }
+          for (int i = 0; i < itemFormats.size(); ++i) {
+    	    Format format = (Format)itemFormats.elementAt(i);
+            String schemaLocation = format.getSchemaLocation();
+            String namespaceURI = format.getSchemaNamespace();
+            String schemaURL = format.getSchemaLocation();
+            
             sb.append("<metadataFormat>");
             sb.append("<metadataPrefix>");
             // make sure it's a space that separates them
             sb.append(formatRegistry.getMetadataPrefix(namespaceURI, schemaURL));
             sb.append("</metadataPrefix>");
             sb.append("<schema>");
-            sb.append(schemaURL);
+            if (schemaURL != null) {
+            	sb.append(schemaURL);
+            }
             sb.append("</schema>");
             sb.append("<metadataNamespace>");
             if (namespaceURI != null) {

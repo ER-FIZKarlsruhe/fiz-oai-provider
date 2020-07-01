@@ -135,16 +135,19 @@ public class MockServerUtil  implements ExpectationInitializer {
     serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*"))
     .respond(response().withStatusCode(200)
         .withBody("{\n" + 
-            "  \"identifier\": \"10.0133/10000386\",\n" + 
-            "  \"datestamp\": \"2019-07-12T12:39:37Z\",\n" + 
-            "  \"deleteFlag\": false,\n" + 
-            "  \"tags\": null,\n" + 
-            "  \"sets\": null,\n" + 
-            "  \"formats\": null,\n" + 
-            "  \"ingestFormat\": \"radar\",\n" + 
-            "  \"content\": null" + 
-            "  }\n" + 
-            "}"));
+                "  \"identifier\": \"10.0133/10000386\",\n" + 
+                "  \"datestamp\": \"2019-07-12T12:39:37Z\",\n" + 
+                "  \"deleteFlag\": false,\n" + 
+                "  \"tags\": null,\n" + 
+                "  \"sets\": [\"dataset\",\"fiz\"],\n" + 
+                "  \"formats\": [\"oai_dc\",\"radar\"],\n" + 
+                "  \"ingestFormat\": \"radar\",\n" + 
+                "  \"content\": {\n" + 
+                "    \"identifier\": \"10.0133/10000386\",\n" + 
+                "    \"format\": \"datacite\",\n" + 
+                "    \"content\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><resource xmlns:xsi=\\\"http://www.w3.org/2001/XMLSchema-instance\\\" xmlns=\\\"http://datacite.org/schema/kernel-4\\\" xsi:schemaLocation=\\\"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd\\\">  <identifier identifierType=\\\"DOI\\\">10.0133/10000386</identifier>  <creators>    <creator>      <creatorName>Admin, Admin</creatorName>      <givenName>Admin</givenName>      <familyName>Admin</familyName>      <nameIdentifier schemeURI=\\\"http://orcid.org/\\\" nameIdentifierScheme=\\\"ORCID\\\">1231-1231-1111</nameIdentifier>      <affiliation>FIZ Karlsruhe</affiliation>    </creator>  </creators>  <titles>    <title>Test zur Publikation 12072018</title>    <title titleType=\\\"Subtitle\\\">Dies ist der Untertitel</title>  </titles>  <publisher>FIZ Karlsruhe</publisher>  <dates>    <date dateType=\\\"Created\\\">2018</date>  </dates>  <publicationYear>2018</publicationYear>  <subjects>    <subject>Verkehrskunde</subject>    <subject>Verkehr, Schild, Warnung</subject>  </subjects>  <resourceType resourceTypeGeneral=\\\"Dataset\\\"/>  <contributors>    <contributor contributorType=\\\"RightsHolder\\\">      <contributorName>FIZ Karlsruhe</contributorName>    </contributor>    <contributor contributorType=\\\"DataCurator\\\">      <contributorName>Müller, Hansi</contributorName>      <affiliation/>    </contributor>  </contributors>  <descriptions>    <description descriptionType=\\\"Abstract\\\">In diesem Projekt geht es um die Untersuchung von fa-sfadsfdsfsddddddddddd</description>    <description descriptionType=\\\"Methods\\\">Laxer XCV</description>    <description descriptionType=\\\"Other\\\">statistische Normierun</description>    <description descriptionType=\\\"Other\\\">Hier stehen...</description>  </descriptions>  <language>          en        </language>  <alternateIdentifiers>    <alternateIdentifier alternateIdentifierType=\\\"1234567489777\\\">Interne Nummer</alternateIdentifier>  </alternateIdentifiers>  <relatedIdentifiers>    <relatedIdentifier relatedIdentifierType=\\\"DOI\\\" relationType=\\\"IsSupplementTo\\\">10.1001/456456</relatedIdentifier>  </relatedIdentifiers>  <geoLocations>    <geoLocation>      <geoLocationPoint>        <pointLongitude>49.0</pointLongitude>        <pointLatitude>49.0</pointLatitude>      </geoLocationPoint>    </geoLocation>  </geoLocations>  <fundingReferences>    <fundingReference>      <funderName>Deutsche Forschungsgemeinschaft</funderName>      <funderIdentifier funderIdentifierType=\\\"Crossref Funder ID\\\">501100001659</funderIdentifier>    </fundingReference>  </fundingReferences>  <sizes>    <size>0 B</size>  </sizes>  <formats>    <format>application/zip</format>  </formats></resource>\\n\"\n" + 
+                "  }\n" + 
+                "}"));
     
 
   }
