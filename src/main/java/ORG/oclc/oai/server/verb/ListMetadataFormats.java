@@ -128,7 +128,7 @@ public class ListMetadataFormats extends ServerVerb {
             sb.append("<metadataFormat>");
             sb.append("<metadataPrefix>");
             // make sure it's a space that separates them
-            sb.append(formatRegistry.getMetadataPrefix(namespaceURI, schemaURL));
+            sb.append(format.getMetadataPrefix());
             sb.append("</metadataPrefix>");
             sb.append("<schema>");
             if (schemaURL != null) {
