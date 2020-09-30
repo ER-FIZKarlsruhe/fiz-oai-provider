@@ -237,6 +237,9 @@
               <connectionString>jdbc:postgresql://${dependencyCheckHost}/${dependencyCheckDatabase}</connectionString>
               <databaseUser>${dependencyCheckUser}</databaseUser>
               <databasePassword>${dependencyCheckPassword}</databasePassword>
+              <formats>HTML,JUNIT</formats>
+			  <skipProvidedScope>true</skipProvidedScope>
+		  	  <failBuildOnCVSS>8</failBuildOnCVSS>
           </configuration>
           <executions>
               <execution>
