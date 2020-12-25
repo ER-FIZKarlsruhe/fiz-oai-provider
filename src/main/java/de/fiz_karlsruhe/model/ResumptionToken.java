@@ -54,7 +54,7 @@ public class ResumptionToken {
 
     for (String keyValueSplit : parameterSplits) {
       try {
-        String key = keyValueSplit.split("=")[0];
+        String key = keyValueSplit.split("=", 2)[0];
 
         // Check parameter is in enum
         ResumptionTokenParameters.valueOf(key.toUpperCase());
@@ -62,7 +62,7 @@ public class ResumptionToken {
           continue;
         }
 
-        String value = keyValueSplit.split("=")[1];
+        String value = keyValueSplit.split("=", 2)[1];
 
         BeanUtils.setProperty(this, key, value);
       } catch (Exception e) {
