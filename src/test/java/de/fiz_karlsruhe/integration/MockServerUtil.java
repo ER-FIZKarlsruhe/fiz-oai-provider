@@ -157,7 +157,7 @@ public class MockServerUtil  implements ExpectationInitializer {
         .respond(response().withStatusCode(200)
             .withBody("{\n" + 
                 "  \"total\": 4,\n" + 
-                "  \"lastItemId\": null,\n" + 
+                "  \"searchMark\": null,\n" + 
                 "  \"size\": 4,\n" + 
                 "  \"data\": [{\n" + 
                 "    \"identifier\": \"10.0133/10000386\",\n" + 
@@ -204,7 +204,7 @@ public class MockServerUtil  implements ExpectationInitializer {
         .respond(response().withStatusCode(200)
             .withBody("{\n" + 
                 "  \"total\": 4,\n" + 
-                "  \"lastItemId\": null,\n" + 
+                "  \"searchMark\": null,\n" + 
                 "  \"size\": 4,\n" + 
                 "  \"data\": [{\n" + 
                 "    \"identifier\": \"10.0133/10000386\",\n" + 
@@ -268,7 +268,7 @@ public class MockServerUtil  implements ExpectationInitializer {
         .respond(response().withStatusCode(200)
             .withBody("{\n" + 
                 "    \"total\": \"0\",\n" + 
-                "    \"lastItemId\": \"null\",\n" + 
+                "    \"searchMark\": \"null\",\n" + 
                 "    \"size\": \"100\",\n" + 
                 "    \"data\": []\n" + 
                 "}"));

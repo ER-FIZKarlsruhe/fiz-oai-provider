@@ -218,9 +218,9 @@ public class FizOAICatalog extends AbstractCatalog {
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
-    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
+    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getSearchMark())) {
       ResumptionToken resumptionToken = new ResumptionToken();
-      resumptionToken.setLastItemId(result.getLastItemId());
+      resumptionToken.setSearchMark(result.getSearchMark());
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
       resumptionToken.setUntil(until);
@@ -264,7 +264,7 @@ public class FizOAICatalog extends AbstractCatalog {
 
     SearchResult<Item> result = null;
     try {
-      result = backendService.getItems(false, restoken.getLastItemId(), maxListSize, restoken.getSet(),
+      result = backendService.getItems(false, restoken.getSearchMark(), maxListSize, restoken.getSet(),
           restoken.getFrom(), restoken.getUntil(), restoken.getMetadataPrefix());
 
       if (result == null || result.getData().isEmpty()) {
@@ -281,8 +281,8 @@ public class FizOAICatalog extends AbstractCatalog {
       throw new OAIInternalServerError(e.getMessage());
     }
 
-    if (StringUtils.isNotBlank(result.getLastItemId())) {
-      restoken.setLastItemId(result.getLastItemId());
+    if (StringUtils.isNotBlank(result.getSearchMark())) {
+      restoken.setSearchMark(result.getSearchMark());
 
       listIdentifiersMap.put("resumptionMap", getResumptionMap(restoken.toString(), (int) result.getTotal(), -1));
     }
@@ -378,9 +378,9 @@ public class FizOAICatalog extends AbstractCatalog {
     /*****************************************************************
      * Construct the resumptionToken
      *****************************************************************/
-    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
+    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getSearchMark())) {
       ResumptionToken resumptionToken = new ResumptionToken();
-      resumptionToken.setLastItemId(result.getLastItemId());
+      resumptionToken.setSearchMark(result.getSearchMark());
       resumptionToken.setSet(set);
       resumptionToken.setFrom(from);
       resumptionToken.setUntil(until);
@@ -417,7 +417,7 @@ public class FizOAICatalog extends AbstractCatalog {
     ResumptionToken token = new ResumptionToken(resumptionTokenParam);
 
     try {
-      result = backendService.getItems(true, token.getLastItemId(), maxListSize, token.getSet(), token.getFrom(),
+      result = backendService.getItems(true, token.getSearchMark(), maxListSize, token.getSet(), token.getFrom(),
           token.getUntil(), token.getMetadataPrefix());
 
       if (result == null || result.getData().isEmpty()) {
@@ -436,8 +436,8 @@ public class FizOAICatalog extends AbstractCatalog {
     }
 
 
-    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getLastItemId())) {
-      token.setLastItemId(result.getLastItemId());
+    if (result.getTotal() > maxListSize && StringUtils.isNotBlank(result.getSearchMark())) {
+      token.setSearchMark(result.getSearchMark());
       listRecordsMap.put("resumptionMap",
           getResumptionMap(token.toString(), (int) result.getTotal(), -1));
     }

@@ -131,7 +131,7 @@ public class BackendService {
   }
   
   
-  public SearchResult<Item> getItems(boolean withContent, String lastItemId, long rows, String set, String from, String until, String metadataPrefix)
+  public SearchResult<Item> getItems(boolean withContent, String searchMark, long rows, String set, String from, String until, String metadataPrefix)
       throws IOException {
     if (metadataPrefix == null || metadataPrefix.isEmpty()) {
       throw new IllegalArgumentException("metadataPrefix must not be null");
@@ -140,8 +140,8 @@ public class BackendService {
     StringBuilder url = new StringBuilder();
     url.append(backendBaseUrl).append("/item?content=").append(withContent);
     url.append("&format=").append(URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8));
-    if (StringUtils.isNotEmpty(lastItemId)) {
-      url.append("&lastItemId=").append(lastItemId);
+    if (StringUtils.isNotEmpty(searchMark)) {
+      url.append("&searchMark=").append(searchMark);
     }
     url.append("&rows=").append(rows);
     if (StringUtils.isNotEmpty(set)) {

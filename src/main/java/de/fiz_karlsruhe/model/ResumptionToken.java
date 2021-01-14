@@ -30,7 +30,7 @@ public class ResumptionToken {
   final static Logger logger = LogManager.getLogger(ResumptionToken.class);
 
   enum ResumptionTokenParameters {
-    METADATAPREFIX, FROM, UNTIL, SET, LASTITEMID, ROWS, TOTAL
+    METADATAPREFIX, FROM, UNTIL, SET, SEARCHMARK, ROWS, TOTAL
   }
 
   private String metadataPrefix;
@@ -39,7 +39,7 @@ public class ResumptionToken {
   private String set;
   private Integer rows;
   private Long total;
-  private String lastItemId;
+  private String searchMark;
 
   public ResumptionToken() {
   }
@@ -75,12 +75,12 @@ public class ResumptionToken {
 
   }
 
-  public String getLastItemId() {
-    return lastItemId;
+  public String getSearchMark() {
+    return searchMark;
   }
 
-  public void setLastItemId(String lastItemId) {
-    this.lastItemId = lastItemId;
+  public void setSearchMark(String searchMark) {
+    this.searchMark = searchMark;
   }
 
   public String getMetadataPrefix() {
@@ -137,7 +137,7 @@ public class ResumptionToken {
     StringBuilder tokenSb = new StringBuilder();
     tokenSb.append("rows=" + rows);
 
-    tokenSb.append("@@lastItemId=" + lastItemId);
+    tokenSb.append("@@searchMark=" + searchMark);
     
     if (set != null) {
       tokenSb.append("@@set=" + set);
@@ -163,13 +163,13 @@ public class ResumptionToken {
   }
 
   public void validate() throws BadResumptionTokenException {
-    if (lastItemId == null || rows == null || total == null) {
-      logger.error("token offset, rows and tola must not be null");
+    if (searchMark == null || rows == null || total == null) {
+      logger.error("token searchMark, rows and total must not be null");
       throw new BadResumptionTokenException();
     }
 
     if (rows <= 0 || total < 0) {
-      logger.error("offset, rows and total must have positive values");
+      logger.error("rows and total must have positive values");
       throw new BadResumptionTokenException();
     }
 
