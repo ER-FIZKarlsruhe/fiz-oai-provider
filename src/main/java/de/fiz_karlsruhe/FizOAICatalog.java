@@ -126,6 +126,9 @@ public class FizOAICatalog extends AbstractCatalog {
       if (nativeItem == null) {
         throw new IdDoesNotExistException(oaiIdentifier);
       }
+      if (nativeItem.getContent() == null) {
+          throw new CannotDisseminateFormatException(metadataPrefix);
+      }
 
       return constructRecord(nativeItem, metadataPrefix);
     } catch (IOException e) {
