@@ -4,7 +4,7 @@
   <groupId>de.fiz-karlsruhe</groupId>
   <artifactId>oai</artifactId>
   <packaging>war</packaging>
-  <version>1.1</version>
+  <version>1.1.RC2</version>
   <name>oai</name>
   <url>http://maven.apache.org</url>
 
