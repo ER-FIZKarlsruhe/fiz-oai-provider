@@ -43,6 +43,8 @@ import de.fiz_karlsruhe.service.BackendService;
 public class FizRecordFactory extends RecordFactory {
 
   private String repositoryIdentifier = null;
+  
+  private ScheduledThreadPoolExecutor stpe = null;
 
   final static Logger logger = LogManager.getLogger(FizRecordFactory.class);
 
@@ -67,8 +69,7 @@ public class FizRecordFactory extends RecordFactory {
       logger.warn("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
     
-    
-    ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(2);    
+    stpe = new ScheduledThreadPoolExecutor(2);
     stpe.scheduleAtFixedRate(new RefreshFormatRegistry(this.formatRegistry, properties), 0, 1, TimeUnit.MINUTES);
   }
 
@@ -158,6 +159,10 @@ public class FizRecordFactory extends RecordFactory {
   @Override
   public String getLocalIdentifier(Object nativeItem) {
     return ((Item) nativeItem).getIdentifier();
+  }
+  
+  public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
+      return stpe;
   }
 
   /**

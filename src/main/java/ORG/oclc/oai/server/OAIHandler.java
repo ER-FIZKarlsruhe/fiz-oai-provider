@@ -31,7 +31,6 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +41,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -117,6 +114,14 @@ public class OAIHandler extends HttpServlet {
         }
     }
     
+    @Override
+    public void destroy() {
+        HashMap globalAttributes = (HashMap)attributesMap.get("global");
+        AbstractCatalog abstractCatalog = (AbstractCatalog)globalAttributes.get("OAIHandler.catalog");
+        ((FizRecordFactory)abstractCatalog.getRecordFactory()).getScheduledThreadPoolExecutor().shutdown();
+        abstractCatalog.close();
+    }
+
     private void loadConfiguration() {
       if (readConfigFromFile(getConfigFolder(), CONFIG_FILENAME)) {
           printConfiguration();
