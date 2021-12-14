@@ -123,6 +123,12 @@
     <tr valign="top">
       <td bgcolor="#eeeeee">
         <table width="100%" border="0" cellspacing="4" cellpadding="0">
+		  <xsl:if test="@status">
+			<tr valign="top">
+			  <td width="150"><strong>status</strong></td>
+			  <td><xsl:value-of select="@status"/></td>
+			</tr>
+		  </xsl:if>
           <xsl:apply-templates/>
         </table>
       </td>
