@@ -116,9 +116,10 @@ public class OAIHandler extends HttpServlet {
     
     @Override
     public void destroy() {
+        LOGGER.info("destroy called");
         HashMap globalAttributes = (HashMap)attributesMap.get("global");
         AbstractCatalog abstractCatalog = (AbstractCatalog)globalAttributes.get("OAIHandler.catalog");
-        ((FizRecordFactory)abstractCatalog.getRecordFactory()).getScheduledThreadPoolExecutor().shutdown();
+        ((FizRecordFactory)abstractCatalog.getRecordFactory()).getRefreshFormatTimer().cancel();
         abstractCatalog.close();
     }
 

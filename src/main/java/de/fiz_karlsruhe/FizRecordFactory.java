@@ -21,8 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +43,7 @@ public class FizRecordFactory extends RecordFactory {
 
   private String repositoryIdentifier = null;
   
-  private ScheduledThreadPoolExecutor stpe = null;
+  private Timer  refreshFormatTimer = null;
 
   final static Logger logger = LogManager.getLogger(FizRecordFactory.class);
 
@@ -65,12 +64,21 @@ public class FizRecordFactory extends RecordFactory {
     this.formatRegistry = new FormatRegistry(formats, transformations);
     
     repositoryIdentifier = properties.getProperty("FizRecordFactory.repositoryIdentifier");
+    
     if (repositoryIdentifier == null) {
       logger.warn("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
     
-    stpe = new ScheduledThreadPoolExecutor(2);
-    stpe.scheduleAtFixedRate(new RefreshFormatRegistry(this.formatRegistry, properties), 0, 1, TimeUnit.MINUTES);
+    
+    String refreshFormatSeconds = properties.getProperty("FizRecordFactory.refreshFormatSeconds");
+    if (refreshFormatSeconds == null) {
+        logger.warn("FizRecordFactory.refreshFormatSeconds from the properties file. Set 2 minutes default!");
+      //By default refresh every 2 minutes
+      refreshFormatSeconds = "120";
+    }
+    
+    refreshFormatTimer = new Timer("Timer");
+    refreshFormatTimer.schedule(new RefreshFormatRegistry(this.formatRegistry, properties), 60000L, Integer.parseInt(refreshFormatSeconds) * 1000);
   }
 
   public static List<Format> initFormats(Properties properties) {
@@ -162,8 +170,8 @@ public class FizRecordFactory extends RecordFactory {
     return ((Item) nativeItem).getIdentifier();
   }
   
-  public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
-      return stpe;
+  public Timer  getRefreshFormatTimer() {
+      return refreshFormatTimer;
   }
 
   /**

@@ -64,15 +64,15 @@ public class FormatRegistry {
     return transformations;
   }
 
-  public void setTransformations(List<Transformation> transformations) {
-	if (transformations == null || transformations.isEmpty()) {
+  public void setTransformations(List<Transformation> transformationsList) {
+	if (transformationsList == null || transformationsList.isEmpty()) {
 		LOGGER.warn("No transformations set. Do nothing!");
 	}
 	  
     if (!CollectionUtils.isEqualCollection(this.transformations, transformations)) {
       LOGGER.warn("Transformations differs in backend and registy! Set new value in transformation list!");
 	  this.transformations.clear();
-	  this.transformations.addAll(transformations);
+	  this.transformations.addAll(transformationsList);
     }
   }
 
@@ -80,15 +80,15 @@ public class FormatRegistry {
     return formats;
   }
 
-  public void setFormats(List<Format> formats) {
-	if (formats == null || formats.isEmpty()) {
+  public void setFormats(List<Format> formatList) {
+	if (formatList == null || formatList.isEmpty()) {
 		LOGGER.warn("No formats set. Do nothing!");
 	}
 	  
-	if (!CollectionUtils.isEqualCollection(this.transformations, transformations)) {
-		  LOGGER.warn("Transformations differs in backend and registy! Set new value in transformation list!");
-  	  this.transformations.clear();
-  	  this.transformations.addAll(transformations);
+	if (!CollectionUtils.isEqualCollection(this.formats, formatList)) {
+		  LOGGER.warn("Formats differs in backend and registy! Set new value in format list!");
+  	  this.formats.clear();
+  	  this.formats.addAll(formatList);
     }
   }
 

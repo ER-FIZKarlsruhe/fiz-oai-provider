@@ -2,6 +2,7 @@ package de.fiz_karlsruhe;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Transformation;
 
-public class RefreshFormatRegistry implements Runnable {
+public class RefreshFormatRegistry extends TimerTask {
 
 	private final static Logger logger = LogManager.getLogger(RefreshFormatRegistry.class);
 
@@ -23,6 +24,7 @@ public class RefreshFormatRegistry implements Runnable {
 		this.properties = properties;
 	}
 
+	@Override
 	public void run() {
 		logger.info("RefreshFormatRegistry.run() Refresh formats and transformations");
 		List<Format> formats = FizRecordFactory.initFormats(properties);

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -187,7 +188,7 @@ public class BackendService {
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        formatList = Arrays.asList(mapper.readValue(json, Format[].class));
+        formatList = new ArrayList<Format>(Arrays.asList(mapper.readValue(json, Format[].class)));
       }
     } catch (Exception e) {
       logger.error("Error on getFormats", e);
@@ -230,7 +231,7 @@ public class BackendService {
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        transformationList = Arrays.asList(mapper.readValue(json, Transformation[].class));
+        transformationList = new ArrayList<Transformation>(Arrays.asList(mapper.readValue(json, Transformation[].class)));
       }
     } catch (Exception e) {
       logger.error("Error on getTransformations", e);
@@ -251,7 +252,7 @@ public class BackendService {
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        setObjects = Arrays.asList(mapper.readValue(json, Set[].class));
+        setObjects = new ArrayList<Set>(Arrays.asList(mapper.readValue(json, Set[].class)));
       }
     } catch (Exception e) {
       logger.error("Error on getIdentifiers", e);
