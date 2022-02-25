@@ -276,6 +276,7 @@ public class FizOAICatalog extends AbstractCatalog {
       }
 
       for (Item item : result.getData()) {
+        logger.debug("FizOAICatalog item: " + item);
         String[] header = getRecordFactory().createHeader(item);
         headers.add(header[0]);
         identifiers.add(header[1]);

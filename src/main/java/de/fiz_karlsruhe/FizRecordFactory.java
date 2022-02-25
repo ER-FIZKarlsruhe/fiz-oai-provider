@@ -158,6 +158,7 @@ public class FizRecordFactory extends RecordFactory {
    */
   @Override
   public String getLocalIdentifier(Object nativeItem) {
+    logger.debug("nativeItem: " + nativeItem);
     return ((Item) nativeItem).getIdentifier();
   }
   
