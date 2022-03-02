@@ -10,11 +10,14 @@
  */
 package ORG.oclc.oai.server;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,28 +25,30 @@ import java.net.SocketException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.XMLConstants;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
-import ORG.oclc.oai.server.verb.BadVerb;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.server.verb.ServerVerb;
+import de.fiz_karlsruhe.FizRecordFactory;
+import de.fiz_karlsruhe.service.ConfigurationService;
 
 /**
  * OAIHandler is the primary Servlet for OAICat.
@@ -51,31 +56,21 @@ import ORG.oclc.oai.server.verb.ServerVerb;
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
  */
 public class OAIHandler extends HttpServlet {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     
+    final static Logger LOGGER = LogManager.getLogger(OAIHandler.class);
+    
     public static final String PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE = OAIHandler.class.getName() + ".properties";
+    
+    private static final String CONFIG_FILENAME = "oaicat.properties";
     
     private static final String VERSION = "1.5.62";
     private static boolean debug = false;
 
-//    private Transformer transformer = null;
-//    private boolean serviceUnavailable = false;
-//    private boolean monitor = false;
-//    private boolean forceRender = false;
-    protected HashMap attributesMap = new HashMap();
-//    private HashMap serverVerbs = null;
-//    private HashMap extensionVerbs = null;
-//    private String extensionPath = null;
-    
-//    private static Logger logger = Logger.getLogger(OAIHandler.class);
-//    static {
-//        BasicConfigurator.configure();
-//    }
-    
-    private Log log = LogFactory.getLog(OAIHandler.class);
+    private final Properties properties = new Properties();
+
+    protected final HashMap attributesMap = new HashMap();
+
     
     /**
      * Get the VERSION number
@@ -91,57 +86,102 @@ public class OAIHandler extends HttpServlet {
      * @param config servlet configuration information
      * @exception ServletException there was a problem with initialization
      */
+    @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         
         try {
             HashMap attributes = null;
-            ServletContext context = getServletContext();
-            Properties properties = (Properties) context.getAttribute(PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE);
-            if (properties == null) {
-                final String PROPERTIES_INIT_PARAMETER = "properties";
-                log.debug("OAIHandler.init(..): No '" + PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE + "' servlet context attribute. Trying to use init parameter '" + PROPERTIES_INIT_PARAMETER + "'");
-                
-                String fileName = config.getServletContext().getInitParameter(PROPERTIES_INIT_PARAMETER);
-                InputStream in;
-                try {
-                    log.debug("fileName=" + fileName);
-                    in = new FileInputStream(fileName);
-                } catch (FileNotFoundException e) {
-                    log.debug("file not found. Try the classpath: " + fileName);
-                    in = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
-                }
-                if (in != null) {
-                    log.debug("file was found: Load the properties");
-                    properties = new Properties();
-                    properties.load(in);
-                    attributes = getAttributes(properties);
-                    if (debug) System.out.println("OAIHandler.init: fileName=" + fileName);
-                }
-            } else {
-                log.debug("Load context properties");
-                attributes = getAttributes(properties);
-            }
+            loadConfiguration();
+            attributes = getAttributes(properties);
 
-            log.debug("Store global properties");
             attributesMap.put("global", attributes);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         } catch (Throwable e) {
-            e.printStackTrace();
+            LOGGER.error(e);
             throw new ServletException(e.getMessage());
         }
     }
+    
+    @Override
+    public void destroy() {
+        LOGGER.info("destroy called");
+        HashMap globalAttributes = (HashMap)attributesMap.get("global");
+        AbstractCatalog abstractCatalog = (AbstractCatalog)globalAttributes.get("OAIHandler.catalog");
+        ((FizRecordFactory)abstractCatalog.getRecordFactory()).getRefreshFormatTimer().cancel();
+        abstractCatalog.close();
+    }
+
+    private void loadConfiguration() {
+      if (readConfigFromFile(getConfigFolder(), CONFIG_FILENAME)) {
+          printConfiguration();
+      }
+  }
+    
+    protected String getConfigFolder() {
+      String confFolderPath = null;
+      
+      //Is a dedicated oai-backend conf folder defined?
+      String oaiBackendConfRoot = System.getProperty("oai.provider.conf.folder");
+
+      //Catalina conf is fallback
+      String tomcatRoot = System.getProperty("catalina.base");
+      
+      if (oaiBackendConfRoot != null && !oaiBackendConfRoot.isEmpty()) {
+        confFolderPath = new File(oaiBackendConfRoot).getAbsolutePath();
+      } else if (tomcatRoot != null && !tomcatRoot.isEmpty()) {
+        confFolderPath = new File(tomcatRoot, "conf").getAbsolutePath();
+      }
+
+      LOGGER.info("Use confFolderPath: {}", confFolderPath);
+      
+      return confFolderPath;
+  }
+    
+    protected boolean readConfigFromFile(String folder, String filename) {
+
+      File file = new File(folder, filename);
+      try {
+          Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+          try {
+              properties.load(reader);
+              
+              //Init ConfigurationService as singleton
+              ConfigurationService configService = ConfigurationService.getInstance(properties);
+
+              return true;
+          } finally {
+              reader.close();
+          }
+      } catch (Exception e) {
+          LOGGER.error("Unable to read property file: " + file.getAbsolutePath(),e);
+          return false;
+      }
+  }
+    
+    public void printConfiguration() {
+      StringBuilder builder = new StringBuilder();
+      for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+          if (entry.getKey().toString().toLowerCase().contains("password")) {
+              builder.append(entry.getKey() + " : ***********\n");
+          }
+          else {
+              builder.append(entry.getKey() + " : " + entry.getValue() + "\n");
+          }
+      }
+      LOGGER.info("Using the following configuration: \n" + builder.toString());
+  }
     
     public HashMap getAttributes(Properties properties)
     throws Throwable {
@@ -181,6 +221,7 @@ public class OAIHandler extends HttpServlet {
             }
             StreamSource xslSource = new StreamSource(is);
             TransformerFactory tFactory = TransformerFactory.newInstance();
+            tFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             Transformer transformer = tFactory.newTransformer(xslSource);
             attributes.put("OAIHandler.transformer", transformer);
         }
@@ -189,36 +230,36 @@ public class OAIHandler extends HttpServlet {
     
     public HashMap getAttributes(String pathInfo) {
         HashMap attributes = null;
-        log.debug("pathInfo=" + pathInfo);
+        LOGGER.debug("pathInfo=" + pathInfo);
         if (pathInfo != null && pathInfo.length() > 0) {
             if (attributesMap.containsKey(pathInfo)) {
-                log.debug("attributesMap containsKey");
+                LOGGER.debug("attributesMap containsKey");
                 attributes = (HashMap) attributesMap.get(pathInfo);
             } else {
-                log.debug("!attributesMap containsKey");
+                LOGGER.debug("!attributesMap containsKey");
                 try {
                     String fileName = pathInfo.substring(1) + ".properties";
-                    log.debug("attempting load of " + fileName);
+                    LOGGER.debug("attempting load of " + fileName);
                     InputStream in = Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream(fileName);
                     if (in != null) {
-                        log.debug("file found");
-                        Properties properties = new Properties();
-                        properties.load(in);
-                        attributes = getAttributes(properties);
+                        LOGGER.debug("file found");
+                        Properties fileProperties = new Properties();
+                        fileProperties.load(in);
+                        attributes = getAttributes(fileProperties);
                     } else {
-                        log.debug("file not found");
+                        LOGGER.debug("file not found");
                     }
                     attributesMap.put(pathInfo, attributes);
                 } catch (Throwable e) {
-                    log.debug("Couldn't load file", e);
+                    LOGGER.debug("Couldn't load file", e);
                     // do nothing
                 }
             }
         }
         if (attributes == null) {
-            log.debug("use global attributes");
+            LOGGER.debug("use global attributes");
             attributes = (HashMap) attributesMap.get("global");
         }
         return attributes;
@@ -233,6 +274,7 @@ public class OAIHandler extends HttpServlet {
      * @param response the servlet's response information
      * @exception IOException an I/O error occurred
      */
+    @Override
     public void doGet(HttpServletRequest request,
             HttpServletResponse response)
     throws IOException {
@@ -240,7 +282,7 @@ public class OAIHandler extends HttpServlet {
         if (!filterRequest(request, response)) {
             return;
         }
-        log.debug("attributes=" + attributes);
+        LOGGER.debug("attributes=" + attributes);
         Properties properties =
             (Properties) attributes.get("OAIHandler.properties");
         boolean monitor = false;
@@ -261,24 +303,22 @@ public class OAIHandler extends HttpServlet {
             forceRender = true;
         }
         
-//      try {
         request.setCharacterEncoding("UTF-8");
-//      } catch (UnsupportedEncodingException e) {
-//      e.printStackTrace();
-//      throw new IOException(e.getMessage());
-//      }
+
         Date then = null;
-        if (monitor) then = new Date();
-        if (debug) {
-            Enumeration headerNames = request.getHeaderNames();
-            System.out.println("OAIHandler.doGet: ");
-            while (headerNames.hasMoreElements()) {
-                String headerName = (String)headerNames.nextElement();
-                System.out.print(headerName);
-                System.out.print(": ");
-                System.out.println(request.getHeader(headerName));
-            }
+        if (monitor) {
+          then = new Date();
         }
+        
+        Enumeration headerNames = request.getHeaderNames();
+        LOGGER.debug("OAIHandler.doGet: ");
+        while (headerNames.hasMoreElements()) {
+            String headerName = (String)headerNames.nextElement();
+            LOGGER.debug(headerName);
+            LOGGER.debug(": ");
+            LOGGER.debug(request.getHeader(headerName));
+        }
+            
         if (serviceUnavailable) {
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
             "Sorry. This server is down for maintenance");
@@ -303,35 +343,19 @@ public class OAIHandler extends HttpServlet {
                     }
                 }
                 String result = getResult(attributes, request, response, serverTransformer, serverVerbs, extensionVerbs, extensionPath);
-//              log.debug("result=" + result);
-                
-//              if (serverTransformer) { // render on the server
-//              response.setContentType("text/html; charset=UTF-8");
-//              StringReader stringReader = new StringReader(getResult(request));
-//              StreamSource streamSource = new StreamSource(stringReader);
-//              StringWriter stringWriter = new StringWriter();
-//              transformer.transform(streamSource, new StreamResult(stringWriter));
-//              result = stringWriter.toString();
-//              } else { // render on the client
-//              response.setContentType("text/xml; charset=UTF-8");
-//              result = getResult(request);
-//              }
-                
+
                 Writer out = getWriter(request, response);
                 out.write(result);
                 out.close();
             } catch (FileNotFoundException e) {
-                if (debug) {
-                    e.printStackTrace();
-                    System.out.println("SC_NOT_FOUND: " + e.getMessage());
-                }
+                LOGGER.warn("SC_NOT_FOUND: " + e.getMessage(),e);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
             } catch (TransformerException e) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (OAIInternalServerError e) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (SocketException e) {
-                System.out.println(e.getMessage());
+                LOGGER.error(e.getMessage(),e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (Throwable e) {
                 e.printStackTrace();
@@ -339,13 +363,13 @@ public class OAIHandler extends HttpServlet {
             }
         }
         if (monitor) {
-            StringBuffer reqUri = new StringBuffer(request.getRequestURI().toString());
+            StringBuilder reqUri = new StringBuilder(request.getRequestURI().toString());
             String queryString = request.getQueryString();   // d=789
             if (queryString != null) {
                 reqUri.append("?").append(queryString);
             }
             Runtime rt = Runtime.getRuntime();
-            System.out.println(rt.freeMemory() + "/" + rt.totalMemory() + " "
+            LOGGER.info(rt.freeMemory() + "/" + rt.totalMemory() + " "
                     + ((new Date()).getTime()-then.getTime()) + "ms: "
                     + reqUri.toString());
         }
@@ -389,9 +413,8 @@ public class OAIHandler extends HttpServlet {
         try {
             boolean isExtensionVerb = extensionPath.equals(request.getPathInfo());
             String verb = request.getParameter("verb");
-            if (debug) {
-                System.out.println("OAIHandler.g<etResult: verb=>" + verb + "<");
-            }
+            LOGGER.debug("OAIHandler.g<etResult: verb=>" + verb + "<");
+            
             String result;
             Class verbClass = null;
             if (isExtensionVerb) {
@@ -416,9 +439,9 @@ public class OAIHandler extends HttpServlet {
             } catch (InvocationTargetException e) {
                 throw e.getTargetException();
             }
-            if (debug) {
-                System.out.println(result);
-            }
+
+            LOGGER.debug(result);
+
             return result;
         } catch (NoSuchMethodException e) {
             throw new OAIInternalServerError(e.getMessage());
@@ -437,29 +460,15 @@ public class OAIHandler extends HttpServlet {
     throws IOException {
         Writer out;
         String encodings = request.getHeader("Accept-Encoding");
-        if (debug) {
-            System.out.println("encodings=" + encodings);
-        }
+        LOGGER.debug("encodings={}", encodings);
+
         if (encodings != null && encodings.indexOf("gzip") != -1) {
-//          System.out.println("using gzip encoding");
-//          log.debug("using gzip encoding");
-            response.setHeader("Content-Encoding", "gzip");
-            out = new OutputStreamWriter(new GZIPOutputStream(response.getOutputStream()),
-            "UTF-8");
-//          } else if (encodings != null && encodings.indexOf("compress") != -1) {
-//          //  	    System.out.println("using compress encoding");
-//          response.setHeader("Content-Encoding", "compress");
-//          ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
-//          zos.putNextEntry(new ZipEntry("dummy name"));
-//          out = new OutputStreamWriter(zos, "UTF-8");
+          response.setHeader("Content-Encoding", "gzip");
+          out = new OutputStreamWriter(new GZIPOutputStream(response.getOutputStream()), "UTF-8");
         } else if (encodings != null && encodings.indexOf("deflate") != -1) {
-//          System.out.println("using deflate encoding");
-//          log.debug("using deflate encoding");
             response.setHeader("Content-Encoding", "deflate");
-            out = new OutputStreamWriter(new DeflaterOutputStream(response.getOutputStream()),
-            "UTF-8");
+            out = new OutputStreamWriter(new DeflaterOutputStream(response.getOutputStream()), "UTF-8");
         } else {
-//          log.debug("using no encoding");
             out = response.getWriter();
         }
         return out;
@@ -472,6 +481,7 @@ public class OAIHandler extends HttpServlet {
      * @param response the servlet's response information
      * @exception IOException an I/O error occurred
      */
+    @Override
     public void doPost(HttpServletRequest request,
             HttpServletResponse response)
     throws IOException {

@@ -45,7 +45,6 @@ public class Identify extends ServerVerb {
    */
   public static String construct(HashMap context, HttpServletRequest request, HttpServletResponse response,
       Transformer serverTransformer) throws TransformerException {
-    String version = (String) context.get("OAIHandler.version");
     AbstractCatalog abstractCatalog = (AbstractCatalog) context.get("OAIHandler.catalog");
     Properties properties = (Properties) context.get("OAIHandler.properties");
     String baseURL = properties.getProperty("OAIHandler.baseURL");
@@ -135,11 +134,11 @@ public class Identify extends ServerVerb {
           sb.append("\n");
         }
       }
-      sb.append(
-          "<description><toolkit xsi:schemaLocation=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit http://alcme.oclc.org/oaicat/toolkit.xsd\" xmlns=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit\"><title>OCLC's OAICat Repository Framework</title><author><name>Jeffrey A. Young</name><email>jyoung@oclc.org</email><institution>OCLC</institution></author><version>");
-      sb.append(version);
-      sb.append(
-          "</version><toolkitIcon>http://alcme.oclc.org/oaicat/oaicat_icon.gif</toolkitIcon><URL>http://www.oclc.org/research/software/oai/cat.shtm</URL></toolkit></description>");
+//      sb.append(
+//          "<description><toolkit xsi:schemaLocation=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit http://alcme.oclc.org/oaicat/toolkit.xsd\" xmlns=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit\"><title>OCLC's OAICat Repository Framework</title><author><name>Jeffrey A. Young</name><email>jyoung@oclc.org</email><institution>OCLC</institution></author><version>");
+//      sb.append(version);
+//      sb.append(
+//          "</version><toolkitIcon>http://alcme.oclc.org/oaicat/oaicat_icon.gif</toolkitIcon><URL>http://www.oclc.org/research/software/oai/cat.shtm</URL></toolkit></description>");
       String descriptions = abstractCatalog.getDescriptions();
       if (descriptions != null) {
         sb.append(descriptions);

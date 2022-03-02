@@ -2,32 +2,36 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.fiz-karlsruhe</groupId>
-  <artifactId>fiz-oai-provider</artifactId>
+  <artifactId>oai</artifactId>
   <packaging>war</packaging>
-  <version>0.1</version>
-  <name>fiz-oai-provider</name>
+
+  <version>1.2.0</version>
+  <name>oai</name>
   <url>http://maven.apache.org</url>
+
+  <parent>
+	<groupId>de.fiz.iee</groupId>
+	<artifactId>common</artifactId>
+	<version>develop-SNAPSHOT</version>
+  </parent>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>xalan</groupId>
-      <artifactId>xalan</artifactId>
-      <version>2.7.2</version>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.11.0</version>
+      <version>2.12.0</version>
       <exclusions>
         <exclusion>
           <groupId>xerces</groupId>
@@ -41,31 +45,210 @@
       <version>1.4.01</version>
     </dependency>
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.2</version>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.9.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.8</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <version>5.7.2</version>
+      <scope>test</scope>
+    </dependency>
+
+	  <dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-api</artifactId>
+	    <version>2.16.0</version>
+	  </dependency>
+	  <dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-core</artifactId>
+	    <version>2.16.0</version>
+	  </dependency>
+  
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-web</artifactId>
+        <version>2.16.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.10.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.9</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>2.23.4</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
-    <finalName>${project.name}</finalName>
+    <finalName>oai</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.2.3</version>
-
-      </plugin>
-      <plugin>
-        <groupId>org.apache.tomcat.maven</groupId>
-        <artifactId>tomcat7-maven-plugin</artifactId>
-        <version>2.2</version>
         <configuration>
-          <url>http://localhost:8080/manager/text</url>
-          <server>TomcatServer</server>
-          <path>/fiz-oai-provider</path>
+          <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.0</version>
+        <configuration>
+          <excludes>
+            <exclude>de.fiz_karlsruhe.integration.*</exclude>
+          </excludes>
+          <argLine>
+            --illegal-access=permit
+          </argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+          <includes>
+            <include>de.fiz_karlsruhe.integration.*IT.java</include>
+          </includes>
+          <argLine>
+            --illegal-access=permit
+          </argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.mock-server</groupId>
+        <artifactId>mockserver-maven-plugin</artifactId>
+        <version>5.5.4</version>
+        <configuration>
+          <serverPort>1080</serverPort>
+          <proxyPort>1090</proxyPort>
+          <logLevel>WARN</logLevel>
+          <initializationClass>de.fiz_karlsruhe.integration.MockServerUtil</initializationClass>
+        </configuration>
+        <executions>
+          <execution>
+            <id>process-test-classes</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.4.19.v20190610</version>
+        <configuration>
+          <httpConnector>
+            <port>8999</port>
+          </httpConnector>
+          <stopKey>quit</stopKey>
+          <stopPort>9000</stopPort>
+          <webApp>
+            <contextPath>/oai</contextPath>
+            <descriptor>${project.build.directory}/oai/WEB-INF/web.xml</descriptor>
+          </webApp>
+          <systemProperties>
+            <systemProperty>
+              <name>oai.provider.conf.folder</name>
+              <value>${project.build.directory}/oai/WEB-INF/</value>
+            </systemProperty>
+            <systemProperty>
+              <name>logback.configurationFile</name>
+              <value>${project.build.directory}/oai/WEB-INF/fiz-oai-provider-log4j.properties</value>
+            </systemProperty>
+          </systemProperties>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-jetty</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>stop-jetty</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <release>11</release>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-dependency-analyzer</artifactId>
+            <version>1.11.1</version>
+          </dependency>
+        </dependencies>
+        
       </plugin>
     </plugins>
   </build>
+
+
+  <repositories>
+    <repository>
+        <id>ecs-marep</id>
+        <url>https://dev.fiz-karlsruhe.de/artifactory/repo</url>
+    </repository>
+  </repositories>
+  
+  
 </project>

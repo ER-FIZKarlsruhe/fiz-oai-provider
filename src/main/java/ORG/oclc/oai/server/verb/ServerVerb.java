@@ -33,9 +33,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.util.OAIUtil;
-//import javax.servlet.http.HttpUtils;
 
 /**
  * ServerVerb is the parent class for each of the server-side OAI verbs.
@@ -43,8 +45,7 @@ import ORG.oclc.oai.util.OAIUtil;
  * @author Jefffrey A. Young, OCLC Online Computer Library Center
  */
 public abstract class ServerVerb {
-    private static final boolean debug = false;
-
+    protected final static Logger LOGGER = LogManager.getLogger(ServerVerb.class);
     private int statusCode = HttpServletResponse.SC_OK; // http status
     private String message = null; // http response message
 
@@ -66,9 +67,7 @@ public abstract class ServerVerb {
      * @param xmlText complete XML response string
      */
     protected void init(String xmlText) {
-        if (debug) {
-            System.out.println("ServerVerb.init: xmlText=" + xmlText);
-        }
+        LOGGER.info("ServerVerb.init: xmlText={}", xmlText);
         this.xmlText = xmlText;
     }
 
@@ -113,7 +112,7 @@ public abstract class ServerVerb {
      * @return a String representation of the OAI response Date.
      */
     public static String createResponseDate(Date date) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         TimeZone tz = TimeZone.getTimeZone("UTC");
         formatter.setTimeZone(tz);
@@ -131,7 +130,7 @@ public abstract class ServerVerb {
             List validParamNames,
             String baseURL,
             boolean xmlEncodeSetSpec) {
-        StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
         sb.append("<request");
         Enumeration params = request.getParameterNames();
         while (params.hasMoreElements()) {
@@ -179,11 +178,11 @@ public abstract class ServerVerb {
             String name = (String)params.nextElement();
             String[] values = request.getParameterValues(name);
             if (!validParamNames.contains(name)) {
-                return true;
+              return true;
             } else if (values.length > 1) {
-                return true;
+              return true;
             } else if (values.length == 1 && !catalog.isValidParam(name, values[0])) {
-            	return true;
+              return true;
             }
         }
         String identifier = request.getParameter("identifier");
@@ -270,10 +269,9 @@ public abstract class ServerVerb {
             if (propertyName.startsWith(propertyPrefix)) {
                 String verb = propertyName.substring(propertyPrefix.length());
                 String verbClassName = (String)properties.get(propertyName);
-                if (debug) {
-                    System.out.println("ExtensionVerb.getVerbs: verb=" + verb);
-                    System.out.println("ExtensionVerb.verbClassName=" + verbClassName);
-                }
+                LOGGER.debug("ExtensionVerb.getVerbs: verb={}", verb);
+                LOGGER.debug("ExtensionVerb.verbClassName={}", verbClassName);
+                
                 try {
                     Class serverVerbClass = Class.forName(verbClassName);
                     Method init =
@@ -285,12 +283,9 @@ public abstract class ServerVerb {
                         throw e.getTargetException();
                     }
                     extensionVerbsMap.put(verb, serverVerbClass);
-                    if (debug) {
-                        System.out.println("ExtensionVerb.getVerbs: " + verb + "=" + verbClassName);
-                    }
+                    LOGGER.debug("ExtensionVerb.getVerbs: " + verb + "=" + verbClassName);
                 } catch (Throwable e) {
-                    System.err.println("ExtensionVerb: couldn't construct: " + verbClassName);
-                    e.printStackTrace();
+                    LOGGER.error("ExtensionVerb: couldn't construct: " + verbClassName, e);
                 }
             }
         }
