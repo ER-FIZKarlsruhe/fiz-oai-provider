@@ -290,7 +290,16 @@
     </plugins>
   </build>
 
-
+ <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>2.0.0</version>
+      </plugin>
+    </plugins>
+  </reporting>
+  
   <repositories>
     <repository>
         <id>ecs-marep</id>
