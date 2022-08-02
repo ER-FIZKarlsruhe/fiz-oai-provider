@@ -32,6 +32,9 @@ public class ConfigurationService {
 
   final static Logger logger = LogManager.getLogger(ConfigurationService.class);
 
+  final static int SOCKET_TIMEOUT = 15000;
+  final static int CONNECTION_TIMEOUT = 15000;
+  
   private ConfigurationService(Properties properties) {
     ConfigurationService.properties = properties;
   }
@@ -145,6 +148,28 @@ public class ConfigurationService {
 
     return color;
   }
+  
+  public int getHttpSocketTimeout() {
+      String property = properties.getProperty("http.socket.timeout");
+      int timeout = SOCKET_TIMEOUT;
+      
+      if (StringUtils.isNotEmpty(property)) {
+          timeout = Integer.valueOf(property);
+      }
+
+      return timeout;
+    }
+  
+  public int getHttpConnectionTimeout() {
+      String property = properties.getProperty("http.connection.timeout");
+      int timeout = CONNECTION_TIMEOUT;
+      
+      if (StringUtils.isNotEmpty(property)) {
+          timeout = Integer.valueOf(property);
+      }
+
+      return timeout;
+    }
   
   
 }
