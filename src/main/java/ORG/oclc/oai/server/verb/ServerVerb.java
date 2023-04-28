@@ -43,6 +43,7 @@ import ORG.oclc.oai.util.OAIUtil;
  * ServerVerb is the parent class for each of the server-side OAI verbs.
  *
  * @author Jefffrey A. Young, OCLC Online Computer Library Center
+ * @author Stefan Hofmann, FIZ Karlsruhe - Leibniz-Institut fuer Informationsinfrastruktur GmbH
  */
 public abstract class ServerVerb {
     protected final static Logger LOGGER = LogManager.getLogger(ServerVerb.class);

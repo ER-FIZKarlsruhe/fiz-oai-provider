@@ -42,6 +42,7 @@ import de.fiz_karlsruhe.FormatRegistry;
  * database. Implement this interface to have OAICat work with your database.
  *
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
+ * @author Stefan Hofmann, FIZ Karlsruhe - Leibniz-Institut fuer Informationsinfrastruktur GmbH
  */
 public abstract class AbstractCatalog {
   

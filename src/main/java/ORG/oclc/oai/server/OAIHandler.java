@@ -54,6 +54,7 @@ import de.fiz_karlsruhe.service.ConfigurationService;
  * OAIHandler is the primary Servlet for OAICat.
  *
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
+ * @author Stefan Hofmann, FIZ Karlsruhe - Leibniz-Institut fuer Informationsinfrastruktur GmbH
  */
 public class OAIHandler extends HttpServlet {
     private static final long serialVersionUID = 1L;

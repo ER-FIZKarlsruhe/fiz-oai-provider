@@ -30,6 +30,7 @@ import de.fiz_karlsruhe.FormatRegistry;
  * client-side and on the server-side to represent a ListRecords response
  *
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
+ * @author Stefan Hofmann, FIZ Karlsruhe - Leibniz-Institut fuer Informationsinfrastruktur GmbH
  */
 public class ListRecords extends ServerVerb {
   private static ArrayList validParamNames1 = new ArrayList();
