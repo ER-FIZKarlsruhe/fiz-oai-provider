@@ -51,11 +51,11 @@ public class FormatRegistry {
     this.formats = formats;
     this.transformations = transformations;
 
-    if (formats.size() == 0) {
+    if (formats == null || formats.size() == 0) {
       LOGGER.warn("No formats have been initialized!");
     }
 
-    if (transformations.size() == 0) {
+    if (transformations == null || transformations.size() == 0) {
       LOGGER.warn("No transformations have been initialized!");
     }
   }

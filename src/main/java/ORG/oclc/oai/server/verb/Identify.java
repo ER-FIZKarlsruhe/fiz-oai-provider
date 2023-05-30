@@ -29,6 +29,7 @@ import ORG.oclc.oai.server.catalog.AbstractCatalog;
  * client
  *
  * @author Jeffrey A. Young, OCLC Online Computer Library Center
+ * @author Stefan Hofmann, FIZ Karlsruhe - Leibniz-Institut fuer Informationsinfrastruktur GmbH
  */
 public class Identify extends ServerVerb {
   private static ArrayList validParamNames = new ArrayList();

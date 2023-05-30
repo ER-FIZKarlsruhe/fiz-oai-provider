@@ -33,6 +33,8 @@ import de.fiz_karlsruhe.service.BackendService;
  * native records such as the identifier, datestamp, and sets. Note that the
  * Crosswalk implementations are responsible for the creating the
  * &lt;metadata&gt; part of the response from native records.
+ * 
+ * @author Stefan Hofmann, FIZ Karlsruhe - Leibniz-Institut fuer Informationsinfrastruktur GmbH
  */
 public abstract class RecordFactory {
 

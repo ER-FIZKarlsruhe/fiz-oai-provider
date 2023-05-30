@@ -18,7 +18,6 @@ package de.fiz_karlsruhe.service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,8 +51,7 @@ public class BackendService {
 
   final static Logger logger = LogManager.getLogger(BackendService.class);
 
-  final static int SOCKET_TIMEOUT = 15000;
-  final static int CONNECTION_TIMEOUT = 15000;
+
 
   private BackendService(String backendBaseUrl) {
     BackendService.backendBaseUrl = backendBaseUrl;
@@ -262,10 +260,18 @@ public class BackendService {
   }
 
   private HttpGet getHttpGet(String url) {
+    ConfigurationService configurationService = ConfigurationService.getInstance();
+      
+    int socketTimeout = configurationService.getHttpSocketTimeout();
+    int connectionTimeout = configurationService.getHttpConnectionTimeout();
+    logger.info("Init Http cient");
+    logger.info("Set socket timout " + socketTimeout);
+    logger.info("Set connection timout " + connectionTimeout);
+    
     HttpGet httpGet = new HttpGet(url);
     httpGet.setConfig(RequestConfig.custom()
-            .setSocketTimeout(SOCKET_TIMEOUT)
-            .setConnectTimeout(CONNECTION_TIMEOUT)
+            .setSocketTimeout(socketTimeout)
+            .setConnectTimeout(connectionTimeout)
             .build());
     return httpGet;
   }
