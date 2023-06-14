@@ -272,7 +272,7 @@ public class FizOAICatalog extends AbstractCatalog {
           restoken.getFrom(), restoken.getUntil(), restoken.getMetadataPrefix());
 
       if (result == null || result.getData().isEmpty()) {
-        throw new OAIInternalServerError("Empty resultSet");
+        throw new BadResumptionTokenException();
       }
 
       for (Item item : result.getData()) {
@@ -426,7 +426,7 @@ public class FizOAICatalog extends AbstractCatalog {
           token.getUntil(), token.getMetadataPrefix());
 
       if (result == null || result.getData().isEmpty()) {
-        throw new OAIInternalServerError("There is a problem wit the resumption token. Cannot retrieve any results!");
+          throw new BadResumptionTokenException();
       }
 
       for (Item item : result.getData()) {
