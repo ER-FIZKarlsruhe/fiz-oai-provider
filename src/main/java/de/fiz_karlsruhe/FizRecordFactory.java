@@ -93,7 +93,7 @@ public class FizRecordFactory extends RecordFactory {
     List<Format> formats = null;
     try {
       formats = BackendService.getInstance(backendBaseUrl).getFormats();
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.error("Cannot read supported formats from backend", e);
     }
 
@@ -112,7 +112,7 @@ public class FizRecordFactory extends RecordFactory {
     List<Transformation> transformations = null;
     try {
       transformations = BackendService.getInstance(backendBaseUrl).getTransformations();
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.error("Cannot read supported transformations from backend", e);
     }
     
