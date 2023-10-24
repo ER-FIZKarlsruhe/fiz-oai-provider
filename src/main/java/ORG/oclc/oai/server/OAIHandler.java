@@ -351,14 +351,16 @@ public class OAIHandler extends HttpServlet {
                 LOGGER.warn("SC_NOT_FOUND: " + e.getMessage(),e);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
             } catch (TransformerException e) {
+                LOGGER.error(e.getMessage() ,e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (OAIInternalServerError e) {
+                LOGGER.error(e.getMessage(), e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (SocketException e) {
-                LOGGER.error(e.getMessage(),e);
+                LOGGER.error(e.getMessage(), e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (Throwable e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             }
         }
