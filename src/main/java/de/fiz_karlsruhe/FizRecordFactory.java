@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -44,6 +47,8 @@ public class FizRecordFactory extends RecordFactory {
   private String repositoryIdentifier = null;
   
   private Timer  refreshFormatTimer = null;
+  
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
   final static Logger logger = LogManager.getLogger(FizRecordFactory.class);
 
@@ -68,17 +73,16 @@ public class FizRecordFactory extends RecordFactory {
     if (repositoryIdentifier == null) {
       logger.warn("FizRecordFactory.repositoryIdentifier is missing from the properties file");
     }
-    
-    
+
     String refreshFormatSeconds = properties.getProperty("FizRecordFactory.refreshFormatSeconds");
     if (refreshFormatSeconds == null) {
         logger.warn("FizRecordFactory.refreshFormatSeconds from the properties file. Set 2 minutes default!");
       //By default refresh every 2 minutes
       refreshFormatSeconds = "120";
     }
-    
-    refreshFormatTimer = new Timer("Timer");
-    refreshFormatTimer.schedule(new RefreshFormatRegistry(this.formatRegistry, properties), 60000L, Integer.parseInt(refreshFormatSeconds) * 1000);
+
+    RefreshFormatRegistry refreshRunnable = new RefreshFormatRegistry(this.formatRegistry, properties);
+    scheduler.scheduleAtFixedRate(refreshRunnable, 60000L, Integer.parseInt(refreshFormatSeconds) * 1000, TimeUnit.MILLISECONDS);
   }
 
   public static List<Format> initFormats(Properties properties) {

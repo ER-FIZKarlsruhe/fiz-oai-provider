@@ -183,11 +183,14 @@ public class BackendService {
     List<Format> formatList = null;
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+      CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+        
+      logger.info("getFormats response code: {}", response.getStatusLine().getStatusCode());
+        
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         formatList = new ArrayList<Format>(Arrays.asList(mapper.readValue(json, Format[].class)));
-      }
+      } 
     } catch (Exception e) {
       logger.error("Error on getFormats", e);
     }
@@ -205,6 +208,9 @@ public class BackendService {
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+        
+      logger.info("getFormat response code: {}", response.getStatusLine().getStatusCode());
+        
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         format = mapper.readValue(json, Format.class);
@@ -227,6 +233,9 @@ public class BackendService {
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+        
+      logger.info("getTransformations response code: {}", response.getStatusLine().getStatusCode());
+        
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         transformationList = new ArrayList<Transformation>(Arrays.asList(mapper.readValue(json, Transformation[].class)));
@@ -248,6 +257,10 @@ public class BackendService {
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+        
+      logger.info("getSets response code: {}", response.getStatusLine().getStatusCode());
+        
+        
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         setObjects = new ArrayList<Set>(Arrays.asList(mapper.readValue(json, Set[].class)));

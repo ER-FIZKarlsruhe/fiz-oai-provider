@@ -2,15 +2,13 @@ package de.fiz_karlsruhe;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.TimerTask;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Transformation;
 
-public class RefreshFormatRegistry extends TimerTask {
+public class RefreshFormatRegistry implements Runnable {
 
 	private final static Logger logger = LogManager.getLogger(RefreshFormatRegistry.class);
 
