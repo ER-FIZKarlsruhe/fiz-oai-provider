@@ -277,9 +277,9 @@ public class BackendService {
       
     int socketTimeout = configurationService.getHttpSocketTimeout();
     int connectionTimeout = configurationService.getHttpConnectionTimeout();
-    logger.info("Init Http cient");
-    logger.info("Set socket timout " + socketTimeout);
-    logger.info("Set connection timout " + connectionTimeout);
+    logger.debug("Init Http cient");
+    logger.debug("Set socket timout " + socketTimeout);
+    logger.debug("Set connection timout " + connectionTimeout);
     
     HttpGet httpGet = new HttpGet(url);
     httpGet.setConfig(RequestConfig.custom()
