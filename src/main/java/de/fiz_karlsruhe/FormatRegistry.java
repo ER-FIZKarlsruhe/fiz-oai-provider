@@ -41,23 +41,17 @@ public class FormatRegistry {
 
   final static Logger LOGGER = LogManager.getLogger(FormatRegistry.class);
   
-  //Use a synchronized list that can be filled from another thread (RefreshFormatRegistry)
-  private List<Transformation> transformations = Collections.synchronizedList(new ArrayList<Transformation>());
+  private List<Transformation> transformations;
 
-  //Use a synchronized list that can be filled from another thread (RefreshFormatRegistry)
-  private List<Format> formats = Collections.synchronizedList(new ArrayList<Format>());
+  private List<Format> formats;
 
   public FormatRegistry(List<Format> formats, List<Transformation> transformations) {
-    this.formats = formats;
-    this.transformations = transformations;
+    //Use synchronized lists that can be filled from another thread (RefreshFormatRegistry)
+    this.formats = Collections.synchronizedList(new ArrayList<Format>());
+    this.transformations = Collections.synchronizedList(new ArrayList<Transformation>());
 
-    if (formats == null || formats.size() == 0) {
-      LOGGER.warn("No formats have been initialized!");
-    }
-
-    if (transformations == null || transformations.size() == 0) {
-      LOGGER.warn("No transformations have been initialized!");
-    }
+    setFormats(formats);
+    setTransformations(transformations);
   }
 
   public List<Transformation> getTransformations() {
@@ -67,6 +61,7 @@ public class FormatRegistry {
   public void setTransformations(List<Transformation> transformationsList) {
 	if (transformationsList == null || transformationsList.isEmpty()) {
 		LOGGER.warn("No transformations set. Do nothing!");
+		return;
 	}
 	  
     if (!CollectionUtils.isEqualCollection(this.transformations, transformations)) {
@@ -83,6 +78,7 @@ public class FormatRegistry {
   public void setFormats(List<Format> formatList) {
 	if (formatList == null || formatList.isEmpty()) {
 		LOGGER.warn("No formats set. Do nothing!");
+		return;
 	}
 	  
 	if (!CollectionUtils.isEqualCollection(this.formats, formatList)) {
