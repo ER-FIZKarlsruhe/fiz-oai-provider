@@ -3,6 +3,7 @@
 	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" output="target/classes" path="src/main/java">
@@ -22,6 +23,7 @@
 		<attributes>
 			<attribute name="test" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar" sourcepath="M2_REPO/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0-sources.jar"/>
@@ -42,9 +44,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/httpcomponents/httpclient/4.5.8/httpclient-4.5.8.jar" sourcepath="M2_REPO/org/apache/httpcomponents/httpclient/4.5.8/httpclient-4.5.8-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/httpcomponents/httpcore/4.4.11/httpcore-4.4.11.jar" sourcepath="M2_REPO/org/apache/httpcomponents/httpcore/4.4.11/httpcore-4.4.11-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/commons-codec/commons-codec/1.11/commons-codec-1.11.jar" sourcepath="M2_REPO/commons-codec/commons-codec/1.11/commons-codec-1.11-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/mock-server/mockserver-netty/5.5.4/mockserver-netty-5.5.4.jar" sourcepath="M2_REPO/org/mock-server/mockserver-netty/5.5.4/mockserver-netty-5.5.4-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/mock-server/mockserver-client-java/5.5.4/mockserver-client-java-5.5.4.jar" sourcepath="M2_REPO/org/mock-server/mockserver-client-java/5.5.4/mockserver-client-java-5.5.4-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/mock-server/mockserver-core/5.5.4/mockserver-core-5.5.4.jar" sourcepath="M2_REPO/org/mock-server/mockserver-core/5.5.4/mockserver-core-5.5.4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/io/netty/netty-buffer/4.1.35.Final/netty-buffer-4.1.35.Final.jar" sourcepath="M2_REPO/io/netty/netty-buffer/4.1.35.Final/netty-buffer-4.1.35.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/io/netty/netty-common/4.1.35.Final/netty-common-4.1.35.Final.jar" sourcepath="M2_REPO/io/netty/netty-common/4.1.35.Final/netty-common-4.1.35.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/io/netty/netty-codec/4.1.35.Final/netty-codec-4.1.35.Final.jar" sourcepath="M2_REPO/io/netty/netty-codec/4.1.35.Final/netty-codec-4.1.35.Final-sources.jar"/>
@@ -96,7 +95,7 @@
 	<classpathentry kind="var" path="M2_REPO/com/sun/istack/istack-commons-runtime/3.0.7/istack-commons-runtime-3.0.7.jar" sourcepath="M2_REPO/com/sun/istack/istack-commons-runtime/3.0.7/istack-commons-runtime-3.0.7-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/jvnet/staxex/stax-ex/1.8/stax-ex-1.8.jar" sourcepath="M2_REPO/org/jvnet/staxex/stax-ex/1.8/stax-ex-1.8-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/sun/xml/fastinfoset/FastInfoset/1.2.15/FastInfoset-1.2.15.jar" sourcepath="M2_REPO/com/sun/xml/fastinfoset/FastInfoset/1.2.15/FastInfoset-1.2.15-sources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
@@ -104,6 +103,7 @@
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>

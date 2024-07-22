@@ -1,13 +1,9 @@
-FROM tomcat:9-jre11-temurin-focal
+FROM tomcat:9-jre17-temurin-focal
 MAINTAINER "FIZ-Karlsruhe"
 
 ARG UNAME=oai_provider
 ARG UID=8008
 ARG GID=8008
-
-#ARG UNAME=admin
-#ARG UID=1000
-#ARG GID=1000
 
 RUN groupadd -g $GID -o $UNAME
 RUN useradd -m -u $UID -g $GID -o -s /bin/bash $UNAME

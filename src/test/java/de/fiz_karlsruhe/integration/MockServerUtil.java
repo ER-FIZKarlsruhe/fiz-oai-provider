@@ -35,7 +35,7 @@ public class MockServerUtil  implements ExpectationInitializer {
   @Override
   public void initializeExpectations(MockServerClient mockServerClient) {
     logger.info("MockServer initializeExpectations");
-    ConfigurationProperties.httpProxy("proxy.fiz-karlsruhe.de:8888");
+    ConfigurationProperties.forwardHttpProxy("proxy.fiz-karlsruhe.de:8888");
     
     initGetSpecificFormat(mockServerClient);
     initGetAllFormats(mockServerClient);
