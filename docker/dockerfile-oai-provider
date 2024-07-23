@@ -1,8 +1,6 @@
 FROM tomcat:9-jre17-temurin-focal
 MAINTAINER "FIZ-Karlsruhe"
 
-RUN  apt-get update -y && apt-get upgrade -y
-
 ARG UNAME=oai_provider
 ARG UID=8008
 ARG GID=8008
