@@ -187,11 +187,13 @@ public class ResumptionToken {
       }
 
     } catch (DateTimeParseException e) {
+        logger.error("Invalid from or until date", e);
       throw new BadResumptionTokenException();
     }
 
     if (frominstant != null && untilinstant != null) {
       if (frominstant.compareTo(untilinstant) > 0) {
+          logger.error("Invalid date rage. From date is older than until date!");
         throw new BadResumptionTokenException();
       }
     }
