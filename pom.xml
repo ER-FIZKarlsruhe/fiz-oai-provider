@@ -6,6 +6,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <project_version>develop-SNAPSHOT</project_version>
+
     <log4j.version>2.23.1</log4j.version>
 
   </properties>

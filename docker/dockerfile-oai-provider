@@ -13,6 +13,13 @@ RUN chmod -R 770 /usr/local/tomcat/
 
 RUN export JAVA_OPTS="$JAVA_OPTS -Dlog4j2.formatMsgNoLookups=true"
 
+# --- Harden Tomcat error pages ---
+# Add ErrorReportValve under <Host> to prevent stack traces and server info leakage
+# (idempotent: only inserts if not already present)
+RUN grep -q 'org.apache.catalina.valves.ErrorReportValve' /usr/local/tomcat/conf/server.xml \
+ || sed -i 's#</Host>#  <!-- Prevent Tomcat from showing stack traces and server info on error pages -->\n  <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>\n</Host>#' /usr/local/tomcat/conf/server.xml
+
+
 USER $UNAME
 
 COPY target/oai.war /usr/local/tomcat/webapps
