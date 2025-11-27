@@ -107,9 +107,16 @@ public class Identify extends ServerVerb {
 //          sb.append("<compression>compress</compression>");
       sb.append("<compression>deflate</compression>");
       // }
+
+      String repositoryDecription = properties.getProperty("Identify.description");
       String repositoryIdentifier = properties.getProperty("Identify.repositoryIdentifier");
       String sampleIdentifier = properties.getProperty("Identify.sampleIdentifier");
-      if (repositoryIdentifier != null && sampleIdentifier != null) {
+
+      if (repositoryDecription != null) {
+          sb.append("<description>");
+          sb.append(repositoryDecription);
+          sb.append("</description>");
+      } else if (repositoryIdentifier != null && sampleIdentifier != null) {
         sb.append("<description>");
         sb.append("<oai-identifier xmlns=\"http://www.openarchives.org/OAI/2.0/oai-identifier\"");
         sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
@@ -126,6 +133,7 @@ public class Identify extends ServerVerb {
         sb.append("</oai-identifier>");
         sb.append("</description>");
       }
+
       String propertyPrefix = "Identify.description";
       Enumeration propNames = properties.propertyNames();
       while (propNames.hasMoreElements()) {
