@@ -134,15 +134,15 @@ public class Identify extends ServerVerb {
         sb.append("</description>");
       }
 
-      String propertyPrefix = "Identify.description";
-      Enumeration propNames = properties.propertyNames();
-      while (propNames.hasMoreElements()) {
-        String propertyName = (String) propNames.nextElement();
-        if (propertyName.startsWith(propertyPrefix)) {
-          sb.append((String) properties.get(propertyName));
-          sb.append("\n");
-        }
-      }
+//      String propertyPrefix = "Identify.description";
+//      Enumeration propNames = properties.propertyNames();
+//      while (propNames.hasMoreElements()) {
+//        String propertyName = (String) propNames.nextElement();
+//        if (propertyName.startsWith(propertyPrefix)) {
+//          sb.append((String) properties.get(propertyName));
+//          sb.append("\n");
+//        }
+//      }
 //      sb.append(
 //          "<description><toolkit xsi:schemaLocation=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit http://alcme.oclc.org/oaicat/toolkit.xsd\" xmlns=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit\"><title>OCLC's OAICat Repository Framework</title><author><name>Jeffrey A. Young</name><email>jyoung@oclc.org</email><institution>OCLC</institution></author><version>");
 //      sb.append(version);
