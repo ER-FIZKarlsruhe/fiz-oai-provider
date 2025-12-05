@@ -98,9 +98,11 @@ public class ListSets extends ServerVerb {
 		while (sets.hasNext()) {
 		    sb.append((String)sets.next());
 		}
+
+        String newResumptionToken = (String) listSetsMap.get("resumptionToken");
 		Map newResumptionMap = (Map)listSetsMap.get("resumptionMap");
 		if (newResumptionMap != null) {
-		    String newResumptionToken = (String)newResumptionMap.get("resumptionToken");
+
 		    String expirationDate = (String)newResumptionMap.get("expirationDate");
 		    String completeListSize = (String)newResumptionMap.get("completeListSize");
 		    String cursor = (String)newResumptionMap.get("cursor");
@@ -121,9 +123,14 @@ public class ListSets extends ServerVerb {
 			sb.append("\"");
 		    }
 		    sb.append(">");
-		    sb.append(newResumptionToken);
 		    sb.append("</resumptionToken>");
-		} else if (oldResumptionToken != null) {
+        } else if (newResumptionToken != null) {
+            sb.append("<resumptionToken>");
+            sb.append(newResumptionToken);
+            sb.append("</resumptionToken>");
+        }
+
+        else if (oldResumptionToken != null) {
 		    sb.append("<resumptionToken />");
 		}
 		sb.append("</ListSets>");

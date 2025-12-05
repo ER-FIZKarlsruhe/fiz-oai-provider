@@ -342,7 +342,7 @@ public abstract class AbstractCatalog {
      * @exception NoSetHierarchyException No sets are defined for this repository
      * @exception OAIInternalServerError An error occurred
      */
-    public abstract Map listSets() throws NoSetHierarchyException, OAIInternalServerError;
+    public abstract Map listSets() throws NoSetHierarchyException, OAIInternalServerError, BadResumptionTokenException;
 
     /**
      * Retrieve the next cluster of supported sets.

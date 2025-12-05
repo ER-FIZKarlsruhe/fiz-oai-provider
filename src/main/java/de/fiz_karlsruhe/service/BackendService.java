@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.fiz_karlsruhe.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -37,11 +38,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
-import de.fiz_karlsruhe.model.Format;
-import de.fiz_karlsruhe.model.Item;
-import de.fiz_karlsruhe.model.SearchResult;
-import de.fiz_karlsruhe.model.Set;
-import de.fiz_karlsruhe.model.Transformation;
 
 public class BackendService {
 
@@ -248,7 +244,7 @@ public class BackendService {
   }
   
   
-  public List<Set> getSets() throws OAIInternalServerError, IOException {
+  public List<Set> getSets() throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     String url = backendBaseUrl + "/set";
     logger.info("getSets url {}", url);
@@ -271,6 +267,39 @@ public class BackendService {
 
     return setObjects;
   }
+
+    public ListSetsResult searchSets(String resumptionToken) {
+        ObjectMapper mapper = new ObjectMapper();
+        String url = backendBaseUrl + "set/search";
+
+        if (StringUtils.isNotEmpty(resumptionToken)) {
+            url = url + "?resumptionToken=" + resumptionToken;
+        }
+
+        logger.info("searchSets url {}", url);
+
+        ListSetsResult result = null;
+
+        try (CloseableHttpClient client = HttpClientBuilder.create().build();
+             CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            logger.info("getSets response code: {}", statusCode);
+
+            if (statusCode == 200) {
+                String json = EntityUtils.toString(response.getEntity());
+                result = mapper.readValue(json, ListSetsResult.class);
+            } else {
+                logger.warn("Non-200 status when calling searchSets: {}", statusCode);
+            }
+        } catch (Exception e) {
+            logger.error("Error on searchSets", e);
+        }
+
+        return result;
+    }
+
+
 
   private HttpGet getHttpGet(String url) {
     ConfigurationService configurationService = ConfigurationService.getInstance();

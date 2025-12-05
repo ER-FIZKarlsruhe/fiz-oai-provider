@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
+import de.fiz_karlsruhe.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,10 +39,6 @@ import ORG.oclc.oai.server.verb.NoMetadataFormatsException;
 import ORG.oclc.oai.server.verb.NoSetHierarchyException;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.util.OAIUtil;
-import de.fiz_karlsruhe.model.Item;
-import de.fiz_karlsruhe.model.ResumptionToken;
-import de.fiz_karlsruhe.model.SearchResult;
-import de.fiz_karlsruhe.model.Set;
 import de.fiz_karlsruhe.service.BackendService;
 
 /**
@@ -451,28 +448,6 @@ public class FizOAICatalog extends AbstractCatalog {
     return listRecordsMap;
   }
 
-  @Override
-  public Map listSets() throws NoSetHierarchyException, OAIInternalServerError {
-    Map<String, Iterator> setsIterator = new HashMap<>();
-    List<String> xmlSets = new ArrayList<>();
-
-    logger.info("listSets");
-
-    List<Set> backendSetList;
-    try {
-      backendSetList = backendService.getSets();
-    } catch (IOException e) {
-      throw new OAIInternalServerError("Cannot retrieve sets from backend");
-    }
-
-    for (Set setItem : backendSetList) {
-      xmlSets.add(getSetXML(setItem));
-    }
-
-    setsIterator.put("sets", xmlSets.iterator());
-    return setsIterator;
-
-  }
 
   private String getSetXML(Set setItem) throws IllegalArgumentException {
     StringBuilder sb = new StringBuilder();
@@ -500,9 +475,32 @@ public class FizOAICatalog extends AbstractCatalog {
     return sb.toString();
   }
 
+    @Override
+    public Map listSets() throws NoSetHierarchyException, OAIInternalServerError, BadResumptionTokenException {
+        return listSets(null);
+    }
+
   @Override
-  public Map listSets(String resumptionToken) throws BadResumptionTokenException {
-    throw new BadResumptionTokenException();
+  public Map listSets(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
+      Map<String, Object> resultMap = new HashMap<>();
+      List<String> xmlSets = new ArrayList<>();
+
+      logger.info("listSets with resumptionToken {}", resumptionToken);
+
+      ListSetsResult backendSetList;
+      try {
+          backendSetList = backendService.searchSets(resumptionToken);
+      } catch (Exception e) {
+          throw new OAIInternalServerError("Cannot retrieve sets from backend");
+      }
+
+      for (Set setItem : backendSetList.getSets()) {
+          xmlSets.add(getSetXML(setItem));
+      }
+
+      resultMap.put("sets", xmlSets.iterator());
+      resultMap.put("resumptionToken", backendSetList.getResumptionToken());
+      return resultMap;
   }
 
   /**
