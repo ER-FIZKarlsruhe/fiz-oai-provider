@@ -107,9 +107,16 @@ public class Identify extends ServerVerb {
 //          sb.append("<compression>compress</compression>");
       sb.append("<compression>deflate</compression>");
       // }
+
+      String repositoryDecription = properties.getProperty("Identify.description");
       String repositoryIdentifier = properties.getProperty("Identify.repositoryIdentifier");
       String sampleIdentifier = properties.getProperty("Identify.sampleIdentifier");
-      if (repositoryIdentifier != null && sampleIdentifier != null) {
+
+      if (repositoryDecription != null) {
+          sb.append("<description>");
+          sb.append(repositoryDecription);
+          sb.append("</description>");
+      } else if (repositoryIdentifier != null && sampleIdentifier != null) {
         sb.append("<description>");
         sb.append("<oai-identifier xmlns=\"http://www.openarchives.org/OAI/2.0/oai-identifier\"");
         sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
@@ -126,15 +133,16 @@ public class Identify extends ServerVerb {
         sb.append("</oai-identifier>");
         sb.append("</description>");
       }
-      String propertyPrefix = "Identify.description";
-      Enumeration propNames = properties.propertyNames();
-      while (propNames.hasMoreElements()) {
-        String propertyName = (String) propNames.nextElement();
-        if (propertyName.startsWith(propertyPrefix)) {
-          sb.append((String) properties.get(propertyName));
-          sb.append("\n");
-        }
-      }
+
+//      String propertyPrefix = "Identify.description";
+//      Enumeration propNames = properties.propertyNames();
+//      while (propNames.hasMoreElements()) {
+//        String propertyName = (String) propNames.nextElement();
+//        if (propertyName.startsWith(propertyPrefix)) {
+//          sb.append((String) properties.get(propertyName));
+//          sb.append("\n");
+//        }
+//      }
 //      sb.append(
 //          "<description><toolkit xsi:schemaLocation=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit http://alcme.oclc.org/oaicat/toolkit.xsd\" xmlns=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit\"><title>OCLC's OAICat Repository Framework</title><author><name>Jeffrey A. Young</name><email>jyoung@oclc.org</email><institution>OCLC</institution></author><version>");
 //      sb.append(version);
