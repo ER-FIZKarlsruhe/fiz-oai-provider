@@ -17,15 +17,10 @@
 package de.fiz_karlsruhe;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 import de.fiz_karlsruhe.model.*;
+import de.fiz_karlsruhe.model.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -491,17 +486,20 @@ public class FizOAICatalog extends AbstractCatalog {
       try {
           backendSetList = backendService.searchSets(resumptionToken);
       } catch (Exception e) {
+          // Log the original cause
+          logger.error("Error retrieving sets from backend", e);
           throw new OAIInternalServerError("Cannot retrieve sets from backend");
       }
 
       for (Set setItem : backendSetList.getSets()) {
-          xmlSets.add(getSetXML(setItem));
+              xmlSets.add(getSetXML(setItem));
       }
 
       resultMap.put("sets", xmlSets.iterator());
       resultMap.put("resumptionToken", backendSetList.getResumptionToken());
       return resultMap;
   }
+
 
   /**
    * close the repository

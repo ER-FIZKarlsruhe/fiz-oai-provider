@@ -355,23 +355,39 @@ public class MockServerUtil  implements ExpectationInitializer {
                 "  \"identifierCssSelector\":\"\"\n" + 
                 "}"));
   }
-  
-  private void initGetAllSets(MockServerClient serverClient) {
-    serverClient.when(request().withMethod("GET").withPath("/set"))
-        .respond(response().withStatusCode(200)
-            .withBody("[\n" + 
-                "{\n" + 
-                "  \"name\":\"Deutsche Fotothek\",\n" +
-                "  \"spec\":\"institution\",\n" +
-                "  \"description\":\"Description for Deutsche Fotothek\"\n" +
-                "}\n" + 
-                ",\n" + 
-                "{\n" + 
-                "  \"name\":\"TIB\",\n" +
-                "  \"spec\":\"institution:hannover\",\n" +
-                "  \"description\":\"Description for TIB\"\n" +
-                "}\n" + 
-                "]"));
-  }
+
+    private void initGetAllSets(MockServerClient serverClient) {
+        serverClient
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/set/search")
+                        // do NOT add queryString matchers if first call uses resumptionToken = null
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\n" +
+                                        "  \"sets\": [\n" +
+                                        "    {\n" +
+                                        "      \"name\": \"Deutsche Fotothek\",\n" +
+                                        "      \"spec\": \"institution\",\n" +
+                                        "      \"description\": \"Description for Deutsche Fotothek\"\n" +
+                                        "    },\n" +
+                                        "    {\n" +
+                                        "      \"name\": \"TIB\",\n" +
+                                        "      \"spec\": \"institution:hannover\",\n" +
+                                        "      \"description\": \"Description for TIB\"\n" +
+                                        "    }\n" +
+                                        "  ],\n" +
+                                        "  \"resumptionToken\": null,\n" +
+                                        "  \"cursor\": 0,\n" +
+                                        "  \"completeListSize\": 2\n" +
+                                        "}\n")
+                );
+    }
+
+
   
 }
