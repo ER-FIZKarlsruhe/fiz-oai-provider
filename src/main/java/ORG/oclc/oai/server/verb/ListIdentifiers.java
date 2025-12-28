@@ -47,12 +47,14 @@ public class ListIdentifiers extends ServerVerb {
     validParamNames1.add("until");
     validParamNames1.add("set");
     validParamNames1.add("metadataPrefix");
+    validParamNames1.add("renderHtml");
   }
   
   private static ArrayList validParamNames2 = new ArrayList();
   static {
     validParamNames2.add("verb");
     validParamNames2.add("resumptionToken");
+    validParamNames2.add("renderHtml");
   }
   
   private static ArrayList requiredParamNames1 = new ArrayList();
@@ -91,12 +93,12 @@ public class ListIdentifiers extends ServerVerb {
       metadataPrefix = null;
 
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-    if (styleSheet != null) {
-      sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-      sb.append(styleSheet);
-      sb.append("\"?>");
-    }
+    //String styleSheet = properties.getProperty("OAIHandler.styleSheet");
+    //if (styleSheet != null) {
+    //sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
+    //sb.append(styleSheet);
+    //sb.append("\"?>");
+    //}
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
     sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     sb.append(" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/");

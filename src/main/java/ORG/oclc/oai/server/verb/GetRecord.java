@@ -43,6 +43,7 @@ public class GetRecord extends ServerVerb {
     validParamNames.add("verb");
     validParamNames.add("identifier");
     validParamNames.add("metadataPrefix");
+    validParamNames.add("renderHtml");
   }
 
   /**
@@ -75,12 +76,12 @@ public class GetRecord extends ServerVerb {
     LOGGER.info("GetRecord.constructGetRecord: metadataPrefix={}", metadataPrefix);
 
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-    if (styleSheet != null) {
-      sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-      sb.append(styleSheet);
-      sb.append("\"?>");
-    }
+    //String styleSheet = properties.getProperty("OAIHandler.styleSheet");
+    //if (styleSheet != null) {
+    //  sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
+    //  sb.append(styleSheet);
+    //  sb.append("\"?>");
+    //}
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
     sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     String extraXmlns = properties.getProperty("OAIHandler.extraXmlns");

@@ -15,6 +15,7 @@
 <h2>OAI ListIdentifiers Request Form</h2>
 <form class="nospace" action="<%=request.getContextPath()%>/OAIHandler" method="POST">
 <input type="hidden" name="verb" value="ListIdentifiers">
+<input type="hidden" name="renderHtml" value="true">
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
 <tr valign="top">
 <td width="150"><strong>from:</strong></td>

@@ -18,6 +18,7 @@
 
 <form class="nospace" action="<%=request.getContextPath()%>/OAIHandler" method="POST">
 <input type="hidden" name="verb" value="ListSets">
+<input type="hidden" name="renderHtml" value="true">
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
 <tr valign="top">
 <td><input type="submit"></td>
