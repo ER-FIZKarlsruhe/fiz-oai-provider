@@ -138,11 +138,30 @@
   <xsl:template match="oai:metadata">
     <tr valign="top">
       <td>
-      <textarea>
+      <textarea class="xml-content-area" style="width:100%; height:200px; font-family:monospace; margin-bottom:10px;">
         <xsl:copy-of select="node()" />
       </textarea>
       </td>
     </tr>
+  </xsl:template>
+
+  <xsl:template match="*" mode="serialize">
+    <xsl:text disable-output-escaping="yes">&lt;</xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:apply-templates select="@*" mode="serialize" />
+    <xsl:text disable-output-escaping="yes">&gt;</xsl:text>
+    <xsl:apply-templates select="node()" mode="serialize" />
+    <xsl:text disable-output-escaping="yes">&lt;/</xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:text disable-output-escaping="yes">&gt;</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="@*" mode="serialize">
+    <xsl:text> </xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:text>="</xsl:text>
+    <xsl:value-of select="."/>
+    <xsl:text>"</xsl:text>
   </xsl:template>
 
   <xsl:template match="oai:set" >
@@ -159,7 +178,7 @@
 <!--   </xsl:template> -->
 
   <xsl:template match="oai:setSpec">
-    <td width="150"><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+    <td width="150"><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
   </xsl:template>
 
   <xsl:template match="oai:setName">
@@ -196,14 +215,14 @@
 
   <xsl:template match="oai:resumptionToken">
     <tr valign="top">
-      <td>ResumptionToken: <a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=<xsl:value-of select="//oai:OAI-PMH/oai:request/@verb"/>&amp;resumptionToken=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+      <td>ResumptionToken: <a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=<xsl:value-of select="//oai:OAI-PMH/oai:request/@verb"/>&amp;renderHtml=true&amp;resumptionToken=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:identifier">
     <tr valign="top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
-      <td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=GetRecord&amp;metadataPrefix=<xsl:choose><xsl:when test="/oai:OAI-PMH/oai:request/@metadataPrefix"><xsl:value-of select="/oai:OAI-PMH/oai:request/@metadataPrefix"/></xsl:when><xsl:otherwise>oai_dc</xsl:otherwise></xsl:choose>&amp;identifier=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+      <td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=GetRecord&amp;renderHtml=true&amp;metadataPrefix=<xsl:choose><xsl:when test="/oai:OAI-PMH/oai:request/@metadataPrefix"><xsl:value-of select="/oai:OAI-PMH/oai:request/@metadataPrefix"/></xsl:when><xsl:otherwise>oai_dc</xsl:otherwise></xsl:choose>&amp;identifier=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
@@ -314,7 +333,7 @@
 
   <xsl:template match="oai:metadataFormat">
     <table width="100%" border="0" cellspacing="0" cellpadding="4">
-      <tr valign="top"><td width="150"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
+      <tr valign="top"><td width="150"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
         <tr valign="top"><td width="150"><strong>schema</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:schema"/></xsl:attribute><xsl:value-of select="oai:schema"/></a></td></tr>
         <tr valign="top"><td width="150"><strong>metadataNamespace</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:metadataNamespace"/></xsl:attribute><xsl:value-of select="oai:metadataNamespace"/></a></td></tr>
     </table>

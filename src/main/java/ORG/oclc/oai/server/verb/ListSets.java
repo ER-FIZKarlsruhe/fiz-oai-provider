@@ -38,7 +38,7 @@ public class ListSets extends ServerVerb {
     }
     private static ArrayList requiredParamNames = new ArrayList();
     static {
-	validParamNames.add("verb");
+		requiredParamNames.add("verb");
     }
 
     /**

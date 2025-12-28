@@ -46,14 +46,19 @@ public class GetRecord extends ServerVerb {
     validParamNames.add("renderHtml");
   }
 
+  private static ArrayList requiredParamNames = new ArrayList();
+  static {
+    requiredParamNames.add("verb");
+    requiredParamNames.add("identifier");
+    requiredParamNames.add("metadataPrefix");
+  }
+
   /**
    * Construct the xml response on the server-side.
    *
    * @param context the servlet context
    * @param request the servlet request
    * @return a String containing the XML response
-   * @exception OAIBadRequestException an http 400 status error occurred
-   * @exception OAINotFoundException   an http 404 status error occurred
    * @exception OAIInternalServerError an http 500 status error occurred
    */
   public static String construct(HashMap context, HttpServletRequest request, HttpServletResponse response,
@@ -95,7 +100,7 @@ public class GetRecord extends ServerVerb {
     FormatRegistry formatRegistry = abstractCatalog.getFormatRegistry();
     try {
       if (metadataPrefix == null || metadataPrefix.length() == 0 || identifier == null || identifier.length() == 0
-          || hasBadArguments(request, validParamNames.iterator(), validParamNames, abstractCatalog)) {
+          || hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
         throw new BadArgumentException();
       } else if (!formatRegistry.containsValue(metadataPrefix)) {
         throw new CannotDisseminateFormatException(metadataPrefix);

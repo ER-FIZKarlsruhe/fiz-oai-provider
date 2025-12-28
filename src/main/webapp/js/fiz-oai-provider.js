@@ -3,8 +3,11 @@ $(document).ready(function() {
 	//console.log(userAgent);
 
 	$('textarea').each(function() {
+		var $this = $(this);
 		$(this).css("width", '100%');
 
+		var rawXml = $this.text().trim();
+		$this.val(rawXml);
 		if (userAgent.includes("firefox")) {
 			var md = $(this).html();
 			$(this).text(md);
