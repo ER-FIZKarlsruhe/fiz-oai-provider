@@ -38,6 +38,11 @@ public class Identify extends ServerVerb {
     validParamNames.add("renderHtml");
   }
 
+  private static ArrayList requiredParamNames = new ArrayList();
+  static {
+    requiredParamNames.add("verb");
+  }
+
   /**
    * Construct the xml response on the server side.
    *
@@ -76,7 +81,7 @@ public class Identify extends ServerVerb {
 //      sb.append(getRequestURL(request));
 //      sb.append("</requestURL>");
     sb.append(getRequestElement(request, validParamNames, baseURL));
-    if (hasBadArguments(request, validParamNames.iterator(), validParamNames, abstractCatalog)) {
+    if (hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
       sb.append(new BadArgumentException().getMessage());
     } else {
       sb.append("<Identify>");
