@@ -270,7 +270,7 @@ public class BackendService {
 
     public ListSetsResult searchSets(String resumptionToken) {
         ObjectMapper mapper = new ObjectMapper();
-        String url = backendBaseUrl + "set/search";
+        String url = backendBaseUrl + "/set/search";
 
         if (StringUtils.isNotEmpty(resumptionToken)) {
             url = url + "?resumptionToken=" + resumptionToken;
