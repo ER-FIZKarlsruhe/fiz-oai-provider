@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.6.1] – 2026-12-29
+## [1.6.2] – 2026-01-13
+
+### Changed
+Update dependencies
+
+## [1.6.1] – 2025-12-29
 Server-side XSLT rendering for OAI-PMH responses
 
 In version 1.6.1, the browser-side XSLT rendering of OAI-PMH results has been replaced with server-side XSLT rendering.
