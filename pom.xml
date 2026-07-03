@@ -7,7 +7,7 @@
 
     <project_version>develop-SNAPSHOT</project_version>
 
-    <log4j.version>2.23.1</log4j.version>
+    <log4j.version>2.26.0</log4j.version>
 
   </properties>
   
@@ -95,9 +95,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
+      <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.16.2</version>
+      <version>3.2.0</version>
     </dependency>
 
     <dependency>

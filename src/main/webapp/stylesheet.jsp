@@ -37,7 +37,7 @@
             }
           </xsl:comment>
         </style>
-          <script src="js/vendor/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+          <script src="js/vendor/jquery-3.7.1/jquery-3.7.1.min.js"></script>
           <script src="js/vendor/autosize/autosize.min.js"></script>
           <script src="js/fiz-oai-provider.js"></script>
       </head>
