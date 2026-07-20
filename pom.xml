@@ -196,7 +196,7 @@
         <version>5.15.0</version>
         <configuration>
           <serverPort>1080</serverPort>
-          <proxyPort>1090</proxyPort>
+
           <logLevel>WARN</logLevel>
           <initializationClass>de.fiz_karlsruhe.integration.MockServerUtil</initializationClass>
         </configuration>

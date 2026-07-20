@@ -109,7 +109,7 @@ public class BaseIT {
       InputStream xmlStream = new ByteArrayInputStream(xml.getBytes());
 
       SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      //factory.setResourceResolver(new ResourceResolver("datacite"));
+      factory.setResourceResolver(new ResourceResolver("radar"));
       Schema schema = factory.newSchema(schemas);
       Validator validator = schema.newValidator();
       validator.validate(new StreamSource(xmlStream));

@@ -35,7 +35,7 @@ public class MockServerUtil  implements ExpectationInitializer {
   @Override
   public void initializeExpectations(MockServerClient mockServerClient) {
     logger.info("MockServer initializeExpectations");
-    ConfigurationProperties.forwardHttpProxy("proxy.fiz-karlsruhe.de:8888");
+    //ConfigurationProperties.forwardHttpProxy("proxy.fiz-karlsruhe.de:8888");
     
     initGetSpecificFormat(mockServerClient);
     initGetAllFormats(mockServerClient);
@@ -59,9 +59,8 @@ public class MockServerUtil  implements ExpectationInitializer {
         "  \"tags\": null,\n" + 
         "  \"sets\": null,\n" + 
         "  \"formats\": null,\n" + 
-        "  \"ingestFormat\": \"oai_dc\",\n" + 
-        "  \"content\": null" + 
-        "  }\n" + 
+        "  \"ingestFormat\": \"oai_dc\",\n" +
+        "  \"content\": null\n" +
         "}"));
 
     serverClient.when(request().withMethod("GET").withPath("/item/10\\.0133.*").withQueryStringParameters(new Parameter("format", Arrays.asList("radar"))))

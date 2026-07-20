@@ -34,13 +34,23 @@ public class ResourceResolver implements LSResourceResolver {
 
   @Override
   public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId, String baseURI) {
-      // note: in this sample, the XSD's are expected to be in the root of the classpath
-      InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(buildPath(systemId));
+      // systemId may be a bare filename or an absolute URL (e.g. schemaLocation="https://dublincore.org/.../dc.xsd");
+      // in both cases resolve the file name against local classpath resources instead of hitting the network.
+      String fileName = extractFileName(systemId);
+      InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(buildPath(fileName));
+      if (resourceAsStream == null) {
+          resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
+      }
       Objects.requireNonNull(resourceAsStream, String.format("Could not find the specified xsd file: %s", systemId));
       return new DOMInputImpl(publicId, systemId, baseURI, resourceAsStream, "UTF-8");
   }
 
-  private String buildPath(String systemId) {
-      return basePath == null ? systemId : String.format("%s/%s", basePath, systemId);
+  private String buildPath(String fileName) {
+      return basePath == null ? fileName : String.format("%s/%s", basePath, fileName);
+  }
+
+  private String extractFileName(String systemId) {
+      int lastSlash = Math.max(systemId.lastIndexOf('/'), systemId.lastIndexOf('\\'));
+      return lastSlash >= 0 ? systemId.substring(lastSlash + 1) : systemId;
   }
 }
