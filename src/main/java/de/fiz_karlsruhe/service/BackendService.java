@@ -136,19 +136,19 @@ public class BackendService {
     url.append(backendBaseUrl).append("/item?content=").append(withContent);
     url.append("&format=").append(URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8));
     if (StringUtils.isNotEmpty(searchMark)) {
-      url.append("&searchMark=").append(searchMark);
+      url.append("&searchMark=").append(URLEncoder.encode(searchMark, StandardCharsets.UTF_8));
     }
     url.append("&rows=").append(rows);
     if (StringUtils.isNotEmpty(set)) {
-      url.append("&set=").append(set);
+      url.append("&set=").append(URLEncoder.encode(set, StandardCharsets.UTF_8));
     }
-    
+
     if (StringUtils.isNotEmpty(from)) {
-      url.append("&from=").append(from);
+      url.append("&from=").append(URLEncoder.encode(from, StandardCharsets.UTF_8));
     }
 
     if (StringUtils.isNotEmpty(until)) {
-      url.append("&until=").append(until);
+      url.append("&until=").append(URLEncoder.encode(until, StandardCharsets.UTF_8));
     }
 
     logger.info("getItems url: {}", url.toString());
@@ -197,7 +197,7 @@ public class BackendService {
   public Format getFormat(String metadataPrefix) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
 
-    String url = backendBaseUrl + "/format/" + metadataPrefix;
+    String url = backendBaseUrl + "/format/" + URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8);
 
     logger.info("getFormat url: {}", url);
     Format format = null;
@@ -273,7 +273,7 @@ public class BackendService {
         String url = backendBaseUrl + "/set/search";
 
         if (StringUtils.isNotEmpty(resumptionToken)) {
-            url = url + "?resumptionToken=" + resumptionToken;
+            url = url + "?resumptionToken=" + URLEncoder.encode(resumptionToken, StandardCharsets.UTF_8);
         }
 
         logger.info("searchSets url {}", url);
