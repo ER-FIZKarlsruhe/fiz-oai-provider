@@ -12,7 +12,6 @@ package ORG.oclc.oai.server.verb;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -22,7 +21,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
-//import org.xml.sax.SAXException;
 
 /**
  * This class represents an Identify response on either the server or on the
@@ -59,17 +57,12 @@ public class Identify extends ServerVerb {
       try {
         baseURL = request.getRequestURL().toString();
       } catch (java.lang.NoSuchMethodError f) {
+        LOGGER.debug("getRequestURL failed, retrying", f);
         baseURL = request.getRequestURL().toString();
       }
     }
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    //String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-    //if (styleSheet != null) {
-    //sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-    //sb.append(styleSheet);
-    //sb.append("\"?>");
-    //}
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
     sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     sb.append(" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/");
@@ -77,9 +70,6 @@ public class Identify extends ServerVerb {
     sb.append("<responseDate>");
     sb.append(createResponseDate(new Date()));
     sb.append("</responseDate>");
-//      sb.append("<requestURL>");
-//      sb.append(getRequestURL(request));
-//      sb.append("</requestURL>");
     sb.append(getRequestElement(request, validParamNames, baseURL));
     if (hasBadArguments(request, requiredParamNames.iterator(), validParamNames, abstractCatalog)) {
       sb.append(new BadArgumentException().getMessage());
@@ -107,12 +97,8 @@ public class Identify extends ServerVerb {
         sb.append(granularity);
         sb.append("</granularity>");
       }
-      // String compression = properties.getProperty("Identify.compression");
-      // if (compression != null) {
       sb.append("<compression>gzip</compression>");
-//          sb.append("<compression>compress</compression>");
       sb.append("<compression>deflate</compression>");
-      // }
 
       String repositoryDecription = properties.getProperty("Identify.description");
       String repositoryIdentifier = properties.getProperty("Identify.repositoryIdentifier");
@@ -139,21 +125,6 @@ public class Identify extends ServerVerb {
         sb.append("</oai-identifier>");
         sb.append("</description>");
       }
-
-//      String propertyPrefix = "Identify.description";
-//      Enumeration propNames = properties.propertyNames();
-//      while (propNames.hasMoreElements()) {
-//        String propertyName = (String) propNames.nextElement();
-//        if (propertyName.startsWith(propertyPrefix)) {
-//          sb.append((String) properties.get(propertyName));
-//          sb.append("\n");
-//        }
-//      }
-//      sb.append(
-//          "<description><toolkit xsi:schemaLocation=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit http://alcme.oclc.org/oaicat/toolkit.xsd\" xmlns=\"http://oai.dlib.vt.edu/OAI/metadata/toolkit\"><title>OCLC's OAICat Repository Framework</title><author><name>Jeffrey A. Young</name><email>jyoung@oclc.org</email><institution>OCLC</institution></author><version>");
-//      sb.append(version);
-//      sb.append(
-//          "</version><toolkitIcon>http://alcme.oclc.org/oaicat/oaicat_icon.gif</toolkitIcon><URL>http://www.oclc.org/research/software/oai/cat.shtm</URL></toolkit></description>");
       String descriptions = abstractCatalog.getDescriptions();
       if (descriptions != null) {
         sb.append(descriptions);

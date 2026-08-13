@@ -146,7 +146,7 @@ public class FizOAICatalog extends AbstractCatalog {
    * @exception OAIInternalServerError signals an http status code 500 problem
    */
   @Override
-  public Vector getSchemaLocations(String oaiIdentifier)
+  public List getSchemaLocations(String oaiIdentifier)
       throws IdDoesNotExistException, OAIInternalServerError, NoMetadataFormatsException {
     Item nativeItem = null;
     try {
@@ -208,6 +208,7 @@ public class FizOAICatalog extends AbstractCatalog {
       }
 
     } catch (IOException e) {
+      logger.error(e.getMessage(), e);
       throw new OAIInternalServerError(e.getMessage());
     }
 
@@ -228,6 +229,7 @@ public class FizOAICatalog extends AbstractCatalog {
         listIdentifiersMap.put("resumptionMap",
             getResumptionMap(resumptionToken.getToken(), (int) result.getTotal(), -1));
       } catch (BadResumptionTokenException e) {
+        logger.error(e.getMessage(), e);
         throw new OAIInternalServerError("An error occured while creating the ResumptionToken");
       }
     }
@@ -275,6 +277,7 @@ public class FizOAICatalog extends AbstractCatalog {
       }
 
     } catch (IOException e) {
+      logger.error(e.getMessage(), e);
       throw new OAIInternalServerError(e.getMessage());
     }
 
@@ -369,6 +372,7 @@ public class FizOAICatalog extends AbstractCatalog {
       }
 
     } catch (IOException e) {
+      logger.error(e.getMessage(), e);
       throw new OAIInternalServerError(e.getMessage());
     }
 
@@ -427,6 +431,7 @@ public class FizOAICatalog extends AbstractCatalog {
       }
 
     } catch (IOException e) {
+      logger.error(e.getMessage(), e);
       throw new OAIInternalServerError(e.getMessage());
     } catch (CannotDisseminateFormatException e) {
       logger.error("Cannot disseminate format for resumptionToken {}", resumptionTokenParam, e);

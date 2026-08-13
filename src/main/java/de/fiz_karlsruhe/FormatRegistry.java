@@ -132,6 +132,7 @@ public class FormatRegistry {
     try {
       return tokenizer.nextToken();
     } catch (NoSuchElementException e) {
+      LOGGER.debug(e.getMessage(), e);
       return temp;
     }
   }

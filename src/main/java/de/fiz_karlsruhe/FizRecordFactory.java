@@ -82,7 +82,7 @@ public class FizRecordFactory extends RecordFactory {
     }
 
     RefreshFormatRegistry refreshRunnable = new RefreshFormatRegistry(this.formatRegistry, properties);
-    scheduler.scheduleAtFixedRate(refreshRunnable, 60000L, Integer.parseInt(refreshFormatSeconds) * 1000, TimeUnit.MILLISECONDS);
+    scheduler.scheduleAtFixedRate(refreshRunnable, 60000L, (long) Integer.parseInt(refreshFormatSeconds) * 1000, TimeUnit.MILLISECONDS);
   }
 
   public static List<Format> initFormats(Properties properties) {

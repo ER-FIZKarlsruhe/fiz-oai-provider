@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -64,18 +64,13 @@ public class ListMetadataFormats extends ServerVerb {
       try {
         baseURL = request.getRequestURL().toString();
       } catch (java.lang.NoSuchMethodError f) {
+        LOGGER.debug("getRequestURL failed, retrying", f);
         baseURL = request.getRequestURL().toString();
       }
     }
     StringBuffer sb = new StringBuffer();
     String identifier = request.getParameter("identifier");
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    //String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-    //if (styleSheet != null) {
-    //sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-    //sb.append(styleSheet);
-    //sb.append("\"?>");
-    //}
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
     sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     sb.append(" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/");
@@ -119,10 +114,10 @@ public class ListMetadataFormats extends ServerVerb {
         sb.append("</ListMetadataFormats>");
       } else {
         try {
-          Vector itemFormats = abstractCatalog.getSchemaLocations(identifier);
+          List itemFormats = abstractCatalog.getSchemaLocations(identifier);
           sb.append("<ListMetadataFormats>");
           for (int i = 0; i < itemFormats.size(); ++i) {
-    	    Format format = (Format)itemFormats.elementAt(i);
+    	    Format format = (Format)itemFormats.get(i);
             String schemaLocation = format.getSchemaLocation();
             String namespaceURI = format.getSchemaNamespace();
             String schemaURL = format.getSchemaLocation();
@@ -146,8 +141,10 @@ public class ListMetadataFormats extends ServerVerb {
           }
           sb.append("</ListMetadataFormats>");
         } catch (IdDoesNotExistException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(e.getMessage());
         } catch (NoMetadataFormatsException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(e.getMessage());
         }
       }

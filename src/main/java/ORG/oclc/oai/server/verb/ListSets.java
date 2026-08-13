@@ -60,18 +60,13 @@ public class ListSets extends ServerVerb {
 	    try {
 		baseURL = request.getRequestURL().toString();
 	    } catch (java.lang.NoSuchMethodError f) {
+		LOGGER.debug("getRequestURL failed, retrying", f);
 		baseURL = request.getRequestURL().toString();
 	    }
 	}
         StringBuffer sb = new StringBuffer();
 	String oldResumptionToken = request.getParameter("resumptionToken");
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-		//String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-		//if (styleSheet != null) {
-		//sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-		//sb.append(styleSheet);
-		//sb.append("\"?>");
-		//}
         sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
         sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
         sb.append(" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/");
@@ -79,9 +74,6 @@ public class ListSets extends ServerVerb {
         sb.append("<responseDate>");
 	sb.append(createResponseDate(new Date()));
 	sb.append("</responseDate>");
-//         sb.append("<requestURL>");
-//         sb.append(getRequestURL(request));
-//         sb.append("</requestURL>");
 	sb.append(getRequestElement(request, validParamNames, baseURL));
 	Map listSetsMap = null;
 	if (hasBadArguments(request, requiredParamNames.iterator(),
@@ -136,8 +128,10 @@ public class ListSets extends ServerVerb {
 		}
 		sb.append("</ListSets>");
 	    } catch (NoSetHierarchyException e) {
+		LOGGER.debug(e.getMessage(), e);
 		sb.append(e.getMessage());
 	    } catch (BadResumptionTokenException e) {
+		LOGGER.debug(e.getMessage(), e);
 		sb.append(e.getMessage());
 	    }
 	}

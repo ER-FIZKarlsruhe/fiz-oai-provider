@@ -35,7 +35,7 @@ import de.fiz_karlsruhe.FormatRegistry;
  */
 public class GetRecord extends ServerVerb {
 
-  private final static Logger LOGGER = LogManager.getLogger(GetRecord.class);
+  private static final Logger LOGGER = LogManager.getLogger(GetRecord.class);
 
   private static ArrayList validParamNames = new ArrayList();
   
@@ -70,10 +70,11 @@ public class GetRecord extends ServerVerb {
       try {
         baseURL = request.getRequestURL().toString();
       } catch (java.lang.NoSuchMethodError f) {
+        LOGGER.debug("getRequestURL failed, retrying", f);
         baseURL = request.getRequestURL().toString();
       }
     }
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     String identifier = request.getParameter("identifier");
     String metadataPrefix = request.getParameter("metadataPrefix");
 
@@ -81,12 +82,6 @@ public class GetRecord extends ServerVerb {
     LOGGER.info("GetRecord.constructGetRecord: metadataPrefix={}", metadataPrefix);
 
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    //String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-    //if (styleSheet != null) {
-    //  sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-    //  sb.append(styleSheet);
-    //  sb.append("\"?>");
-    //}
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
     sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     String extraXmlns = properties.getProperty("OAIHandler.extraXmlns");
@@ -116,14 +111,17 @@ public class GetRecord extends ServerVerb {
         }
       }
     } catch (BadArgumentException e) {
+      LOGGER.debug(e.getMessage(), e);
       sb.append("<request verb=\"GetRecord\">");
       sb.append(baseURL);
       sb.append("</request>");
       sb.append(e.getMessage());
     } catch (CannotDisseminateFormatException e) {
+      LOGGER.debug(e.getMessage(), e);
       sb.append(getRequestElement(request, validParamNames, baseURL));
       sb.append(e.getMessage());
     } catch (IdDoesNotExistException e) {
+      LOGGER.debug(e.getMessage(), e);
       sb.append(getRequestElement(request, validParamNames, baseURL));
       sb.append(e.getMessage());
     }

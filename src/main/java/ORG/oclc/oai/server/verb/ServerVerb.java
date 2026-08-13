@@ -182,7 +182,7 @@ public abstract class ServerVerb {
               return true;
             } else if (values.length > 1) {
               return true;
-            } else if (values.length == 1 && !catalog.isValidParam(name, values[0])) {
+            } else if (values.length == 1 && !catalog.isValidParam(values[0])) {
               return true;
             }
         }
@@ -193,6 +193,7 @@ public abstract class ServerVerb {
                 new URI(identifier);
             }
         } catch (Exception e) {
+            LOGGER.debug(e.getMessage(), e);
             return true;
         }
         return false;
@@ -279,11 +280,12 @@ public abstract class ServerVerb {
                     try {
                         init.invoke(null, new Object[] {properties});
                     } catch (InvocationTargetException e) {
-                        throw e.getTargetException();
+                        LOGGER.error(e.getMessage(), e);
+                        throw new RuntimeException(e.getTargetException());
                     }
                     extensionVerbsMap.put(verb, serverVerbClass);
                     LOGGER.debug("ExtensionVerb.getVerbs: " + verb + "=" + verbClassName);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     LOGGER.error("ExtensionVerb: couldn't construct: " + verbClassName, e);
                 }
             }

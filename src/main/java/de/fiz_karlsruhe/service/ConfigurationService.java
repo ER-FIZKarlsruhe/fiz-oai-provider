@@ -30,10 +30,10 @@ public class ConfigurationService {
 
   private static ConfigurationService INSTANCE;
 
-  final static Logger logger = LogManager.getLogger(ConfigurationService.class);
+  static final Logger logger = LogManager.getLogger(ConfigurationService.class);
 
-  final static int SOCKET_TIMEOUT = 15000;
-  final static int CONNECTION_TIMEOUT = 15000;
+  static final int SOCKET_TIMEOUT = 15000;
+  static final int CONNECTION_TIMEOUT = 15000;
   
   private ConfigurationService(Properties properties) {
     ConfigurationService.properties = properties;

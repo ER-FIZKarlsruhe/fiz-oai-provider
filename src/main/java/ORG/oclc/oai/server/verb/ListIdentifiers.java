@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
-import de.fiz_karlsruhe.FizOAICatalog;
 import de.fiz_karlsruhe.FormatRegistry;
 
 /**
@@ -38,7 +37,7 @@ import de.fiz_karlsruhe.FormatRegistry;
  */
 public class ListIdentifiers extends ServerVerb {
   
-  private final static Logger LOGGER = LogManager.getLogger(ListIdentifiers.class);
+  private static final Logger LOGGER = LogManager.getLogger(ListIdentifiers.class);
   private static ArrayList validParamNames1 = new ArrayList();
   
   static {
@@ -80,25 +79,20 @@ public class ListIdentifiers extends ServerVerb {
       try {
         baseURL = request.getRequestURL().toString();
       } catch (java.lang.NoSuchMethodError f) {
+        LOGGER.debug("getRequestURL failed, retrying", f);
         baseURL = request.getRequestURL().toString();
       }
     }
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     String oldResumptionToken = request.getParameter("resumptionToken");
     LOGGER.info("ListIdentifiers construct: {}", oldResumptionToken);
-    
+
     String metadataPrefix = request.getParameter("metadataPrefix");
 
     if (metadataPrefix != null && metadataPrefix.length() == 0)
       metadataPrefix = null;
 
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    //String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-    //if (styleSheet != null) {
-    //sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-    //sb.append(styleSheet);
-    //sb.append("\"?>");
-    //}
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
     sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     sb.append(" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/");
@@ -159,18 +153,22 @@ public class ListIdentifiers extends ServerVerb {
             listIdentifiersMap = abstractCatalog.listIdentifiers(from, until, set, metadataPrefix);
           }
         } catch (NoItemsMatchException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(e.getMessage());
         } catch (BadArgumentException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append("<request verb=\"ListIdentifiers\">");
           sb.append(baseURL);
           sb.append("</request>");
           sb.append(e.getMessage());
 
         } catch (CannotDisseminateFormatException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(e.getMessage());
         } catch (NoSetHierarchyException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(e.getMessage());
         }
@@ -185,6 +183,7 @@ public class ListIdentifiers extends ServerVerb {
           try {
             listIdentifiersMap = abstractCatalog.listIdentifiers(oldResumptionToken);
           } catch (BadResumptionTokenException e) {
+            LOGGER.debug(e.getMessage(), e);
             sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
             sb.append(e.getMessage());
           }

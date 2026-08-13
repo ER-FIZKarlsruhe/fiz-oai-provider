@@ -12,7 +12,6 @@ package ORG.oclc.oai.server.verb;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Properties;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,16 +39,8 @@ public class BadVerb extends ServerVerb {
                                    HttpServletRequest request, HttpServletResponse response,
                                    Transformer serverTransformer)
         throws TransformerException {
-        Properties properties =
-	    (Properties)context.get("OAIHandler.properties");
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-		//String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-		//if (styleSheet != null) {
-		//sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-		//sb.append(styleSheet);
-		//sb.append("\"?>");
-		//}
         sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
         sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
         sb.append(" xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/");
@@ -57,15 +48,12 @@ public class BadVerb extends ServerVerb {
 	sb.append("<responseDate>");
 	sb.append(createResponseDate(new Date()));
 	sb.append("</responseDate>");
-// 	sb.append("<requestURL>");
-//         sb.append(getRequestURL(request));
-// 	sb.append("</requestURL>");
 	sb.append("<request>");
 	try {
 	    sb.append(request.getRequestURL().toString());
 	} catch (java.lang.NoSuchMethodError e) {
+	    LOGGER.debug("getRequestURL failed, retrying", e);
 	    sb.append(request.getRequestURL().toString());
-//	    sb.append(HttpUtils.getRequestURL(request).toString());
 	}
 	sb.append("</request>");
 	sb.append("<error code=\"badVerb\">Illegal verb</error>");

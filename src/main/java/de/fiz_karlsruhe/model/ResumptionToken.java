@@ -66,7 +66,7 @@ public class ResumptionToken {
 
         BeanUtils.setProperty(this, key, value);
       } catch (Exception e) {
-        logger.error("cannot extract token parameters");
+        logger.error("cannot extract token parameters", e);
         throw new BadResumptionTokenException();
       }
     }
@@ -205,6 +205,7 @@ public class ResumptionToken {
     try {
       return getToken();
     } catch (BadResumptionTokenException e) {
+      logger.debug(e.getMessage(), e);
       return "InvalidToken";
     }
   }

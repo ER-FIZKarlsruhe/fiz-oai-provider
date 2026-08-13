@@ -62,14 +62,13 @@ import de.fiz_karlsruhe.service.ConfigurationService;
 public class OAIHandler extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    final static Logger LOGGER = LogManager.getLogger(OAIHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(OAIHandler.class);
 
     public static final String PROPERTIES_SERVLET_CONTEXT_ATTRIBUTE = OAIHandler.class.getName() + ".properties";
 
     private static final String CONFIG_FILENAME = "oaicat.properties";
 
     private static final String VERSION = "1.5.62";
-    private static boolean debug = false;
 
     private final Properties properties = new Properties();
 
@@ -162,7 +161,7 @@ public class OAIHandler extends HttpServlet {
             Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
             try {
                 properties.load(reader);
-                ConfigurationService configService = ConfigurationService.getInstance(properties);
+                ConfigurationService.getInstance(properties);
                 return true;
             } finally {
                 reader.close();
@@ -258,7 +257,9 @@ public class OAIHandler extends HttpServlet {
             }
             attributes.put("OAIHandler.templates", templates);
         } finally {
-            if (is != null) is.close();
+            if (is != null) {
+                is.close();
+            }
         }
 
         return newTransformer(templates);
@@ -320,17 +321,17 @@ public class OAIHandler extends HttpServlet {
             return;
         }
         LOGGER.debug("attributes=" + attributes);
-        Properties properties =
+        Properties requestProperties =
                 (Properties) attributes.get("OAIHandler.properties");
         boolean monitor = false;
-        if (properties.getProperty("OAIHandler.monitor") != null) {
+        if (requestProperties.getProperty("OAIHandler.monitor") != null) {
             monitor = true;
         }
-        boolean serviceUnavailable = isServiceUnavailable(properties);
-        String extensionPath = properties.getProperty("OAIHandler.extensionPath", "/extension");
+        boolean serviceUnavailable = isServiceUnavailable(requestProperties);
+        String extensionPath = requestProperties.getProperty("OAIHandler.extensionPath", "/extension");
 
-        HashMap serverVerbs = ServerVerb.getVerbs(properties);
-        HashMap extensionVerbs = ServerVerb.getExtensionVerbs(properties);
+        HashMap serverVerbs = ServerVerb.getVerbs(requestProperties);
+        HashMap extensionVerbs = ServerVerb.getExtensionVerbs(requestProperties);
 
 
 
@@ -352,7 +353,7 @@ public class OAIHandler extends HttpServlet {
 
                 if (isUiRequest) {
                     response.setContentType("text/html; charset=UTF-8");
-                    Transformer transformer = getTransformer(properties, attributes);
+                    Transformer transformer = getTransformer(requestProperties, attributes);
                     result = getResult(
                             attributes,
                             request,
@@ -470,6 +471,7 @@ public class OAIHandler extends HttpServlet {
                                 response,
                                 serverTransformer});
             } catch (InvocationTargetException e) {
+                LOGGER.error(e.getMessage(), e);
                 throw e.getTargetException();
             }
 
@@ -477,8 +479,10 @@ public class OAIHandler extends HttpServlet {
 
             return result;
         } catch (NoSuchMethodException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new OAIInternalServerError(e.getMessage());
         } catch (IllegalAccessException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new OAIInternalServerError(e.getMessage());
         }
     }

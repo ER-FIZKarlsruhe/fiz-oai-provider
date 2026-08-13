@@ -9,6 +9,9 @@
 
     <log4j.version>2.26.0</log4j.version>
 
+    <sonar.host.url>https://dev.fiz-karlsruhe.de/sonar</sonar.host.url>
+    <sonar.projectKey>de.fiz_karlsruhe.oai-provider</sonar.projectKey>
+
   </properties>
   
   <groupId>de.fiz-karlsruhe</groupId>
@@ -338,7 +341,13 @@
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>3.4.0</version>
       </plugin>
-      
+
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>4.0.0.4121</version>
+      </plugin>
+
     </plugins>
   </build>
 

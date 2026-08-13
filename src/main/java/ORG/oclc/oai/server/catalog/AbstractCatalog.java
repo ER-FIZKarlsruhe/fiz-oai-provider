@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import jakarta.servlet.ServletContext;
@@ -47,7 +47,7 @@ import de.fiz_karlsruhe.FormatRegistry;
  */
 public abstract class AbstractCatalog {
   
-  private final static Logger LOGGER = LogManager.getLogger(AbstractCatalog.class);
+  private static final Logger LOGGER = LogManager.getLogger(AbstractCatalog.class);
   
   /**
      * The RecordFactory that understands how to convert this database's
@@ -181,7 +181,9 @@ public abstract class AbstractCatalog {
             sb.setLength(sb.length()-1);
 
         if (sb.length() < VALID_GRANULARITIES[0].length()) {
-            while (sb.length() < 4) sb.append("9");
+            while (sb.length() < 4) {
+                sb.append("9");
+            }
             switch (sb.length()) {
             case 4: // YYYY
                 sb.append("-");
@@ -216,28 +218,6 @@ public abstract class AbstractCatalog {
                 sb.append(":");
             case 14: // YYYY-MM-DDThh:
                 sb.append("59");
-//              case 16: // YYYY-MM-DDThh:mm
-//              sb.append("Z");
-//              break;
-
-//              case 12: // YYYY-MM-DDTh
-//              case 15: // YYYY-MM-DDThh:m
-//              throw new BadGranularityException();
-//              }
-//              }
-
-//              until = sb.toString();
-//              if (until.length() == VALID_GRANULARITIES[supportedGranularityOffset].length()) {
-//              if (!isValidGranularity(until))
-//              throw new BadGranularityException();
-//              return until;
-//              }
-
-//              if (sb.charAt(sb.length()-1) == 'Z')
-//              sb.setLength(sb.length()-1); // remove the trailing 'Z'
-
-//              if (sb.length() < VALID_GRANULARITIES[2].length()) {
-//              switch (sb.length()) {
             case 16: // YYYY-MM-DDThh:mm
                 sb.append(":");
             case 17: // YYYY-MM-DDThh:mm:
@@ -250,26 +230,6 @@ public abstract class AbstractCatalog {
                 throw new BadArgumentException();
             }
         }
-
-//      until = sb.toString();
-//      if (until.length() == VALID_GRANULARITIES[supportedGranularityOffset].length()) {
-//      if (!isValidGranularity(until))
-//      throw new BadGranularityException();
-//      return until;
-//      }
-
-//      if (sb.charAt(sb.length()-1) == 'Z')
-//      sb.setLength(sb.length()-1); // remove the trailing 'Z'
-
-//      switch (sb.length()) {
-//      case 19: // YYYY-MM-DDThh:mm:ss
-//      sb.append(".");
-//      case 20: // YYYY-MM-DDThh:mm:ss.
-//      sb.append("0");
-//      case 21: // YYYY-MM-DDThh:mm:ss.s
-//      sb.append("Z");
-//      break;
-//      }
 
         until = sb.toString();
         if (!isValidGranularity(until))
@@ -301,35 +261,20 @@ public abstract class AbstractCatalog {
             return false;
         }
 
-        if (date.length() > VALID_GRANULARITIES[0].length()) {
-            if (date.charAt(10) != 'T'
+        if (date.length() > VALID_GRANULARITIES[0].length()
+                && (date.charAt(10) != 'T'
                 || date.charAt(date.length()-1) != 'Z'
                     || !Character.isDigit(date.charAt(11)) // hh
                     || !Character.isDigit(date.charAt(12))
                     || date.charAt(13) != ':'
                         || !Character.isDigit(date.charAt(14)) // mm
                         || !Character.isDigit(date.charAt(15))
-//                      ) {
-//                      return false;
-//                      }
-//                      }
-
-//                      if (date.length() > VALID_GRANULARITIES[1].length()) {
-//                      if (
                         || date.charAt(16) != ':'
                             || !Character.isDigit(date.charAt(17)) // ss
-                            || !Character.isDigit(date.charAt(18))) {
-                return false;
-            }
+                            || !Character.isDigit(date.charAt(18)))) {
+            return false;
         }
 
-//      if (date.length() > VALID_GRANULARITIES[2].length()) {
-//      if (date.charAt(19) != '.'
-//      || !Character.isDigit(date.charAt(20))) { // s
-//      return false;
-//      }
-
-//      }
         return true;
     }
 
@@ -406,6 +351,7 @@ public abstract class AbstractCatalog {
                     (AbstractCatalog)oaiCatalogConstructor.newInstance(new Object[]
                                                                                   {properties, context});
             } catch (NoSuchMethodException e) {
+                LOGGER.debug("No (Properties, ServletContext) constructor, falling back to (Properties)", e);
                 oaiCatalogConstructor =
                     oaiCatalogClass.getConstructor(new Class[] {Properties.class});
                 oaiCatalog =
@@ -423,7 +369,7 @@ public abstract class AbstractCatalog {
             LOGGER.debug("AbstractCatalog.factory: recordFactory={}", oaiCatalog.recordFactory);
 
             String harvestable = properties.getProperty("AbstractCatalog.harvestable");
-            if (harvestable != null && harvestable.equals("false")) {
+            if ("false".equals(harvestable)) {
                 oaiCatalog.harvestable = false;
             }
             String secondsToLive =
@@ -444,6 +390,7 @@ public abstract class AbstractCatalog {
                         VALID_GRANULARITIES[oaiCatalog.supportedGranularityOffset]);
             }
         } catch (InvocationTargetException e) {
+            LOGGER.error(e.getMessage(), e);
             throw e.getTargetException();
         }
         return oaiCatalog;
@@ -463,13 +410,13 @@ public abstract class AbstractCatalog {
      * identifier.
      *
      * @param identifier the OAI identifier
-     * @return a Vector containing schemaLocation Strings
+     * @return a List containing schemaLocation Strings
      * @exception IdDoesNotExistException The specified identifier doesn't exist.
      * @exception NoMetadataFormatsException The identifier exists, but no metadataFormats are
      * provided for it.
      * @exception OAIInternalServerError signals an http status code 500 problem
      */
-    public abstract Vector getSchemaLocations(String identifier)
+    public abstract List getSchemaLocations(String identifier)
     throws IdDoesNotExistException, NoMetadataFormatsException, OAIInternalServerError;
 
     /**
@@ -530,11 +477,9 @@ public abstract class AbstractCatalog {
      * @exception OAIInternalServerError signals an http status code 500 problem
      * @throws CannotDisseminateFormatException
      * @throws IdDoesNotExistException
-     * @throws IdDoesNotExistException
      */
     public String getMetadata(String identifier, String metadataPrefix)
-    throws OAIInternalServerError, IdDoesNotExistException,
-    IdDoesNotExistException, CannotDisseminateFormatException {
+    throws OAIInternalServerError, IdDoesNotExistException, CannotDisseminateFormatException {
         throw new OAIInternalServerError("You need to override AbstractCatalog.getMetadata()");
     }
 
@@ -572,6 +517,7 @@ public abstract class AbstractCatalog {
             try {
                 records.add(getRecord(identifier, metadataPrefix));
             } catch (IdDoesNotExistException e) {
+                LOGGER.error(e.getMessage(), e);
                 throw new OAIInternalServerError("GetRecord failed to retrieve identifier '"
                         + identifier + "'");
             }
@@ -609,10 +555,12 @@ public abstract class AbstractCatalog {
             try {
                 records.add(getRecord(identifier, metadataPrefix));
             } catch (IdDoesNotExistException e) {
+                LOGGER.error(e.getMessage(), e);
                 throw new OAIInternalServerError("GetRecord failed to retrieve identifier '"
                         + identifier + "'");
             } catch (CannotDisseminateFormatException e) {
                 // someone cheated
+                LOGGER.error(e.getMessage(), e);
                 throw new BadResumptionTokenException();
             }
         }
@@ -633,7 +581,6 @@ public abstract class AbstractCatalog {
             resumptionMap = new HashMap();
             resumptionMap.put("resumptionToken", resumptionToken);
             if (millisecondsToLive > 0) {
-//              Date now = new Date();
                 Date then = new Date((new Date()).getTime() + millisecondsToLive);
                 resumptionMap.put("expirationDate", ServerVerb.createResponseDate(then));
             }
@@ -656,11 +603,10 @@ public abstract class AbstractCatalog {
      * Validate the parameter value
      * The default regex pattern can be overridden by setting a AbstractCatalog.paramRegex property
      *
-     * @param key
      * @param value
      * @return true if the parameter is valid, false if not
      */
-	public boolean isValidParam(String key, String value) {
+	public boolean isValidParam(String value) {
 		if (paramPattern != null) {
 			return paramPattern.matcher(value).matches();
 		}

@@ -75,6 +75,7 @@ public class ListRecords extends ServerVerb {
       try {
         baseURL = request.getRequestURL().toString();
       } catch (java.lang.NoSuchMethodError f) {
+        LOGGER.debug("getRequestURL failed, retrying", f);
         baseURL = request.getRequestURL().toString();
       }
     }
@@ -86,12 +87,6 @@ public class ListRecords extends ServerVerb {
       metadataPrefix = null;
 
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    //String styleSheet = properties.getProperty("OAIHandler.styleSheet");
-    //if (styleSheet != null) {
-    //sb.append("<?xml-stylesheet type=\"text/xsl\" href=\"");
-    //sb.append(styleSheet);
-    //sb.append("\"?>");
-    //}
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
     sb.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     String extraXmlns = properties.getProperty("OAIHandler.extraXmlns");
@@ -156,17 +151,21 @@ public class ListRecords extends ServerVerb {
             listRecordsMap = abstractCatalog.listRecords(from, until, set, metadataPrefix);
           }
         } catch (NoItemsMatchException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(e.getMessage());
         } catch (BadArgumentException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append("<request verb=\"ListRecords\">");
           sb.append(baseURL);
           sb.append("</request>");
           sb.append(e.getMessage());
         } catch (CannotDisseminateFormatException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(e.getMessage());
         } catch (NoSetHierarchyException e) {
+          LOGGER.debug(e.getMessage(), e);
           sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
           sb.append(e.getMessage());
         }
@@ -180,6 +179,7 @@ public class ListRecords extends ServerVerb {
           try {
             listRecordsMap = abstractCatalog.listRecords(oldResumptionToken);
           } catch (BadResumptionTokenException e) {
+            LOGGER.debug(e.getMessage(), e);
             sb.append(getRequestElement(request, validParamNames, baseURL, xmlEncodeSetSpec));
             sb.append(e.getMessage());
           }

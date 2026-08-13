@@ -11,9 +11,9 @@
 package ORG.oclc.oai.server.catalog;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,7 +26,6 @@ import ORG.oclc.oai.util.OAIUtil;
 import de.fiz_karlsruhe.FormatRegistry;
 import de.fiz_karlsruhe.model.Format;
 import de.fiz_karlsruhe.model.Item;
-import de.fiz_karlsruhe.model.Transformation;
 import de.fiz_karlsruhe.service.BackendService;
 
 /**
@@ -39,9 +38,9 @@ import de.fiz_karlsruhe.service.BackendService;
  */
 public abstract class RecordFactory {
 
-  private final static Logger LOGGER = LogManager.getLogger(RecordFactory.class);
+  private static final Logger LOGGER = LogManager.getLogger(RecordFactory.class);
 
-  private final static Pattern XML_DECLARATION_PATTERN = Pattern.compile("\\<\\?xml(.+?)\\?\\>");
+  private static final Pattern XML_DECLARATION_PATTERN = Pattern.compile("\\<\\?xml(.+?)\\?\\>");
 
   /**
    * Container for the crosswalk(s) supported by this factory
@@ -81,12 +80,12 @@ public abstract class RecordFactory {
    * Get a list of supported schemaLocations for the specified native record.
    * 
    * @param nativeItem native database record
-   * @return A Vector containing all the schemaLocations this record can support.
+   * @return A List containing all the schemaLocations this record can support.
    * @exception NoMetadatdaFormatsException This record doesn't support any of the
    *                                        available schemaLocations for this
    *                                        repository.
    */
-  public Vector getSchemaLocations(Object nativeItem) throws NoMetadataFormatsException {
+  public List getSchemaLocations(Object nativeItem) throws NoMetadataFormatsException {
     if (isDeleted(nativeItem)) {
       throw new NoMetadataFormatsException();
     }
@@ -95,8 +94,8 @@ public abstract class RecordFactory {
     //Filter the formats that are available for the item
     List<Format> filteredFormats = getFormatRegistry().getFormats().stream().
     		filter(element -> item.getFormats().contains(element.getMetadataPrefix())).collect(Collectors.toList());
-    
-    return new Vector(filteredFormats);
+
+    return new ArrayList(filteredFormats);
   }
 
   /**
@@ -158,17 +157,7 @@ public abstract class RecordFactory {
     if (setSpecs != null) {
       while (setSpecs.hasNext()) {
         xmlHeader.append("<setSpec>");
-//                     try {
-//                         if (encodeSetSpec) {
-//                             xmlHeader.append(URLEncoder.encode((String)setSpecs.next(), "UTF-8"));
-//                         } else {
         xmlHeader.append((String) setSpecs.next());
-//                         }
-
-//                     } catch (UnsupportedEncodingException e) {
-//                         e.printStackTrace();
-//                         throw new OAIInternalServerError(e.getMessage());
-//                     }
         xmlHeader.append("</setSpec>");
       }
     }
@@ -313,9 +302,9 @@ public abstract class RecordFactory {
           throw new CannotDisseminateFormatException("Caoot find item in the backend");
         }
         } catch (IOException e) {
-        e.printStackTrace();
+        LOGGER.error(e.getMessage(), e);
       }
-      
+
       xmlRec.append("</metadata>");
       LOGGER.debug("RecordFactory.create: finished metadata");
       
@@ -425,22 +414,11 @@ public abstract class RecordFactory {
     if (isDeleted) {
       throw new CannotDisseminateFormatException("Record is deleted");
     }
-//    Iterator iterator = getCrosswalks().iterator();
-//    while (iterator.hasNext()) {
-//      Map.Entry entry = (Map.Entry) iterator.next();
-//      CrosswalkItem crosswalkItem = (CrosswalkItem) entry.getValue();
-//      Crosswalk crosswalk = crosswalkItem.getCrosswalk();
-//      if (schemaURL == null || crosswalk.getSchemaURL().equals(schemaURL)) {
-//        xmlRec.append(crosswalk.createMetadata(nativeItem));
-//      }
-//    }
-    //TODO
     try {
       Item item = BackendService.getInstance().getItem(getLocalIdentifier(nativeItem));
       xmlRec.append(item.getContent().getContent());
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOGGER.error(e.getMessage(), e);
     }
     return xmlRec.toString();
   }
