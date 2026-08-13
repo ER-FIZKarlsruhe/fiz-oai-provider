@@ -191,11 +191,9 @@ public class ResumptionToken {
       throw new BadResumptionTokenException();
     }
 
-    if (frominstant != null && untilinstant != null) {
-      if (frominstant.compareTo(untilinstant) > 0) {
-          logger.error("Invalid date rage. From date is older than until date!");
+    if (frominstant != null && untilinstant != null && frominstant.compareTo(untilinstant) > 0) {
+        logger.error("Invalid date rage. From date is older than until date!");
         throw new BadResumptionTokenException();
-      }
     }
 
   }

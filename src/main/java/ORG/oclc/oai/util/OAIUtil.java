@@ -25,6 +25,9 @@ import org.xml.sax.SAXException;
  * Utility methods for OAICat and OAIHarvester
  */
 public class OAIUtil {
+    private OAIUtil() {
+    }
+
     private static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     static {
         dbFactory.setNamespaceAware(true);
@@ -104,6 +107,7 @@ public class OAIUtil {
      * @return  an LCCN String in MARC display format (e.g. 'n2001-50268').
      * @deprecated use toLCCNDisplay() instead.
      */
+    @Deprecated(forRemoval = false)
     public static String getLCCN(String packedLCCN) {
 	return toLCCNDisplay(packedLCCN);
     }

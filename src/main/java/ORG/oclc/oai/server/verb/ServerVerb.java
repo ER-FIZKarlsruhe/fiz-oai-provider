@@ -15,7 +15,6 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,6 +22,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 
 import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.util.OAIUtil;
+import de.fiz_karlsruhe.OaiRuntimeException;
 
 /**
  * ServerVerb is the parent class for each of the server-side OAI verbs.
@@ -199,30 +200,6 @@ public abstract class ServerVerb {
         return false;
     }
 
-//  /**
-//  * Get the OAI requestURL from the verb response
-//  *
-//  * @param request the HTTP servlet request object
-//  * @return the current verb's requestURL value
-//  */
-//  protected static String getRequestURL(HttpServletRequest request) {
-//  StringBuffer sb = new StringBuffer();
-//  sb.append(HttpUtils.getRequestURL(request));
-//  sb.append("?");
-//  Enumeration params = request.getParameterNames();
-//  while (params.hasMoreElements()) {
-//  String name = (String)params.nextElement();
-//  String value = request.getParameter(name);
-//  sb.append(OAIUtil.xmlEncode(name));
-//  sb.append("=");
-//  sb.append(OAIUtil.xmlEncode(value));
-//  if (params.hasMoreElements()) {
-//  sb.append("&amp;");
-//  }
-//  }
-//  return sb.toString();
-//  }
-
     /**
      * Get the complete XML response for the verb request
      *
@@ -249,7 +226,7 @@ public abstract class ServerVerb {
         return renderedResult;
     }
 
-    public static HashMap getVerbs(Properties properties) {
+    public static Map getVerbs() {
         HashMap serverVerbsMap = new HashMap();
         serverVerbsMap.put("ListRecords", ListRecords.class);
         serverVerbsMap.put("ListIdentifiers", ListIdentifiers.class);
@@ -260,7 +237,7 @@ public abstract class ServerVerb {
         return serverVerbsMap;
     }
 
-    public static HashMap getExtensionVerbs(Properties properties) {
+    public static Map getExtensionVerbs(Properties properties) {
         HashMap extensionVerbsMap = new HashMap();
         String propertyPrefix = "ExtensionVerbs.";
         Enumeration propNames = properties.propertyNames();
@@ -277,12 +254,7 @@ public abstract class ServerVerb {
                     Method init =
                         serverVerbClass.getMethod("init",
                                 new Class[] {Properties.class});
-                    try {
-                        init.invoke(null, new Object[] {properties});
-                    } catch (InvocationTargetException e) {
-                        LOGGER.error(e.getMessage(), e);
-                        throw new RuntimeException(e.getTargetException());
-                    }
+                    invokeInit(init, properties);
                     extensionVerbsMap.put(verb, serverVerbClass);
                     LOGGER.debug("ExtensionVerb.getVerbs: " + verb + "=" + verbClassName);
                 } catch (Exception e) {
@@ -291,5 +263,14 @@ public abstract class ServerVerb {
             }
         }
         return extensionVerbsMap;
+    }
+
+    private static void invokeInit(Method init, Properties properties) throws IllegalAccessException {
+        try {
+            init.invoke(null, new Object[] {properties});
+        } catch (InvocationTargetException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new OaiRuntimeException(e.getTargetException());
+        }
     }
 }

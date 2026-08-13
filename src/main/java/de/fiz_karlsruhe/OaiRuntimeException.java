@@ -14,38 +14,25 @@
  * limitations under the License.
  */
 
-package de.fiz_karlsruhe.model;
+package de.fiz_karlsruhe;
 
-public class Content {
+/**
+ * Dedicated unchecked exception used in place of raw RuntimeException for
+ * unrecoverable configuration or reflection failures.
+ */
+public class OaiRuntimeException extends RuntimeException {
 
-    private String identifier;
-    private String format;
-    private String contentValue;
+    private static final long serialVersionUID = 1L;
 
-
-    public String getIdentifier() {
-      return identifier;
+    public OaiRuntimeException(String message) {
+        super(message);
     }
 
-    public void setIdentifier(String identifier) {
-      this.identifier = identifier;
+    public OaiRuntimeException(Throwable cause) {
+        super(cause);
     }
 
-    public String getFormat() {
-      return format;
+    public OaiRuntimeException(String message, Throwable cause) {
+        super(message, cause);
     }
-
-    public void setFormat(String format) {
-      this.format = format;
-    }
-
-    public String getContent() {
-      return contentValue;
-    }
-
-    public void setContent(String content) {
-      this.contentValue = content;
-    }
-
-  
 }

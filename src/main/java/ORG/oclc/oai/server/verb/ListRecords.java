@@ -79,7 +79,7 @@ public class ListRecords extends ServerVerb {
         baseURL = request.getRequestURL().toString();
       }
     }
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     String oldResumptionToken = request.getParameter("resumptionToken");
     String metadataPrefix = request.getParameter("metadataPrefix");
 

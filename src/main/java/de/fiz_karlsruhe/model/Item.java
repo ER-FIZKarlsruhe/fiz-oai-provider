@@ -19,6 +19,7 @@ package de.fiz_karlsruhe.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Item {
 
@@ -105,8 +106,8 @@ public class Item {
     this.sets = sets;
   }
 
-  public HashMap<String,Object> toNativeitem() {
-    HashMap<String,Object> map = new HashMap<String,Object>();
+  public Map<String,Object> toNativeitem() {
+    Map<String,Object> map = new HashMap<String,Object>();
     map.put("localIdentifier", this.identifier);
     map.put("lastModified", this.datestamp);
     map.put("recordBytes", this.content);

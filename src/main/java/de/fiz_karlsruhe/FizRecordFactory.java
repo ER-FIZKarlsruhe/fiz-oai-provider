@@ -229,7 +229,7 @@ public class FizRecordFactory extends RecordFactory {
    */
   public boolean isDeleted(Object nativeItem) throws IllegalArgumentException {
     if (nativeItem != null) {
-      return Boolean.valueOf(((Item) nativeItem).getDeleteFlag());
+      return ((Item) nativeItem).getDeleteFlag();
     }
     
     return false;

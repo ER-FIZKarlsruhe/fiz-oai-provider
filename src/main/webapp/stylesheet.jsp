@@ -183,13 +183,6 @@
     </tr>
   </xsl:template>
 
-<!--   <xsl:template match="oai:setSpec"> -->
-<!--     <tr class="valign-top"> -->
-<!--       <td><strong><xsl:value-of select="name()"/></strong></td> -->
-<!--       <td><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td> -->
-<!--     </tr> -->
-<!--   </xsl:template> -->
-
   <xsl:template match="oai:setSpec">
     <td class="label-cell"><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
   </xsl:template>
@@ -239,29 +232,12 @@
     </tr>
   </xsl:template>
 
-<!--
-  <xsl:template name="apply-templates-copy-all">
-    <xsl:copy>
-      <xsl:call-template name="apply-templates-copy-all"/>
-    </xsl:copy>
-  </xsl:template>
--->
-
   <xsl:template match="oai:description">
     <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:apply-templates/></td>
     </tr>
   </xsl:template>
-
-<!--
-  <xsl:template match="oai_id:oai-identifier">
-    <table border="0">
-      <tr class="valign-top"><td>OAI Identifier</td></tr>
-      <xsl:apply-templates/>
-    </table>
-  </xsl:template>
--->
 
   <xsl:template match="oai_id:oai-identifier">
     <table border="0" class="layout-plain" role="presentation" aria-label="OAI identifier">
@@ -301,14 +277,6 @@
       </td>
     </tr>
   </xsl:template>
-
-<!--
-  <xsl:template match="oai_branding:metadataRendering>
-    <tr class="valign-top">
-      <td><strong><xsl:value-of select="name()"/></strong></td>
-    </tr>
-  </xsl:template>
--->
 
   <xsl:template match="oai_branding:collectionIcon">
     <tr class="valign-top">

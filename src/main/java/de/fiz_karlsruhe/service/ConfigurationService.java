@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import jakarta.servlet.ServletContext;
 
+import de.fiz_karlsruhe.OaiRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +42,7 @@ public class ConfigurationService {
 
   public static ConfigurationService getInstance() {
     if (INSTANCE == null) {
-      throw new RuntimeException("Service must be initialized with backendUrl first!");
+      throw new OaiRuntimeException("Service must be initialized with backendUrl first!");
     }
 
     return INSTANCE;

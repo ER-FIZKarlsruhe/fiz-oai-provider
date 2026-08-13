@@ -28,11 +28,11 @@ public class RefreshFormatRegistry implements Runnable {
 		List<Format> formats = FizRecordFactory.initFormats(properties);
 		List<Transformation> transformations = FizRecordFactory.initTransformations(properties);
 
-		if (formats != null && formats.size() > 0) {
+		if (formats != null && !formats.isEmpty()) {
 			this.formatRegistry.setFormats(formats);
 		}
 
-		if (transformations != null && transformations.size() > 0) {
+		if (transformations != null && !transformations.isEmpty()) {
 			this.formatRegistry.setTransformations(transformations);
 		}
 	}

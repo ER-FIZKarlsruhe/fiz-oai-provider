@@ -198,6 +198,9 @@ public abstract class AbstractCatalog {
             case 6: // YYYY-M
             case 9: // YYYY-MM-D
                 throw new BadArgumentException();
+
+            default:
+                break;
             }
         }
 
@@ -228,6 +231,9 @@ public abstract class AbstractCatalog {
 
             case 18: // YYYY-MM-DDThh:mm:s
                 throw new BadArgumentException();
+
+            default:
+                break;
             }
         }
 
@@ -342,22 +348,7 @@ public abstract class AbstractCatalog {
         }
         Class oaiCatalogClass = Class.forName(oaiCatalogClassName);
         try {
-            Constructor oaiCatalogConstructor = null;
-            try {
-                oaiCatalogConstructor =
-                    oaiCatalogClass.getConstructor(new Class[] {Properties.class,
-                            ServletContext.class});
-                oaiCatalog =
-                    (AbstractCatalog)oaiCatalogConstructor.newInstance(new Object[]
-                                                                                  {properties, context});
-            } catch (NoSuchMethodException e) {
-                LOGGER.debug("No (Properties, ServletContext) constructor, falling back to (Properties)", e);
-                oaiCatalogConstructor =
-                    oaiCatalogClass.getConstructor(new Class[] {Properties.class});
-                oaiCatalog =
-                    (AbstractCatalog)oaiCatalogConstructor.newInstance(new Object[]
-                                                                                  {properties});
-            }
+            oaiCatalog = instantiateOaiCatalog(oaiCatalogClass, properties, context);
 
             LOGGER.debug("AbstractCatalog.factory: recordFactoryClassName={}", recordFactoryClassName);
 
@@ -394,6 +385,24 @@ public abstract class AbstractCatalog {
             throw e.getTargetException();
         }
         return oaiCatalog;
+    }
+
+    private static AbstractCatalog instantiateOaiCatalog(Class oaiCatalogClass, Properties properties,
+            ServletContext context) throws Exception {
+        Constructor oaiCatalogConstructor;
+        try {
+            oaiCatalogConstructor =
+                oaiCatalogClass.getConstructor(new Class[] {Properties.class,
+                        ServletContext.class});
+            return (AbstractCatalog) oaiCatalogConstructor.newInstance(new Object[]
+                                                                              {properties, context});
+        } catch (NoSuchMethodException e) {
+            LOGGER.debug("No (Properties, ServletContext) constructor, falling back to (Properties)", e);
+            oaiCatalogConstructor =
+                oaiCatalogClass.getConstructor(new Class[] {Properties.class});
+            return (AbstractCatalog) oaiCatalogConstructor.newInstance(new Object[]
+                                                                              {properties});
+        }
     }
 
     /**

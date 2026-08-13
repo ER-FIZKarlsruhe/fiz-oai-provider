@@ -1,6 +1,5 @@
 $(document).ready(function() {
 	var userAgent = navigator.userAgent.toLowerCase();
-	//console.log(userAgent);
 
 	$('textarea').each(function() {
 		var $this = $(this);

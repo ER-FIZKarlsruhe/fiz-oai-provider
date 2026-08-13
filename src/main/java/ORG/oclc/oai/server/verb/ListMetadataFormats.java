@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -68,7 +67,7 @@ public class ListMetadataFormats extends ServerVerb {
         baseURL = request.getRequestURL().toString();
       }
     }
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     String identifier = request.getParameter("identifier");
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
     sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");
@@ -118,7 +117,6 @@ public class ListMetadataFormats extends ServerVerb {
           sb.append("<ListMetadataFormats>");
           for (int i = 0; i < itemFormats.size(); ++i) {
     	    Format format = (Format)itemFormats.get(i);
-            String schemaLocation = format.getSchemaLocation();
             String namespaceURI = format.getSchemaNamespace();
             String schemaURL = format.getSchemaLocation();
             
@@ -151,14 +149,5 @@ public class ListMetadataFormats extends ServerVerb {
     }
     sb.append("</OAI-PMH>");
     return render(response, "text/xml; charset=UTF-8", sb.toString(), serverTransformer);
-  }
-
-  private static String[] split(String s) {
-    StringTokenizer tokenizer = new StringTokenizer(s);
-    String[] tokens = new String[tokenizer.countTokens()];
-    for (int i = 0; i < tokens.length; ++i) {
-      tokens[i] = tokenizer.nextToken();
-    }
-    return tokens;
   }
 }

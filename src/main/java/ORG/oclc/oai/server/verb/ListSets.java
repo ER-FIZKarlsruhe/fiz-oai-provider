@@ -64,7 +64,7 @@ public class ListSets extends ServerVerb {
 		baseURL = request.getRequestURL().toString();
 	    }
 	}
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 	String oldResumptionToken = request.getParameter("resumptionToken");
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
         sb.append("<OAI-PMH xmlns=\"http://www.openarchives.org/OAI/2.0/\"");

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.fiz_karlsruhe.OaiRuntimeException;
 import de.fiz_karlsruhe.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
@@ -74,7 +75,7 @@ public class BackendService {
 
   public static BackendService getInstance() {
 	    if (INSTANCE == null) {
-	      throw new RuntimeException("Service must be initialized with backendUrl first!"); 
+	      throw new OaiRuntimeException("Service must be initialized with backendUrl first!");
 	    }
 
 	    return INSTANCE;

@@ -51,6 +51,7 @@ import ORG.oclc.oai.server.catalog.AbstractCatalog;
 import ORG.oclc.oai.server.verb.OAIInternalServerError;
 import ORG.oclc.oai.server.verb.ServerVerb;
 import de.fiz_karlsruhe.FizRecordFactory;
+import de.fiz_karlsruhe.OaiRuntimeException;
 import de.fiz_karlsruhe.service.ConfigurationService;
 
 /**
@@ -94,7 +95,7 @@ public class OAIHandler extends HttpServlet {
         super.init(config);
 
         try {
-            HashMap attributes = null;
+            Map attributes = null;
             loadConfiguration();
             attributes = getAttributes(properties);
 
@@ -185,7 +186,7 @@ public class OAIHandler extends HttpServlet {
         LOGGER.info("Using the following configuration: \n" + builder.toString());
     }
 
-    public HashMap getAttributes(Properties properties) throws Throwable {
+    public Map getAttributes(Properties properties) throws Throwable {
         HashMap<String, Object> attributes = new HashMap<>();
 
         // Copy servlet context attributes
@@ -220,7 +221,7 @@ public class OAIHandler extends HttpServlet {
      * cheap-to-create instance is handed to each request instead of sharing one
      * across concurrently running requests.
      */
-    public Transformer getTransformer(Properties properties, HashMap attributes) throws IOException {
+    public Transformer getTransformer(Properties properties, Map attributes) throws IOException {
         Templates templates = (Templates) attributes.get("OAIHandler.templates");
         if (templates != null) {
             return newTransformer(templates);
@@ -253,7 +254,7 @@ public class OAIHandler extends HttpServlet {
                 tFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
                 templates = tFactory.newTemplates(xslSource);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new OaiRuntimeException(e);
             }
             attributes.put("OAIHandler.templates", templates);
         } finally {
@@ -269,12 +270,12 @@ public class OAIHandler extends HttpServlet {
         try {
             return templates.newTransformer();
         } catch (TransformerConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new OaiRuntimeException(e);
         }
     }
 
-    public HashMap getAttributes(String pathInfo) {
-        HashMap attributes = null;
+    public Map getAttributes(String pathInfo) {
+        Map attributes = null;
         LOGGER.debug("pathInfo=" + pathInfo);
         if (pathInfo != null && pathInfo.length() > 0) {
             if (attributesMap.containsKey(pathInfo)) {
@@ -316,7 +317,7 @@ public class OAIHandler extends HttpServlet {
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response)
             throws IOException {
-        HashMap attributes = getAttributes(request.getPathInfo());
+        Map attributes = getAttributes(request.getPathInfo());
         if (!filterRequest(request, response)) {
             return;
         }
@@ -330,8 +331,8 @@ public class OAIHandler extends HttpServlet {
         boolean serviceUnavailable = isServiceUnavailable(requestProperties);
         String extensionPath = requestProperties.getProperty("OAIHandler.extensionPath", "/extension");
 
-        HashMap serverVerbs = ServerVerb.getVerbs(requestProperties);
-        HashMap extensionVerbs = ServerVerb.getExtensionVerbs(requestProperties);
+        Map serverVerbs = ServerVerb.getVerbs();
+        Map extensionVerbs = ServerVerb.getExtensionVerbs(requestProperties);
 
 
 
@@ -436,12 +437,12 @@ public class OAIHandler extends HttpServlet {
         return true;
     }
 
-    public static String getResult(HashMap attributes,
+    public static String getResult(Map attributes,
                                    HttpServletRequest request,
                                    HttpServletResponse response,
                                    Transformer serverTransformer,
-                                   HashMap serverVerbs,
-                                   HashMap extensionVerbs,
+                                   Map serverVerbs,
+                                   Map extensionVerbs,
                                    String extensionPath)
             throws Throwable {
         try {
@@ -464,16 +465,7 @@ public class OAIHandler extends HttpServlet {
                             HttpServletRequest.class,
                             HttpServletResponse.class,
                             Transformer.class});
-            try {
-                result = (String)construct.invoke(null,
-                        new Object[] {attributes,
-                                request,
-                                response,
-                                serverTransformer});
-            } catch (InvocationTargetException e) {
-                LOGGER.error(e.getMessage(), e);
-                throw e.getTargetException();
-            }
+            result = invokeConstruct(construct, attributes, request, response, serverTransformer);
 
             LOGGER.debug(result);
 
@@ -484,6 +476,20 @@ public class OAIHandler extends HttpServlet {
         } catch (IllegalAccessException e) {
             LOGGER.error(e.getMessage(), e);
             throw new OAIInternalServerError(e.getMessage());
+        }
+    }
+
+    private static String invokeConstruct(Method construct, Map attributes, HttpServletRequest request,
+            HttpServletResponse response, Transformer serverTransformer) throws Throwable {
+        try {
+            return (String) construct.invoke(null,
+                    new Object[] {attributes,
+                            request,
+                            response,
+                            serverTransformer});
+        } catch (InvocationTargetException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw e.getTargetException();
         }
     }
     
