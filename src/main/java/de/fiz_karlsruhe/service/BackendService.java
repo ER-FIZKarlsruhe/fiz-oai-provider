@@ -30,6 +30,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,17 +38,27 @@ import org.apache.logging.log4j.Logger;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 
-import ORG.oclc.oai.server.verb.OAIInternalServerError;
-
 public class BackendService {
 
   private static String backendBaseUrl;
 
   private static BackendService INSTANCE;
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+  private static final CloseableHttpClient HTTP_CLIENT = buildHttpClient();
+
   final static Logger logger = LogManager.getLogger(BackendService.class);
 
+  private static CloseableHttpClient buildHttpClient() {
+    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+    connectionManager.setMaxTotal(100);
+    connectionManager.setDefaultMaxPerRoute(20);
 
+    return HttpClientBuilder.create()
+        .setConnectionManager(connectionManager)
+        .build();
+  }
 
   private BackendService(String backendBaseUrl) {
     BackendService.backendBaseUrl = backendBaseUrl;
@@ -78,19 +89,16 @@ public class BackendService {
       throw new IllegalArgumentException("metadataPrefix must not be null");
     }
     
-    ObjectMapper objectMapper = new ObjectMapper();
-
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8)
             + "?format=" + URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8) + "&content=true";
 
     logger.info("getItem localIdentifier + metadataPrefix  url: {}", url);
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+    try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
 
-        item = objectMapper.readValue(json, Item.class);
+        item = OBJECT_MAPPER.readValue(json, Item.class);
       }
     } catch (Exception e) {
       logger.error("Error on getItem", e);
@@ -103,20 +111,17 @@ public class BackendService {
     if (localIdentifier == null || localIdentifier.isEmpty()) {
       throw new IllegalArgumentException("localIdentifier must not be null");
     }
-    
-    ObjectMapper objectMapper = new ObjectMapper();
 
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8);
 
     logger.debug("getItem localIdentifier url: {}", url);
-    
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+
+    try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
 
-        item = objectMapper.readValue(json, Item.class);
+        item = OBJECT_MAPPER.readValue(json, Item.class);
       }
     } catch (Exception e) {
       logger.error("Error on getItem", e);
@@ -154,14 +159,12 @@ public class BackendService {
     logger.info("getItems url: {}", url.toString());
     SearchResult<Item> result = null;
 
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(getHttpGet(url.toString()))) {
+    try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url.toString()))) {
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         logger.debug("json {}", json);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JavaType type = objectMapper.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
-        result = objectMapper.readValue(json, type);
+        JavaType type = OBJECT_MAPPER.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
+        result = OBJECT_MAPPER.readValue(json, type);
       }
     } catch (Exception e) {
       logger.error("Error on getIdentifiers", e);
@@ -171,95 +174,84 @@ public class BackendService {
   }
 
   public List<Format> getFormats() throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-
     String url = backendBaseUrl + "/format";
 
     logger.info("getFormats url: {}", url);
     List<Format> formatList = null;
 
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-      CloseableHttpResponse response = client.execute(getHttpGet(url))) {
-        
+    try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
+
       logger.info("getFormats response code: {}", response.getStatusLine().getStatusCode());
-        
+
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        formatList = new ArrayList<Format>(Arrays.asList(mapper.readValue(json, Format[].class)));
-      } 
+        formatList = new ArrayList<Format>(Arrays.asList(OBJECT_MAPPER.readValue(json, Format[].class)));
+      }
     } catch (Exception e) {
       logger.error("Error on getFormats", e);
     }
-    
+
     return formatList;
   }
 
   public Format getFormat(String metadataPrefix) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-
     String url = backendBaseUrl + "/format/" + URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8);
 
     logger.info("getFormat url: {}", url);
     Format format = null;
 
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
-        
+    try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
+
       logger.info("getFormat response code: {}", response.getStatusLine().getStatusCode());
-        
+
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        format = mapper.readValue(json, Format.class);
+        format = OBJECT_MAPPER.readValue(json, Format.class);
       }
     } catch (Exception e) {
       logger.error("Error on getFormats", e);
     }
-    
+
     return format;
   }
-  
-  
-  public List<Transformation> getTransformations() throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
 
+
+  public List<Transformation> getTransformations() throws IOException {
     String url = backendBaseUrl + "/crosswalk";
 
     logger.info("getTransformations url: {}", url);
     List<Transformation> transformationList = null;
 
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
-        
+    try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
+
       logger.info("getTransformations response code: {}", response.getStatusLine().getStatusCode());
-        
+
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        transformationList = new ArrayList<Transformation>(Arrays.asList(mapper.readValue(json, Transformation[].class)));
+        transformationList = new ArrayList<Transformation>(Arrays.asList(OBJECT_MAPPER.readValue(json, Transformation[].class)));
       }
     } catch (Exception e) {
       logger.error("Error on getTransformations", e);
     }
-    
+
     return transformationList;
   }
-  
-  
+
+
   public List<Set> getSets() throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
     String url = backendBaseUrl + "/set";
     logger.info("getSets url {}", url);
 
     List<Set> setObjects = null;
 
-    try (CloseableHttpClient client = HttpClientBuilder.create().build();
-        CloseableHttpResponse response = client.execute(getHttpGet(url))) {
-        
+    try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
+
       logger.info("getSets response code: {}", response.getStatusLine().getStatusCode());
-        
-        
+
+
       if (response.getStatusLine().getStatusCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
-        setObjects = new ArrayList<Set>(Arrays.asList(mapper.readValue(json, Set[].class)));
+        setObjects = new ArrayList<Set>(Arrays.asList(OBJECT_MAPPER.readValue(json, Set[].class)));
       }
     } catch (Exception e) {
       logger.error("Error on getIdentifiers", e);
@@ -269,7 +261,6 @@ public class BackendService {
   }
 
     public ListSetsResult searchSets(String resumptionToken) {
-        ObjectMapper mapper = new ObjectMapper();
         String url = backendBaseUrl + "/set/search";
 
         if (StringUtils.isNotEmpty(resumptionToken)) {
@@ -280,15 +271,14 @@ public class BackendService {
 
         ListSetsResult result = null;
 
-        try (CloseableHttpClient client = HttpClientBuilder.create().build();
-             CloseableHttpResponse response = client.execute(getHttpGet(url))) {
+        try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
 
             int statusCode = response.getStatusLine().getStatusCode();
             logger.info("getSets response code: {}", statusCode);
 
             if (statusCode == 200) {
                 String json = EntityUtils.toString(response.getEntity());
-                result = mapper.readValue(json, ListSetsResult.class);
+                result = OBJECT_MAPPER.readValue(json, ListSetsResult.class);
             } else {
                 logger.warn("Non-200 status when calling searchSets: {}", statusCode);
             }

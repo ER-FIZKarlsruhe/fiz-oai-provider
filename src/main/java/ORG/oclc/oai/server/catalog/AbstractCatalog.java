@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.ServletContext;
 
@@ -91,6 +92,11 @@ public abstract class AbstractCatalog {
     private String paramRegex = "^[a-zA-Z0-9\\.\\/\\:\\_\\-!]*$";
 
     /**
+     * Compiled form of paramRegex, kept in sync via setParamRegex()
+     */
+    private Pattern paramPattern = Pattern.compile(paramRegex);
+
+    /**
      * return a handle to the RecordFactory
      * @return guess
      */
@@ -102,6 +108,7 @@ public abstract class AbstractCatalog {
 
     public void setParamRegex(String s) {
     	this.paramRegex = s;
+    	this.paramPattern = (s != null && s.length() > 0) ? Pattern.compile(s) : null;
     }
 
     /**
@@ -654,8 +661,8 @@ public abstract class AbstractCatalog {
      * @return true if the parameter is valid, false if not
      */
 	public boolean isValidParam(String key, String value) {
-		if (paramRegex != null && paramRegex.length() > 0) {
-			return value.matches(paramRegex);
+		if (paramPattern != null) {
+			return paramPattern.matcher(value).matches();
 		}
 		return true;
 	}

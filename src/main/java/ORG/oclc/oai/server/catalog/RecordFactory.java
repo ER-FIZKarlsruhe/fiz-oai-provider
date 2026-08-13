@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +40,9 @@ import de.fiz_karlsruhe.service.BackendService;
 public abstract class RecordFactory {
 
   private final static Logger LOGGER = LogManager.getLogger(RecordFactory.class);
-  
+
+  private final static Pattern XML_DECLARATION_PATTERN = Pattern.compile("\\<\\?xml(.+?)\\?\\>");
+
   /**
    * Container for the crosswalk(s) supported by this factory
    */
@@ -305,7 +308,7 @@ public abstract class RecordFactory {
         }
 
         if (item != null) {
-          xmlRec.append(item.getContent().getContent().replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim());
+          xmlRec.append(XML_DECLARATION_PATTERN.matcher(item.getContent().getContent()).replaceAll("").trim());
         } else {
           throw new CannotDisseminateFormatException("Caoot find item in the backend");
         }
