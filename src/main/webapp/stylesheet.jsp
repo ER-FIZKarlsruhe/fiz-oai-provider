@@ -36,25 +36,39 @@
             .nospace {
                 MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px
             }
+            .valign-top { vertical-align: top; }
+            .layout-outer { width: 100%; border-spacing: 20px; }
+            .layout-outer td { padding: 0; }
+            .layout-inner { width: 100%; border-spacing: 0; }
+            .layout-inner td { padding: 4px; }
+            .layout-sp2 { width: 100%; border-spacing: 2px; }
+            .layout-sp2 td { padding: 0; }
+            .layout-sp4 { width: 100%; border-spacing: 4px; }
+            .layout-sp4 td { padding: 0; }
+            .layout-plain { width: 100%; border-spacing: 0; }
+            .layout-plain td { padding: 0; }
+            .label-cell { width: 150px; }
+            .label-cell-200 { width: 200px; }
+            .bg-light { background-color: #eeeeee; }
           </xsl:comment>
         </style>
           <script src="js/vendor/jquery-3.7.1/jquery-3.7.1.min.js"></script>
           <script src="js/vendor/autosize/autosize.min.js"></script>
           <script src="js/fiz-oai-provider.js"></script>
       </head>
-      <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
-        <table width="100%" border="0" cellpadding="0" cellspacing="20">
+      <body leftmargin="0" topmargin="0">
+        <table border="0" class="layout-outer">
 
           <jsp:include page="header.jsp"></jsp:include>
 
-          <tr valign="top">
-            <td bgcolor="${ConfigurationService.getInstance().getBrandingColor()}">
-              <table width="100%" border="0" cellpadding="4" cellspacing="0">
+          <tr class="valign-top">
+            <td style="background-color: ${ConfigurationService.getInstance().getBrandingColor()};">
+              <table border="0" class="layout-inner">
                 <xsl:apply-templates select="oai:responseDate|oai:request"/>
               </table>
             </td>
           </tr>
-          <tr valign="top">
+          <tr class="valign-top">
             <td><xsl:apply-templates select="oai:Identify|oai:GetRecord|oai:ListIdentifiers|oai:ListMetadataFormats|oai:ListRecords|oai:ListSets|oai:error"/></td>
           </tr>
           
@@ -67,7 +81,7 @@
 
   <xsl:template match="oai:Identify|oai:GetRecord">
     <h2><xsl:value-of select="name()"/></h2>
-    <table width="100%" border="0" cellspacing="2" cellpadding="0">
+    <table border="0" class="layout-sp2">
       <xsl:apply-templates/>
     </table>
   </xsl:template>
@@ -79,9 +93,9 @@
 
   <xsl:template match="oai:ListSets">
     <h2><xsl:value-of select="name()"/></h2>
-    <table width="100%" border="0" cellspacing="0" cellpadding="4">
-      <tr valign="top">
-        <td width="150"><strong>setSpec</strong></td>
+    <table border="0" class="layout-inner">
+      <tr class="valign-top">
+        <td class="label-cell"><strong>setSpec</strong></td>
         <td><strong>setName</strong></td>
       </tr>
       <xsl:apply-templates/>
@@ -95,25 +109,25 @@
 
   <xsl:template match="oai:ListIdentifiers">
     <h2><xsl:value-of select="name()"/></h2>
-    <table width="100%" border="0" cellspacing="2" cellpadding="0">
+    <table border="0" class="layout-sp2">
       <xsl:apply-templates/>
     </table>
   </xsl:template>
 
   <xsl:template match="oai:error">
     <h2><font color="red"><xsl:value-of select="name()"/></font></h2>
-    <table width="100%" border="0" cellspacing="2" cellpadding="0">
-      <tr valign="top">
-        <td width="200"><strong><xsl:value-of select="@code"/></strong></td>
+    <table border="0" class="layout-sp2">
+      <tr class="valign-top">
+        <td class="label-cell-200"><strong><xsl:value-of select="@code"/></strong></td>
         <td><xsl:value-of select="."/></td>
       </tr>
     </table>
   </xsl:template>
 
   <xsl:template match="oai:record">
-    <tr valign="top">
+    <tr class="valign-top">
       <td>
-        <table width="100%" border="0" cellspacing="2" cellpadding="0">
+        <table border="0" class="layout-sp2">
           <xsl:apply-templates/>
         </table>
       </td>
@@ -121,12 +135,12 @@
   </xsl:template>
 
   <xsl:template match="oai:header">
-    <tr valign="top">
-      <td bgcolor="#eeeeee">
-        <table width="100%" border="0" cellspacing="4" cellpadding="0">
+    <tr class="valign-top">
+      <td class="bg-light">
+        <table border="0" class="layout-sp4">
 		  <xsl:if test="@status">
-			<tr valign="top">
-			  <td width="150"><strong>status</strong></td>
+			<tr class="valign-top">
+			  <td class="label-cell"><strong>status</strong></td>
 			  <td><xsl:value-of select="@status"/></td>
 			</tr>
 		  </xsl:if>
@@ -137,7 +151,7 @@
   </xsl:template>
 
   <xsl:template match="oai:metadata">
-    <tr valign="top">
+    <tr class="valign-top">
       <td>
       <textarea class="xml-content-area" style="width:100%; height:200px; font-family:monospace; margin-bottom:10px;"><xsl:copy-of select="node()" /></textarea>
       </td>
@@ -164,20 +178,20 @@
   </xsl:template>
 
   <xsl:template match="oai:set" >
-    <tr valign="top">
+    <tr class="valign-top">
       <xsl:apply-templates/>
     </tr>
   </xsl:template>
 
 <!--   <xsl:template match="oai:setSpec"> -->
-<!--     <tr valign="top"> -->
+<!--     <tr class="valign-top"> -->
 <!--       <td><strong><xsl:value-of select="name()"/></strong></td> -->
 <!--       <td><a><xsl:attribute name="href">/fiz-oai-provider/OAIHandler?verb=ListRecords&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td> -->
 <!--     </tr> -->
 <!--   </xsl:template> -->
 
   <xsl:template match="oai:setSpec">
-    <td width="150"><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+    <td class="label-cell"><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=oai_dc&amp;set=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
   </xsl:template>
 
   <xsl:template match="oai:setName">
@@ -185,41 +199,41 @@
   </xsl:template>
 
   <xsl:template match="oai:responseDate">
-    <tr valign="top">
-      <td width="150"><strong><xsl:value-of select="name()"/></strong></td>
+    <tr class="valign-top">
+      <td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:value-of select="."/></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:request">
-    <tr valign="top">
-      <td width="150"><strong><xsl:value-of select="name()"/></strong></td>
+    <tr class="valign-top">
+      <td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:value-of select="."/>?verb=<xsl:value-of select="@verb"/></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:*">
-    <tr valign="top">
-      <td width="150"><strong><xsl:value-of select="name()"/></strong></td>
+    <tr class="valign-top">
+      <td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:value-of select="."/></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:adminEmail">
-    <tr valign="top">
-      <td width="150"><strong><xsl:value-of select="name()"/></strong></td>
+    <tr class="valign-top">
+      <td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
       <td><cite><a><xsl:attribute name="href"><xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></cite></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:resumptionToken">
-    <tr valign="top">
+    <tr class="valign-top">
       <td>ResumptionToken: <a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=<xsl:value-of select="//oai:OAI-PMH/oai:request/@verb"/>&amp;renderHtml=true&amp;resumptionToken=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:identifier">
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=GetRecord&amp;renderHtml=true&amp;metadataPrefix=<xsl:choose><xsl:when test="/oai:OAI-PMH/oai:request/@metadataPrefix"><xsl:value-of select="/oai:OAI-PMH/oai:request/@metadataPrefix"/></xsl:when><xsl:otherwise>oai_dc</xsl:otherwise></xsl:choose>&amp;identifier=<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
@@ -234,7 +248,7 @@
 -->
 
   <xsl:template match="oai:description">
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:apply-templates/></td>
     </tr>
@@ -243,15 +257,15 @@
 <!--
   <xsl:template match="oai_id:oai-identifier">
     <table border="0">
-      <tr valign="top"><td>OAI Identifier</td></tr>
+      <tr class="valign-top"><td>OAI Identifier</td></tr>
       <xsl:apply-templates/>
     </table>
   </xsl:template>
 -->
 
   <xsl:template match="oai_id:oai-identifier">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-    <tr valign="top">
+    <table border="0" class="layout-plain">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/>:</strong></td>
     </tr>
     <xsl:apply-templates/>
@@ -259,20 +273,20 @@
   </xsl:template>
 
   <xsl:template match="oai_id:*">
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:apply-templates/></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai_branding:branding">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <table border="0" class="layout-plain">
     <xsl:apply-templates/>
     </table>
   </xsl:template>
 
   <xsl:template match="oai_branding:metadataRendering">
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td>
         <a>
@@ -290,14 +304,14 @@
 
 <!--
   <xsl:template match="oai_branding:metadataRendering>
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
     </tr>
   </xsl:template>
 -->
 
   <xsl:template match="oai_branding:collectionIcon">
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td>
         <a>
@@ -324,50 +338,50 @@
   </xsl:template>
 
   <xsl:template match="oai_branding:*">
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:apply-templates/></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai:metadataFormat">
-    <table width="100%" border="0" cellspacing="0" cellpadding="4">
-      <tr valign="top"><td width="150"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
-        <tr valign="top"><td width="150"><strong>schema</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:schema"/></xsl:attribute><xsl:value-of select="oai:schema"/></a></td></tr>
-        <tr valign="top"><td width="150"><strong>metadataNamespace</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:metadataNamespace"/></xsl:attribute><xsl:value-of select="oai:metadataNamespace"/></a></td></tr>
+    <table border="0" class="layout-inner">
+      <tr class="valign-top"><td class="label-cell"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
+        <tr class="valign-top"><td class="label-cell"><strong>schema</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:schema"/></xsl:attribute><xsl:value-of select="oai:schema"/></a></td></tr>
+        <tr class="valign-top"><td class="label-cell"><strong>metadataNamespace</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:metadataNamespace"/></xsl:attribute><xsl:value-of select="oai:metadataNamespace"/></a></td></tr>
     </table>
     <hr/>
   </xsl:template>
 
   <xsl:template match="oai_dc:dc">
-        <table width="100%" border="0" cellspacing="4" cellpadding="0">
+        <table border="0" class="layout-sp4">
           <xsl:apply-templates/>
         </table>
   </xsl:template>
 
   <xsl:template match="oai_etdms:thesis">
-        <table width="100%" border="0" cellspacing="4" cellpadding="0">
+        <table border="0" class="layout-sp4">
           <xsl:apply-templates/>
         </table>
   </xsl:template>
 
   <xsl:template match="dc:identifier">
-    <tr valign="top">
+    <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/></strong></td>
       <td><a><xsl:attribute name="href"><xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="dc:*">
-    <tr valign="top">
-      <td width="150"><strong><xsl:value-of select="name()"/></strong></td>
+    <tr class="valign-top">
+      <td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
       <td><xsl:value-of select="."/></td>
     </tr>
   </xsl:template>
 
   <xsl:template match="oai_etdms:*">
-    <tr valign="top">
-      <td width="150"><strong><xsl:value-of select="name()"/></strong></td>
+    <tr class="valign-top">
+      <td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
       <xsl:if test="@resource">
         <td><a><xsl:attribute name="href"><xsl:value-of select="@resource"/></xsl:attribute><xsl:value-of select="."/></a></td>
       </xsl:if>
@@ -378,14 +392,14 @@
   </xsl:template>
 
   <xsl:template match="toolkit:toolkit">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr valign="top"><td width="150"><strong><xsl:value-of select="name()"/></strong></td>
+    <table border="0" class="layout-plain">
+      <tr class="valign-top"><td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
         <td>
     <a>
       <xsl:attribute name="href">
         <xsl:value-of select="toolkit:URL"/>
       </xsl:attribute>
-      <img border="0" cellspacing="0" cellpadding="0">
+      <img border="0">
         <xsl:attribute name="alt">
           <xsl:value-of select="toolkit:title"/>
         </xsl:attribute>

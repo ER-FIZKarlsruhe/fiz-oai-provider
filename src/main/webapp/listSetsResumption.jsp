@@ -5,24 +5,24 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link href="oaicat.css" rel="stylesheet" type="text/css">
 </head>
-<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
-<table width="100%" border="0" cellspacing="20" cellpadding="0">
+<body leftmargin="0" topmargin="0">
+<table border="0" class="layout-outer">
 
 <jsp:include page="header.jsp"></jsp:include>
 
-<tr valign="top">
+<tr class="valign-top">
 <td>
 <h2>OAI ListSets (Resumption) Request Form</h2>
 <form class="nospace" action="<%=request.getContextPath()%>/OAIHandler" method="POST">
 <input type="hidden" name="verb" value="ListSets">
 <input type="hidden" name="renderHtml" value="true">
-<table width="100%" border="0" cellspacing="0" cellpadding="4">
-<tr valign="top">
-<td width="150"><strong>ResumptionToken:</strong></td>
+<table border="0" class="layout-inner">
+<tr class="valign-top">
+<td class="label-cell"><strong>ResumptionToken:</strong></td>
 <td><input type="text" name="resumptionToken"></td>
 </tr>
-<tr valign="top">
-<td width="150">&nbsp;</td>
+<tr class="valign-top">
+<td class="label-cell">&nbsp;</td>
 <td><input type="submit"></td>
 </tr>
 </table>

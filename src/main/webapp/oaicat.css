@@ -1,1 +1,43 @@
+body {
+  margin: 0;
+}
 
+.valign-top {
+  vertical-align: top;
+}
+
+.layout-outer {
+  width: 100%;
+  border-spacing: 20px;
+}
+
+.layout-outer td {
+  padding: 0;
+}
+
+.layout-inner {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.layout-inner td {
+  padding: 4px;
+}
+
+.layout-header {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.layout-header td {
+  padding: 5px;
+}
+
+.label-cell {
+  width: 150px;
+}
+
+.divider-line {
+  background-color: #000000;
+  height: 1px;
+}
