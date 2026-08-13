@@ -14,6 +14,7 @@
                               xmlns:dc="http://purl.org/dc/elements/1.1/"
                               xmlns:toolkit="http://oai.dlib.vt.edu/OAI/metadata/toolkit">
   <xsl:output method="html" version="4.0"/>
+  <xsl:strip-space elements="*"/>
 
   <xsl:template match="/oai:OAI-PMH">
     <html>
@@ -138,9 +139,7 @@
   <xsl:template match="oai:metadata">
     <tr valign="top">
       <td>
-      <textarea class="xml-content-area" style="width:100%; height:200px; font-family:monospace; margin-bottom:10px;">
-        <xsl:copy-of select="node()" />
-      </textarea>
+      <textarea class="xml-content-area" style="width:100%; height:200px; font-family:monospace; margin-bottom:10px;"><xsl:copy-of select="node()" /></textarea>
       </td>
     </tr>
   </xsl:template>
