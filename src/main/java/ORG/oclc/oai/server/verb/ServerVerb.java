@@ -239,9 +239,7 @@ public abstract class ServerVerb {
             StringReader stringReader = new StringReader(result);
             StreamSource streamSource = new StreamSource(stringReader);
             StringWriter stringWriter = new StringWriter();
-            synchronized (transformer) {
-                transformer.transform(streamSource, new StreamResult(stringWriter));
-            }
+            transformer.transform(streamSource, new StreamResult(stringWriter));
             renderedResult = stringWriter.toString();
         } else { // render on the client
             response.setContentType(contentType);

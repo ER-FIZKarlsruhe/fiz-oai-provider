@@ -37,7 +37,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import javax.xml.XMLConstants;
+import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
@@ -213,43 +215,59 @@ public class OAIHandler extends HttpServlet {
     }
 
 
+    /**
+     * Templates (the compiled stylesheet) is thread-safe and reusable, so it is
+     * cached across requests. Transformer is not thread-safe, so a fresh,
+     * cheap-to-create instance is handed to each request instead of sharing one
+     * across concurrently running requests.
+     */
     public Transformer getTransformer(Properties properties, HashMap attributes) throws IOException {
-        Transformer transformer = (Transformer) attributes.get("OAIHandler.transformer");
-        if (transformer != null) {
-            return transformer;
+        Templates templates = (Templates) attributes.get("OAIHandler.templates");
+        if (templates != null) {
+            return newTransformer(templates);
         }
 
         String xsltName = properties.getProperty("OAIHandler.styleSheet");
-        if (xsltName != null) {
-            InputStream is = null;
-            try {
-                if (xsltName.startsWith("http://") || xsltName.startsWith("https://")) {
-                    is = new URL(xsltName).openStream();
-                } else {
-                    // 1. Try ServletContext first (standard web location)
-                    URL xsltUrl = getServletContext().getResource(xsltName);
-                    is = xsltUrl.openStream();
-
-                    if (is == null) {
-                        throw new FileNotFoundException("Stylesheet not found in Context or Classpath: " + xsltName);
-                    }
-                }
-
-                StreamSource xslSource = new StreamSource(is);
-                TransformerFactory tFactory = TransformerFactory.newInstance();
-                try {
-                    tFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                    transformer = tFactory.newTransformer(xslSource);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                attributes.put("OAIHandler.transformer", transformer);
-            } finally {
-                if (is != null) is.close();
-            }
+        if (xsltName == null) {
+            return null;
         }
 
-        return transformer;
+        InputStream is = null;
+        try {
+            if (xsltName.startsWith("http://") || xsltName.startsWith("https://")) {
+                is = new URL(xsltName).openStream();
+            } else {
+                // 1. Try ServletContext first (standard web location)
+                URL xsltUrl = getServletContext().getResource(xsltName);
+                is = xsltUrl.openStream();
+
+                if (is == null) {
+                    throw new FileNotFoundException("Stylesheet not found in Context or Classpath: " + xsltName);
+                }
+            }
+
+            StreamSource xslSource = new StreamSource(is);
+            TransformerFactory tFactory = TransformerFactory.newInstance();
+            try {
+                tFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                templates = tFactory.newTemplates(xslSource);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            attributes.put("OAIHandler.templates", templates);
+        } finally {
+            if (is != null) is.close();
+        }
+
+        return newTransformer(templates);
+    }
+
+    private Transformer newTransformer(Templates templates) {
+        try {
+            return templates.newTransformer();
+        } catch (TransformerConfigurationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public HashMap getAttributes(String pathInfo) {
