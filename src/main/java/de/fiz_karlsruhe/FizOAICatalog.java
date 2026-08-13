@@ -153,7 +153,7 @@ public class FizOAICatalog extends AbstractCatalog {
       String localIdentifier = getRecordFactory().fromOAIIdentifier(oaiIdentifier);
       nativeItem = backendService.getItem(localIdentifier);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Cannot read schema locations for identifier {}", oaiIdentifier, e);
       throw new OAIInternalServerError("Database Failure");
     }
 
@@ -197,7 +197,7 @@ public class FizOAICatalog extends AbstractCatalog {
     try {
       result = backendService.getItems(false, null, maxListSize, set, from, until, metadataPrefix);
 
-      if (result == null || result.getData().isEmpty()) {
+      if (result == null || result.getData() == null || result.getData().isEmpty()) {
         throw new NoItemsMatchException();
       }
 
@@ -263,7 +263,7 @@ public class FizOAICatalog extends AbstractCatalog {
       result = backendService.getItems(false, restoken.getSearchMark(), maxListSize, restoken.getSet(),
           restoken.getFrom(), restoken.getUntil(), restoken.getMetadataPrefix());
 
-      if (result == null || result.getData().isEmpty()) {
+      if (result == null || result.getData() == null || result.getData().isEmpty()) {
         throw new BadResumptionTokenException();
       }
 
@@ -352,7 +352,7 @@ public class FizOAICatalog extends AbstractCatalog {
     try {
       result = backendService.getItems(true, null, maxListSize, set, from, until, metadataPrefix);
 
-      if (result == null || result.getData().isEmpty()) {
+      if (result == null || result.getData() == null || result.getData().isEmpty()) {
         logger.info("No items found ");
         throw new NoItemsMatchException();
       } else {
@@ -417,7 +417,7 @@ public class FizOAICatalog extends AbstractCatalog {
       result = backendService.getItems(true, token.getSearchMark(), maxListSize, token.getSet(), token.getFrom(),
           token.getUntil(), token.getMetadataPrefix());
 
-      if (result == null || result.getData().isEmpty()) {
+      if (result == null || result.getData() == null || result.getData().isEmpty()) {
           throw new BadResumptionTokenException();
       }
 
@@ -429,7 +429,8 @@ public class FizOAICatalog extends AbstractCatalog {
     } catch (IOException e) {
       throw new OAIInternalServerError(e.getMessage());
     } catch (CannotDisseminateFormatException e) {
-      e.printStackTrace();
+      logger.error("Cannot disseminate format for resumptionToken {}", resumptionTokenParam, e);
+      throw new OAIInternalServerError(e.getMessage());
     }
 
 
@@ -506,6 +507,9 @@ public class FizOAICatalog extends AbstractCatalog {
    */
   @Override
   public void close() {
+    if (getRecordFactory() instanceof FizRecordFactory) {
+      ((FizRecordFactory) getRecordFactory()).shutdown();
+    }
   }
 
   public BackendService getBackendService() {

@@ -179,6 +179,13 @@ public class FizRecordFactory extends RecordFactory {
   }
 
   /**
+   * Stop the periodic format-registry refresh task.
+   */
+  public void shutdown() {
+    scheduler.shutdown();
+  }
+
+  /**
    * get the datestamp from the item
    *
    * @param nativeItem a native item presumably containing a datestamp somewhere

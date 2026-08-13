@@ -64,7 +64,7 @@ public class FormatRegistry {
 		return;
 	}
 	  
-    if (!CollectionUtils.isEqualCollection(this.transformations, transformations)) {
+    if (!CollectionUtils.isEqualCollection(this.transformations, transformationsList)) {
       LOGGER.warn("Transformations differs in backend and registy! Set new value in transformation list!");
 	  this.transformations.clear();
 	  this.transformations.addAll(transformationsList);

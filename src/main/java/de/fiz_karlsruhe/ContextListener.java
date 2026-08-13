@@ -16,8 +16,6 @@
 
 package de.fiz_karlsruhe;
 
-import java.io.File;
-
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -25,28 +23,9 @@ import jakarta.servlet.annotation.WebListener;
 @WebListener("oai context listener")
 public class ContextListener implements ServletContextListener {
 
-  /**
-   * Initialize log4j when the application is being started
-   */
   @Override
   public void contextInitialized(ServletContextEvent event) {
-    String confFolderPath = null;
-
-    // Is a dedicated oai-backend conf folder defined?
-    String oaiBackendConfRoot = System.getProperty("oai.provider.conf.folder");
-
-    // Catalina conf is fallback
-    String tomcatRoot = System.getProperty("catalina.base");
-
-    if (oaiBackendConfRoot != null && !oaiBackendConfRoot.isEmpty()) {
-      confFolderPath = new File(oaiBackendConfRoot).getAbsolutePath();
-    } else if (tomcatRoot != null && !tomcatRoot.isEmpty()) {
-      confFolderPath = new File(tomcatRoot, "conf").getAbsolutePath();
-    }
-
-//    File file = new File(confFolderPath, "fiz-oai-provider-log4j.properties");
-//    System.out.println("ContextListener confFolderPath: " + confFolderPath);
-//    System.out.println("log4j2 configuration: " + file.getAbsolutePath());
+    // Log4j2 auto-configures itself from the classpath log4j2.xml; nothing to do here.
   }
 
   @Override
