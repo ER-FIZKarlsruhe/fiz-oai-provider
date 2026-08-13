@@ -250,6 +250,8 @@ public class OAIHandler extends HttpServlet {
             TransformerFactory tFactory = TransformerFactory.newInstance();
             try {
                 tFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                tFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                tFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
                 templates = tFactory.newTemplates(xslSource);
             } catch (Exception e) {
                 throw new RuntimeException(e);

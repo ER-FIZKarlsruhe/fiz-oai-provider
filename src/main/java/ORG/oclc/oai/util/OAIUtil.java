@@ -28,6 +28,17 @@ public class OAIUtil {
     private static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     static {
         dbFactory.setNamespaceAware(true);
+        try {
+            // Disable DTDs entirely and external entity resolution to prevent XXE.
+            dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            dbFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            dbFactory.setXIncludeAware(false);
+            dbFactory.setExpandEntityReferences(false);
+        } catch (ParserConfigurationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
     }
     
     /**
