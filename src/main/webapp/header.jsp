@@ -23,7 +23,7 @@
 
 <tr class="valign-top">
 <td style="background-color: ${ConfigurationService.getInstance().getBrandingColor()};">
-<table border="0" class="layout-header">
+<table border="0" class="layout-header" role="presentation" aria-label="Site header">
 <tr class="valign-top">
 <td colspan="2"><a href="${ConfigurationService.getInstance().getBrandingServiceUrl()}"><img src="logo" alt="${ConfigurationService.getInstance().getBrandingServiceName()} Logo" height="100"></img></a></td>
 </tr>

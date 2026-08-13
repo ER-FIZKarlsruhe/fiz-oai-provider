@@ -17,7 +17,7 @@
   <xsl:strip-space elements="*"/>
 
   <xsl:template match="/oai:OAI-PMH">
-    <html>
+    <html lang="en">
       <head>
         <title><xsl:value-of select="oai:request/@verb"/> Response OAI-Provider</title>
         <style type="text/css">
@@ -57,13 +57,13 @@
           <script src="js/fiz-oai-provider.js"></script>
       </head>
       <body leftmargin="0" topmargin="0">
-        <table border="0" class="layout-outer">
+        <table border="0" class="layout-outer" role="presentation" aria-label="Page layout">
 
           <jsp:include page="header.jsp"></jsp:include>
 
           <tr class="valign-top">
             <td style="background-color: ${ConfigurationService.getInstance().getBrandingColor()};">
-              <table border="0" class="layout-inner">
+              <table border="0" class="layout-inner" role="presentation" aria-label="Response summary">
                 <xsl:apply-templates select="oai:responseDate|oai:request"/>
               </table>
             </td>
@@ -81,7 +81,7 @@
 
   <xsl:template match="oai:Identify|oai:GetRecord">
     <h2><xsl:value-of select="name()"/></h2>
-    <table border="0" class="layout-sp2">
+    <table border="0" class="layout-sp2" role="presentation" aria-label="Identify or GetRecord details">
       <xsl:apply-templates/>
     </table>
   </xsl:template>
@@ -93,7 +93,7 @@
 
   <xsl:template match="oai:ListSets">
     <h2><xsl:value-of select="name()"/></h2>
-    <table border="0" class="layout-inner">
+    <table border="0" class="layout-inner" role="presentation" aria-label="Set list">
       <tr class="valign-top">
         <td class="label-cell"><strong>setSpec</strong></td>
         <td><strong>setName</strong></td>
@@ -109,14 +109,14 @@
 
   <xsl:template match="oai:ListIdentifiers">
     <h2><xsl:value-of select="name()"/></h2>
-    <table border="0" class="layout-sp2">
+    <table border="0" class="layout-sp2" role="presentation" aria-label="Identifier list">
       <xsl:apply-templates/>
     </table>
   </xsl:template>
 
   <xsl:template match="oai:error">
-    <h2><font color="red"><xsl:value-of select="name()"/></font></h2>
-    <table border="0" class="layout-sp2">
+    <h2><span style="color: red;"><xsl:value-of select="name()"/></span></h2>
+    <table border="0" class="layout-sp2" role="presentation" aria-label="Error details">
       <tr class="valign-top">
         <td class="label-cell-200"><strong><xsl:value-of select="@code"/></strong></td>
         <td><xsl:value-of select="."/></td>
@@ -127,7 +127,7 @@
   <xsl:template match="oai:record">
     <tr class="valign-top">
       <td>
-        <table border="0" class="layout-sp2">
+        <table border="0" class="layout-sp2" role="presentation" aria-label="Record">
           <xsl:apply-templates/>
         </table>
       </td>
@@ -137,7 +137,7 @@
   <xsl:template match="oai:header">
     <tr class="valign-top">
       <td class="bg-light">
-        <table border="0" class="layout-sp4">
+        <table border="0" class="layout-sp4" role="presentation" aria-label="Record header">
 		  <xsl:if test="@status">
 			<tr class="valign-top">
 			  <td class="label-cell"><strong>status</strong></td>
@@ -264,7 +264,7 @@
 -->
 
   <xsl:template match="oai_id:oai-identifier">
-    <table border="0" class="layout-plain">
+    <table border="0" class="layout-plain" role="presentation" aria-label="OAI identifier">
     <tr class="valign-top">
       <td><strong><xsl:value-of select="name()"/>:</strong></td>
     </tr>
@@ -280,7 +280,7 @@
   </xsl:template>
 
   <xsl:template match="oai_branding:branding">
-    <table border="0" class="layout-plain">
+    <table border="0" class="layout-plain" role="presentation" aria-label="Branding information">
     <xsl:apply-templates/>
     </table>
   </xsl:template>
@@ -345,7 +345,7 @@
   </xsl:template>
 
   <xsl:template match="oai:metadataFormat">
-    <table border="0" class="layout-inner">
+    <table border="0" class="layout-inner" role="presentation" aria-label="Metadata format">
       <tr class="valign-top"><td class="label-cell"><strong>metadataPrefix</strong></td><td><a><xsl:attribute name="href"><%=request.getContextPath()%>/OAIHandler?verb=ListRecords&amp;renderHtml=true&amp;metadataPrefix=<xsl:value-of select="oai:metadataPrefix"/></xsl:attribute><xsl:value-of select="oai:metadataPrefix"/></a></td></tr>
         <tr class="valign-top"><td class="label-cell"><strong>schema</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:schema"/></xsl:attribute><xsl:value-of select="oai:schema"/></a></td></tr>
         <tr class="valign-top"><td class="label-cell"><strong>metadataNamespace</strong></td><td><a><xsl:attribute name="href"><xsl:value-of select="oai:metadataNamespace"/></xsl:attribute><xsl:value-of select="oai:metadataNamespace"/></a></td></tr>
@@ -354,13 +354,13 @@
   </xsl:template>
 
   <xsl:template match="oai_dc:dc">
-        <table border="0" class="layout-sp4">
+        <table border="0" class="layout-sp4" role="presentation" aria-label="Dublin Core metadata">
           <xsl:apply-templates/>
         </table>
   </xsl:template>
 
   <xsl:template match="oai_etdms:thesis">
-        <table border="0" class="layout-sp4">
+        <table border="0" class="layout-sp4" role="presentation" aria-label="ETD-MS thesis metadata">
           <xsl:apply-templates/>
         </table>
   </xsl:template>
@@ -392,7 +392,7 @@
   </xsl:template>
 
   <xsl:template match="toolkit:toolkit">
-    <table border="0" class="layout-plain">
+    <table border="0" class="layout-plain" role="presentation" aria-label="Toolkit information">
       <tr class="valign-top"><td class="label-cell"><strong><xsl:value-of select="name()"/></strong></td>
         <td>
     <a>
