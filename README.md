@@ -115,6 +115,31 @@ The oaicat.properties must be placed inside the Tomcat conf folder.
 Make sure a FIZ-OAI-Backend instance is running and accessible based on your FizOaiBackend.baseURL configuration.
 
 
+## Health Check Endpoints
+
+The application exposes two endpoints intended for Kubernetes liveness/readiness probes:
+
+- `GET /oai/health/live`
+  - Always returns `200 OK` once the servlet container is serving requests. It does not check the
+    backend, so a transient backend outage will not trigger a pod restart.
+- `GET /oai/health/ready`
+  - Returns `200 OK` once the OAI catalog has finished initializing and its format registry holds
+    at least one format (proof the backend has been reachable). Returns `503 Service Unavailable`
+    otherwise, including while the application is shutting down.
+
+Example Kubernetes probe configuration:
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /oai/health/live
+    port: 8080
+readinessProbe:
+  httpGet:
+    path: /oai/health/ready
+    port: 8080
+```
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
