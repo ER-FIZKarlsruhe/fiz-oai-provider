@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.SocketException;
@@ -158,15 +159,10 @@ public class OAIHandler extends HttpServlet {
     protected boolean readConfigFromFile(String folder, String filename) {
 
         File file = new File(folder, filename);
-        try {
-            Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8");
-            try {
-                properties.load(reader);
-                ConfigurationService.getInstance(properties);
-                return true;
-            } finally {
-                reader.close();
-            }
+        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+            properties.load(reader);
+            ConfigurationService.getInstance(properties);
+            return true;
         } catch (Exception e) {
             LOGGER.error("Unable to read property file: " + file.getAbsolutePath(),e);
             return false;

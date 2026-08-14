@@ -101,8 +101,9 @@ public class BackendService {
 
         item = OBJECT_MAPPER.readValue(json, Item.class);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Error on getItem", e);
+      throw e;
     }
 
     return item;
@@ -124,14 +125,15 @@ public class BackendService {
 
         item = OBJECT_MAPPER.readValue(json, Item.class);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Error on getItem", e);
+      throw e;
     }
 
     return item;
   }
-  
-  
+
+
   public SearchResult<Item> getItems(boolean withContent, String searchMark, long rows, String set, String from, String until, String metadataPrefix)
       throws IOException {
     if (metadataPrefix == null || metadataPrefix.isEmpty()) {
@@ -167,8 +169,9 @@ public class BackendService {
         JavaType type = OBJECT_MAPPER.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
         result = OBJECT_MAPPER.readValue(json, type);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Error on getIdentifiers", e);
+      throw e;
     }
 
     return result;
@@ -188,8 +191,9 @@ public class BackendService {
         String json = EntityUtils.toString(response.getEntity());
         formatList = new ArrayList<Format>(Arrays.asList(OBJECT_MAPPER.readValue(json, Format[].class)));
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Error on getFormats", e);
+      throw e;
     }
 
     return formatList;
@@ -209,8 +213,9 @@ public class BackendService {
         String json = EntityUtils.toString(response.getEntity());
         format = OBJECT_MAPPER.readValue(json, Format.class);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Error on getFormats", e);
+      throw e;
     }
 
     return format;
@@ -231,8 +236,9 @@ public class BackendService {
         String json = EntityUtils.toString(response.getEntity());
         transformationList = new ArrayList<Transformation>(Arrays.asList(OBJECT_MAPPER.readValue(json, Transformation[].class)));
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Error on getTransformations", e);
+      throw e;
     }
 
     return transformationList;
@@ -254,14 +260,15 @@ public class BackendService {
         String json = EntityUtils.toString(response.getEntity());
         setObjects = new ArrayList<Set>(Arrays.asList(OBJECT_MAPPER.readValue(json, Set[].class)));
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Error on getIdentifiers", e);
+      throw e;
     }
 
     return setObjects;
   }
 
-    public ListSetsResult searchSets(String resumptionToken) {
+    public ListSetsResult searchSets(String resumptionToken) throws IOException {
         String url = backendBaseUrl + "/set/search";
 
         if (StringUtils.isNotEmpty(resumptionToken)) {
@@ -283,8 +290,9 @@ public class BackendService {
             } else {
                 logger.warn("Non-200 status when calling searchSets: {}", statusCode);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error on searchSets", e);
+            throw e;
         }
 
         return result;

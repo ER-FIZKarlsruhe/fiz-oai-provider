@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -42,17 +43,12 @@ public class FizOAICatalogTest {
   BackendService backendService;
 
   @Before
-  public void init() {
-
-    try {
-      prop = new Properties();
-      File resourcesDirectory = new File("src/test/resources").getAbsoluteFile();
-      File propertiesFile = new File(resourcesDirectory, "oaicat.properties");
-      InputStream resourcesFile = new FileInputStream(propertiesFile);
+  public void init() throws IOException {
+    prop = new Properties();
+    File resourcesDirectory = new File("src/test/resources").getAbsoluteFile();
+    File propertiesFile = new File(resourcesDirectory, "oaicat.properties");
+    try (InputStream resourcesFile = new FileInputStream(propertiesFile)) {
       prop.load(resourcesFile);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     }
   }
 
@@ -82,8 +78,7 @@ public class FizOAICatalogTest {
     } catch (IdDoesNotExistException e) {
       // do nothing
     } catch (Throwable t) {
-      t.printStackTrace();
-      Assert.fail("Unexpected exception");
+      throw new AssertionError("Unexpected exception", t);
     }
 
   }

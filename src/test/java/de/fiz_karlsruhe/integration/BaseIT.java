@@ -55,12 +55,11 @@ public class BaseIT {
       validator.validate(new StreamSource(xmlStream));
       return true;
     } catch (Exception ex) {
-      System.err.println(ex.getMessage());
-      ex.printStackTrace();
+      logger.error("Failed to validate against oai_dc XSD", ex);
       return false;
     }
   }
-  
+
   protected boolean validateAgainstDataciteXsd(String xml) {
     
     try {
@@ -82,12 +81,11 @@ public class BaseIT {
       validator.validate(new StreamSource(xmlStream));
       return true;
     } catch (Exception ex) {
-      System.err.println(ex.getMessage());
-      ex.printStackTrace();
+      logger.error("Failed to validate against datacite XSD", ex);
       return false;
     }
   }
-  
+
   protected boolean validateAgainstRadarXsd(String xml) {
     
     try {
@@ -100,10 +98,6 @@ public class BaseIT {
         new StreamSource(classLoader.getResourceAsStream("radar/RadarTypes.xsd")),
         new StreamSource(classLoader.getResourceAsStream("radar/RadarElements.xsd")),
         new StreamSource(classLoader.getResourceAsStream("radar/RadarDataset.xsd")),
-//        new StreamSource(classLoader.getResourceAsStream("radar/dcterms.xsd")),
-
-//        new StreamSource(classLoader.getResourceAsStream("datacite/datacite.xsd"))
-     
       };
       
       InputStream xmlStream = new ByteArrayInputStream(xml.getBytes());
@@ -115,9 +109,7 @@ public class BaseIT {
       validator.validate(new StreamSource(xmlStream));
       return true;
     } catch (Exception ex) {
-      System.err.println(xml);
-      System.err.println(ex.getMessage());
-      ex.printStackTrace();
+      logger.error("Failed to validate against radar XSD: {}", xml, ex);
       return false;
     }
   }

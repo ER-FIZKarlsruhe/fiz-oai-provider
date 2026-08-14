@@ -144,13 +144,7 @@ public abstract class ServerVerb {
                     sb.append(name);
                     sb.append("=\"");
                     if (!xmlEncodeSetSpec && "set".equals(name)) {
-//                      try {
                         sb.append(value);
-//                      sb.append(URLEncoder.encode(value, "UTF-8"));
-//                      } catch (UnsupportedEncodingException e) {
-//                      e.printStackTrace();
-//                      sb.append("UnsupportedEncodingException");
-//                      }
                     } else {
                         sb.append(OAIUtil.xmlEncode(value));
                     }

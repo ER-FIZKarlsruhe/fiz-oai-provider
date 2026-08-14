@@ -8,7 +8,7 @@
     <project_version>develop-SNAPSHOT</project_version>
 
     <log4j.version>2.26.1</log4j.version>
-    <netty.version>7.5.0</netty.version>
+    <mockserver.version>7.5.0</mockserver.version>
 
     <sonar.host.url>https://dev.fiz-karlsruhe.de/sonar</sonar.host.url>
     <sonar.projectKey>de.fiz_karlsruhe.oai-provider</sonar.projectKey>
@@ -83,7 +83,7 @@
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-netty</artifactId>
-      <version>${netty.version}</version>
+      <version>${mockserver.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -227,7 +227,7 @@
       <plugin>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-maven-plugin</artifactId>
-        <version>${netty.version}</version>
+        <version>${mockserver.version}</version>
         <configuration>
           <serverPort>1080</serverPort>
 

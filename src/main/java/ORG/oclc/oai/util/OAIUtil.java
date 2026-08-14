@@ -101,17 +101,6 @@ public class OAIUtil {
 	return sb.toString();
     }
 
-    /**
-     * convert a packed LCCN to display format.
-     * @param packedLCCN an LCCN String in packed storage format (e.g. 'n&nbsp;&nbsp;2001050268').
-     * @return  an LCCN String in MARC display format (e.g. 'n2001-50268').
-     * @deprecated use toLCCNDisplay() instead.
-     */
-    @Deprecated(forRemoval = false)
-    public static String getLCCN(String packedLCCN) {
-	return toLCCNDisplay(packedLCCN);
-    }
-
     public static Document parse(InputStream is)
     throws SAXException, IOException, ParserConfigurationException {
         return getThreadedDocumentBuilder().parse(is);

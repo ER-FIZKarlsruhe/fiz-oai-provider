@@ -38,8 +38,7 @@ public class ResumptionTokenTest {
       token.setSet("ABC");
       token.setMetadataPrefix("sd");
       
-      String tokenString = token.getToken();
-      System.out.println(tokenString);
+      token.getToken();
     } catch (BadResumptionTokenException e) {
       Assert.fail("BadResumptionTokenException not expected");
     }
@@ -196,27 +195,28 @@ public class ResumptionTokenTest {
       ResumptionToken token = new ResumptionToken(null);
       Assert.fail("BadResumptionTokenException expected");
     } catch (BadResumptionTokenException e) {
-      // TODO: handle exception
+      //Expected exception
     }
 
     try {
       ResumptionToken token = new ResumptionToken("");
       Assert.fail("BadResumptionTokenException expected");
     } catch (BadResumptionTokenException e) {
-      // TODO: handle exception
+      //Expected exception
     }
 
     try {
       ResumptionToken token = new ResumptionToken("asdasdyxc");
       Assert.fail("BadResumptionTokenException expected");
     } catch (BadResumptionTokenException e) {
-      // TODO: handle exception
+      //Expected exception
     }
 
     try {
       ResumptionToken token = new ResumptionToken("set");
       Assert.fail("BadResumptionTokenException expected");
     } catch (BadResumptionTokenException e) {
+      //Expected exception
     }
 
   }
