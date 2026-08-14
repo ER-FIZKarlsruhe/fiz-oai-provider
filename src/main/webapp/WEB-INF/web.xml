@@ -66,6 +66,25 @@
 
 
     <servlet>
+      <servlet-name>HealthServlet</servlet-name>
+      <servlet-class>de.fiz_karlsruhe.HealthServlet</servlet-class>
+      <!-- Load this servlet at server startup time -->
+      <load-on-startup>5</load-on-startup>
+    </servlet>
+
+    <!-- Kubernetes liveness/readiness probes -->
+    <servlet-mapping>
+      <servlet-name>HealthServlet</servlet-name>
+      <url-pattern>/health/live</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+      <servlet-name>HealthServlet</servlet-name>
+      <url-pattern>/health/ready</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
         <servlet-name>IdentifyServlet</servlet-name>
         <jsp-file>/identify.jsp</jsp-file>
     </servlet>

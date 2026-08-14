@@ -122,6 +122,10 @@ public class OAIHandler extends HttpServlet {
     @Override
     public void destroy() {
         LOGGER.info("destroy called");
+        // Flip readiness to unavailable before tearing down the catalog so a rolling
+        // deployment stops routing new traffic here first.
+        getServletContext().removeAttribute("OAIHandler.catalog");
+
         HashMap globalAttributes = (HashMap)attributesMap.get("global");
         AbstractCatalog abstractCatalog = (AbstractCatalog)globalAttributes.get("OAIHandler.catalog");
 
@@ -205,6 +209,8 @@ public class OAIHandler extends HttpServlet {
             attributes.put("OAIHandler.version", VERSION);
             AbstractCatalog abstractCatalog = AbstractCatalog.factory(properties, getServletContext());
             attributes.put("OAIHandler.catalog", abstractCatalog);
+            // Exposed so HealthServlet can report readiness without depending on this servlet instance.
+            getServletContext().setAttribute("OAIHandler.catalog", abstractCatalog);
         }
 
         return attributes;
