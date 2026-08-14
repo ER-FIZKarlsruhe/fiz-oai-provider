@@ -7,7 +7,7 @@
 
     <project_version>develop-SNAPSHOT</project_version>
 
-    <log4j.version>2.26.0</log4j.version>
+    <log4j.version>2.26.1</log4j.version>
     <netty.version>7.5.0</netty.version>
 
     <sonar.host.url>https://dev.fiz-karlsruhe.de/sonar</sonar.host.url>
