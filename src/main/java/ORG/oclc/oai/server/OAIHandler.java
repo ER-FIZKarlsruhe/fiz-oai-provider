@@ -24,9 +24,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.zip.DeflaterOutputStream;
@@ -74,7 +76,23 @@ public class OAIHandler extends HttpServlet {
 
     private final Properties properties = new Properties();
 
-    protected final HashMap attributesMap = new HashMap();
+    /**
+     * pathInfo is taken directly from the request URL and used as a cache key here
+     * (see getAttributes(String)), so this map must stay bounded and thread-safe:
+     * an attacker can otherwise grow it without limit by requesting distinct,
+     * non-existent path segments. Access-ordered so "global" and other
+     * frequently-used entries stay in the cache while the LRU tail is evicted.
+     */
+    private static final int MAX_ATTRIBUTES_CACHE_SIZE = 1000;
+
+    protected final Map attributesMap = Collections.synchronizedMap(new LinkedHashMap(16, 0.75f, true) {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_ATTRIBUTES_CACHE_SIZE;
+        }
+    });
 
 
     /**
@@ -288,16 +306,17 @@ public class OAIHandler extends HttpServlet {
                 try {
                     String fileName = pathInfo.substring(1) + ".properties";
                     LOGGER.debug("attempting load of " + fileName);
-                    InputStream in = Thread.currentThread()
+                    try (InputStream in = Thread.currentThread()
                             .getContextClassLoader()
-                            .getResourceAsStream(fileName);
-                    if (in != null) {
-                        LOGGER.debug("file found");
-                        Properties fileProperties = new Properties();
-                        fileProperties.load(in);
-                        attributes = getAttributes(fileProperties);
-                    } else {
-                        LOGGER.debug("file not found");
+                            .getResourceAsStream(fileName)) {
+                        if (in != null) {
+                            LOGGER.debug("file found");
+                            Properties fileProperties = new Properties();
+                            fileProperties.load(in);
+                            attributes = getAttributes(fileProperties);
+                        } else {
+                            LOGGER.debug("file not found");
+                        }
                     }
                     attributesMap.put(pathInfo, attributes);
                 } catch (Throwable e) {
