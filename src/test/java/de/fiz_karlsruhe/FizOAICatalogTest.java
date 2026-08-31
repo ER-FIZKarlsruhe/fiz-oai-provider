@@ -391,6 +391,28 @@ public class FizOAICatalogTest {
     catalog.listSets();
   }
 
+  @Test(expected = ORG.oclc.oai.server.verb.NoSetHierarchyException.class)
+  public void listSetsThrowsNoSetHierarchyWhenTheBackendHasNoSetsAtAll() throws Exception {
+    FizOAICatalog catalog = newCatalog(oaiDcFormatRegistry());
+    when(backendService.searchSets(null)).thenReturn(new ListSetsResult(Collections.emptyList(), null, 0, 0));
+
+    catalog.listSets();
+  }
+
+  @Test
+  public void listSetsWithAResumptionTokenDoesNotThrowNoSetHierarchyOnAnEmptyPage() throws Exception {
+    // An empty page returned while paging through an existing resumptionToken is not the same
+    // thing as "this repository has no sets at all" - only the initial, unfiltered listSets()
+    // call is a reliable signal for noSetHierarchy.
+    FizOAICatalog catalog = newCatalog(oaiDcFormatRegistry());
+    when(backendService.searchSets("tok")).thenReturn(new ListSetsResult(Collections.emptyList(), null, 0, 0));
+
+    Map result = catalog.listSets("tok");
+
+    Iterator sets = (Iterator) result.get("sets");
+    assertFalse(sets.hasNext());
+  }
+
   // --- close ---------------------------------------------------------------------------
 
   @Test

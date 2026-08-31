@@ -326,6 +326,25 @@ public class OAIHandlerTest {
     assertNull(RecordingVerb.lastTransformer);
   }
 
+  @Test
+  public void getResultReturnsBadVerbWhenTheVerbParameterIsRepeated() throws Throwable {
+    // Per the OAI-PMH spec, a repeated verb argument is itself a badVerb condition - it must
+    // not fall through to whichever verb class the first value happens to resolve to and be
+    // evaluated there as a badArgument instead.
+    HashMap attributes = new HashMap();
+    attributes.put("OAIHandler.missingVerbClass", ORG.oclc.oai.server.verb.BadVerb.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getRequestURL()).thenReturn(new StringBuffer("http://example.org/oai"));
+    when(request.getParameter("verb")).thenReturn("Identify");
+    when(request.getParameterValues("verb")).thenReturn(new String[] {"Identify", "GetRecord"});
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String result = OAIHandler.getResult(attributes, request, response, null,
+        ORG.oclc.oai.server.verb.ServerVerb.getVerbs(), new HashMap(), "/extension");
+
+    assertTrue(result.contains("<error code=\"badVerb\">Illegal verb</error>"));
+  }
+
   private static void writeIdentityHtmlStylesheet(File file) throws Exception {
     try (FileWriter writer = new FileWriter(file)) {
       writer.write("<?xml version=\"1.0\"?>\n"

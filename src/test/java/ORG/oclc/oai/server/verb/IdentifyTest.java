@@ -60,6 +60,35 @@ public class IdentifyTest {
   }
 
   @Test
+  public void constructEmitsOneAdminEmailElementPerCommaSeparatedAddress() throws Exception {
+    AbstractCatalog catalog = VerbTestSupport.mockCatalogAcceptingAllParams();
+    Properties properties = new Properties();
+    properties.setProperty("Identify.adminEmail", "mailto:one@example.org, mailto:two@example.org");
+    Map<String, String> params = new LinkedHashMap<>();
+    params.put("verb", "Identify");
+    HttpServletRequest request = VerbTestSupport.mockRequest(params);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String result = Identify.construct(VerbTestSupport.context(properties, catalog), request, response, null);
+
+    assertTrue(result.contains("<adminEmail>mailto:one@example.org</adminEmail>"));
+    assertTrue(result.contains("<adminEmail>mailto:two@example.org</adminEmail>"));
+  }
+
+  @Test
+  public void constructDefaultsGranularityToDayWhenNotConfigured() throws Exception {
+    AbstractCatalog catalog = VerbTestSupport.mockCatalogAcceptingAllParams();
+    Map<String, String> params = new LinkedHashMap<>();
+    params.put("verb", "Identify");
+    HttpServletRequest request = VerbTestSupport.mockRequest(params);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String result = Identify.construct(VerbTestSupport.context(new Properties(), catalog), request, response, null);
+
+    assertTrue(result.contains("<granularity>YYYY-MM-DD</granularity>"));
+  }
+
+  @Test
   public void constructUsesTheConfiguredBaseUrlInsteadOfTheRequestUrlWhenSet() throws Exception {
     AbstractCatalog catalog = VerbTestSupport.mockCatalogAcceptingAllParams();
     Properties properties = new Properties();

@@ -82,21 +82,28 @@ public class Identify extends ServerVerb {
       sb.append(baseURL);
       sb.append("</baseURL>");
       sb.append("<protocolVersion>2.0</protocolVersion>");
-      sb.append("<adminEmail>");
-      sb.append(properties.getProperty("Identify.adminEmail", "undefined"));
-      sb.append("</adminEmail>");
+      // the spec allows "one or more" adminEmail elements; a repository can configure
+      // several by separating them with commas in the Identify.adminEmail property
+      for (String adminEmail : properties.getProperty("Identify.adminEmail", "undefined").split(",")) {
+        String trimmedAdminEmail = adminEmail.trim();
+        if (!trimmedAdminEmail.isEmpty()) {
+          sb.append("<adminEmail>");
+          sb.append(trimmedAdminEmail);
+          sb.append("</adminEmail>");
+        }
+      }
       sb.append("<earliestDatestamp>");
       sb.append(properties.getProperty("Identify.earliestDatestamp", "undefined"));
       sb.append("</earliestDatestamp>");
       sb.append("<deletedRecord>");
       sb.append(properties.getProperty("Identify.deletedRecord", "undefined"));
       sb.append("</deletedRecord>");
-      String granularity = properties.getProperty("AbstractCatalog.granularity");
-      if (granularity != null) {
-        sb.append("<granularity>");
-        sb.append(granularity);
-        sb.append("</granularity>");
-      }
+      // granularity is a required Identify element; default to the coarsest granularity
+      // every repository must support (matches AbstractCatalog's own fallback) rather than
+      // omitting the element when the property isn't configured
+      sb.append("<granularity>");
+      sb.append(properties.getProperty("AbstractCatalog.granularity", "YYYY-MM-DD"));
+      sb.append("</granularity>");
       sb.append("<compression>gzip</compression>");
       sb.append("<compression>deflate</compression>");
 

@@ -478,11 +478,18 @@ public class OAIHandler extends HttpServlet {
         try {
             boolean isExtensionVerb = extensionPath.equals(request.getPathInfo());
             String verb = request.getParameter("verb");
+            String[] verbValues = request.getParameterValues("verb");
+            boolean verbRepeated = verbValues != null && verbValues.length > 1;
             LOGGER.debug("OAIHandler.g<etResult: verb=>" + verb + "<");
 
             String result;
             Class verbClass = null;
-            if (isExtensionVerb) {
+            if (verbRepeated) {
+                // a repeated verb argument is itself a badVerb condition per the OAI-PMH
+                // spec, not a badArgument to be evaluated by whichever verb class the
+                // first value happens to resolve to
+                verbClass = null;
+            } else if (isExtensionVerb) {
                 verbClass = (Class)extensionVerbs.get(verb);
             } else {
                 verbClass = (Class)serverVerbs.get(verb);

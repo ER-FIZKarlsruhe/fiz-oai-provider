@@ -478,24 +478,32 @@ public class FizOAICatalog extends AbstractCatalog {
 
     @Override
     public Map listSets() throws NoSetHierarchyException, OAIInternalServerError, BadResumptionTokenException {
-        return listSets(null);
+        ListSetsResult backendSetList = fetchSets(null);
+        if (backendSetList.getSets().isEmpty()) {
+            throw new NoSetHierarchyException();
+        }
+        return toResultMap(backendSetList);
     }
 
   @Override
   public Map listSets(String resumptionToken) throws BadResumptionTokenException, OAIInternalServerError {
-      Map<String, Object> resultMap = new HashMap<>();
-      List<String> xmlSets = new ArrayList<>();
-
       logger.info("listSets with resumptionToken {}", resumptionToken);
+      return toResultMap(fetchSets(resumptionToken));
+  }
 
-      ListSetsResult backendSetList;
+  private ListSetsResult fetchSets(String resumptionToken) throws OAIInternalServerError {
       try {
-          backendSetList = backendService.searchSets(resumptionToken);
+          return backendService.searchSets(resumptionToken);
       } catch (Exception e) {
           // Log the original cause
           logger.error("Error retrieving sets from backend", e);
           throw new OAIInternalServerError("Cannot retrieve sets from backend");
       }
+  }
+
+  private Map toResultMap(ListSetsResult backendSetList) {
+      Map<String, Object> resultMap = new HashMap<>();
+      List<String> xmlSets = new ArrayList<>();
 
       for (Set setItem : backendSetList.getSets()) {
               xmlSets.add(getSetXML(setItem));
