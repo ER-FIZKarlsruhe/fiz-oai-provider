@@ -257,13 +257,11 @@ public class OAIHandler extends HttpServlet {
             if (xsltName.startsWith("http://") || xsltName.startsWith("https://")) {
                 is = new URL(xsltName).openStream();
             } else {
-                // 1. Try ServletContext first (standard web location)
                 URL xsltUrl = getServletContext().getResource(xsltName);
-                is = xsltUrl.openStream();
-
-                if (is == null) {
+                if (xsltUrl == null) {
                     throw new FileNotFoundException("Stylesheet not found in Context or Classpath: " + xsltName);
                 }
+                is = xsltUrl.openStream();
             }
 
             StreamSource xslSource = new StreamSource(is);
