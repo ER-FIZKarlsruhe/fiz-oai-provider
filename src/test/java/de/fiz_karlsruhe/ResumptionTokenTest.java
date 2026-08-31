@@ -175,6 +175,46 @@ public class ResumptionTokenTest {
   
 
   @Test
+  public void testDateOnlyGranularityFromAndUntilAreAccepted() throws Exception {
+    // AbstractCatalog.granularity=YYYY-MM-DD (this project's documented default) makes
+    // AbstractCatalog pass plain "YYYY-MM-DD" from/until values, with no time component,
+    // into the resumption token. Instant.parse alone rejects those; without the LocalDate
+    // fallback, any harvest needing pagination under date-only granularity would fail with
+    // BadResumptionTokenException instead of returning a token.
+    ResumptionToken token = new ResumptionToken();
+    token.setFrom("0001-01-01");
+    token.setUntil("9999-12-31");
+    token.setSearchMark("jkhskajhdkasjd");
+    token.setRows(200);
+    token.setTotal(50000000L);
+    token.setSet("ABC");
+    token.setMetadataPrefix("sd");
+
+    String tokenString = token.getToken();
+
+    ResumptionToken roundTripped = new ResumptionToken(tokenString);
+    assertEquals("0001-01-01", roundTripped.getFrom());
+    assertEquals("9999-12-31", roundTripped.getUntil());
+  }
+
+  @Test
+  public void testDateOnlyGranularityStillRejectsFromAfterUntil() throws Exception {
+    ResumptionToken token = new ResumptionToken();
+    token.setFrom("2020-06-01");
+    token.setUntil("2020-01-01"); // from > until is invalid, even for plain dates
+    token.setSearchMark("jkhskajhdkasjd");
+    token.setRows(200);
+    token.setTotal(50000000L);
+
+    try {
+      token.getToken();
+      Assert.fail("BadResumptionTokenException expected");
+    } catch (BadResumptionTokenException e) {
+      // expected
+    }
+  }
+
+  @Test
   public void testTokenConstruktor() throws Exception {
     try {
       final String token = "total=50000000@@searchMark=lkjasldjadaw@@rows=200@@set=ABC@@from=2018-06-24T08:25:30z@@until=2019-06-23T08:25:30z@@metadataPrefix=sd";

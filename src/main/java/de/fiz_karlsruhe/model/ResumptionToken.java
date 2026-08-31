@@ -17,6 +17,8 @@
 package de.fiz_karlsruhe.model;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -179,11 +181,11 @@ public class ResumptionToken {
     try {
 
       if (from != null && !from.isEmpty()) {
-        frominstant = Instant.parse(from);
+        frominstant = parseAsInstant(from);
       }
 
       if (until != null && !until.isEmpty()) {
-        untilinstant = Instant.parse(until);
+        untilinstant = parseAsInstant(until);
       }
 
     } catch (DateTimeParseException e) {
@@ -196,6 +198,21 @@ public class ResumptionToken {
         throw new BadResumptionTokenException();
     }
 
+  }
+
+  /**
+   * AbstractCatalog.granularity can be configured as either a full timestamp (parseable
+   * directly by Instant.parse) or a plain date (AbstractCatalog.granularity=YYYY-MM-DD,
+   * the documented default), in which case from/until arrive here as bare "YYYY-MM-DD"
+   * strings that Instant.parse rejects. Fall back to LocalDate so date-granularity
+   * repositories can still create/parse resumption tokens.
+   */
+  private static Instant parseAsInstant(String value) throws DateTimeParseException {
+    try {
+      return Instant.parse(value);
+    } catch (DateTimeParseException e) {
+      return LocalDate.parse(value).atStartOfDay(ZoneOffset.UTC).toInstant();
+    }
   }
 
   @Override
