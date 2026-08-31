@@ -145,14 +145,25 @@ public class OAIHandler extends HttpServlet {
         getServletContext().removeAttribute("OAIHandler.catalog");
 
         HashMap globalAttributes = (HashMap)attributesMap.get("global");
-        AbstractCatalog abstractCatalog = (AbstractCatalog)globalAttributes.get("OAIHandler.catalog");
+        AbstractCatalog abstractCatalog = globalAttributes == null ? null
+                : (AbstractCatalog)globalAttributes.get("OAIHandler.catalog");
 
-        FizRecordFactory fizRecordFactory = ((FizRecordFactory)abstractCatalog.getRecordFactory());
-        if (fizRecordFactory.getRefreshFormatTimer() != null) {
-            fizRecordFactory.getRefreshFormatTimer().cancel();
+        if (abstractCatalog == null) {
+            LOGGER.warn("destroy: no catalog was initialized, nothing to shut down");
+            return;
         }
 
-        abstractCatalog.close();
+        // close() shuts down FizRecordFactory's format-refresh ScheduledExecutorService;
+        // guarantee it still runs even if cancelling the legacy Timer below fails, so the
+        // thread pool is never leaked on redeploy/undeploy.
+        try {
+            if (abstractCatalog.getRecordFactory() instanceof FizRecordFactory fizRecordFactory
+                    && fizRecordFactory.getRefreshFormatTimer() != null) {
+                fizRecordFactory.getRefreshFormatTimer().cancel();
+            }
+        } finally {
+            abstractCatalog.close();
+        }
     }
 
     private void loadConfiguration() {
