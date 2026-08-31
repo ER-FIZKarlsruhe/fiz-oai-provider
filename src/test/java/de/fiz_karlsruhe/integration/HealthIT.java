@@ -16,10 +16,10 @@
 
 package de.fiz_karlsruhe.integration;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class HealthIT extends BaseIT {
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpGet)) {
-      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertEquals(200, response.getCode());
     }
   }
 
@@ -43,7 +43,7 @@ public class HealthIT extends BaseIT {
 
     try (CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = client.execute(httpGet)) {
-      Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+      Assert.assertEquals(200, response.getCode());
     }
   }
 }

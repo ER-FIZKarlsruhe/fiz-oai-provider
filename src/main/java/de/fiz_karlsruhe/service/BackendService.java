@@ -22,17 +22,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import de.fiz_karlsruhe.OaiRuntimeException;
 import de.fiz_karlsruhe.model.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,7 +64,12 @@ public class BackendService {
   }
 
   private BackendService(String backendBaseUrl) {
-    BackendService.backendBaseUrl = backendBaseUrl;
+    // Every path below is appended as "/xyz", so a trailing slash here would produce a
+    // double slash in the request path. HttpClient 4.x silently normalized that away;
+    // HttpClient 5.x does not, so it now matters.
+    BackendService.backendBaseUrl = backendBaseUrl.endsWith("/")
+        ? backendBaseUrl.substring(0, backendBaseUrl.length() - 1)
+        : backendBaseUrl;
   }
 
   public static BackendService getInstance(String backendBaseUrl) {
@@ -80,23 +87,23 @@ public class BackendService {
 
 	    return INSTANCE;
 	  }
-  
+
   public Item getItem(String localIdentifier, String metadataPrefix) throws IOException {
     if (localIdentifier == null || localIdentifier.isEmpty()) {
       throw new IllegalArgumentException("localIdentifier must not be null");
     }
-    
+
     if (metadataPrefix == null || metadataPrefix.isEmpty()) {
       throw new IllegalArgumentException("metadataPrefix must not be null");
     }
-    
+
     Item item = null;
     String url = backendBaseUrl + "/item/" + URLEncoder.encode(localIdentifier, StandardCharsets.UTF_8)
             + "?format=" + URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8) + "&content=true";
 
     logger.info("getItem localIdentifier + metadataPrefix  url: {}", url);
     try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
-      if (response.getStatusLine().getStatusCode() == 200) {
+      if (response.getCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
 
         item = OBJECT_MAPPER.readValue(json, Item.class);
@@ -104,6 +111,9 @@ public class BackendService {
     } catch (IOException e) {
       logger.error("Error on getItem", e);
       throw e;
+    } catch (ParseException e) {
+      logger.error("Error on getItem", e);
+      throw new IOException(e);
     }
 
     return item;
@@ -120,7 +130,7 @@ public class BackendService {
     logger.debug("getItem localIdentifier url: {}", url);
 
     try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
-      if (response.getStatusLine().getStatusCode() == 200) {
+      if (response.getCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
 
         item = OBJECT_MAPPER.readValue(json, Item.class);
@@ -128,6 +138,9 @@ public class BackendService {
     } catch (IOException e) {
       logger.error("Error on getItem", e);
       throw e;
+    } catch (ParseException e) {
+      logger.error("Error on getItem", e);
+      throw new IOException(e);
     }
 
     return item;
@@ -139,7 +152,7 @@ public class BackendService {
     if (metadataPrefix == null || metadataPrefix.isEmpty()) {
       throw new IllegalArgumentException("metadataPrefix must not be null");
     }
-    
+
     StringBuilder url = new StringBuilder();
     url.append(backendBaseUrl).append("/item?content=").append(withContent);
     url.append("&format=").append(URLEncoder.encode(metadataPrefix, StandardCharsets.UTF_8));
@@ -163,7 +176,7 @@ public class BackendService {
     SearchResult<Item> result = null;
 
     try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url.toString()))) {
-      if (response.getStatusLine().getStatusCode() == 200) {
+      if (response.getCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         logger.debug("json {}", json);
         JavaType type = OBJECT_MAPPER.getTypeFactory().constructParametricType(SearchResult.class, Item.class);
@@ -172,6 +185,9 @@ public class BackendService {
     } catch (IOException e) {
       logger.error("Error on getIdentifiers", e);
       throw e;
+    } catch (ParseException e) {
+      logger.error("Error on getIdentifiers", e);
+      throw new IOException(e);
     }
 
     return result;
@@ -185,15 +201,18 @@ public class BackendService {
 
     try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
 
-      logger.info("getFormats response code: {}", response.getStatusLine().getStatusCode());
+      logger.info("getFormats response code: {}", response.getCode());
 
-      if (response.getStatusLine().getStatusCode() == 200) {
+      if (response.getCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         formatList = new ArrayList<Format>(Arrays.asList(OBJECT_MAPPER.readValue(json, Format[].class)));
       }
     } catch (IOException e) {
       logger.error("Error on getFormats", e);
       throw e;
+    } catch (ParseException e) {
+      logger.error("Error on getFormats", e);
+      throw new IOException(e);
     }
 
     return formatList;
@@ -207,15 +226,18 @@ public class BackendService {
 
     try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
 
-      logger.info("getFormat response code: {}", response.getStatusLine().getStatusCode());
+      logger.info("getFormat response code: {}", response.getCode());
 
-      if (response.getStatusLine().getStatusCode() == 200) {
+      if (response.getCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         format = OBJECT_MAPPER.readValue(json, Format.class);
       }
     } catch (IOException e) {
       logger.error("Error on getFormats", e);
       throw e;
+    } catch (ParseException e) {
+      logger.error("Error on getFormats", e);
+      throw new IOException(e);
     }
 
     return format;
@@ -230,15 +252,18 @@ public class BackendService {
 
     try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
 
-      logger.info("getTransformations response code: {}", response.getStatusLine().getStatusCode());
+      logger.info("getTransformations response code: {}", response.getCode());
 
-      if (response.getStatusLine().getStatusCode() == 200) {
+      if (response.getCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         transformationList = new ArrayList<Transformation>(Arrays.asList(OBJECT_MAPPER.readValue(json, Transformation[].class)));
       }
     } catch (IOException e) {
       logger.error("Error on getTransformations", e);
       throw e;
+    } catch (ParseException e) {
+      logger.error("Error on getTransformations", e);
+      throw new IOException(e);
     }
 
     return transformationList;
@@ -253,16 +278,19 @@ public class BackendService {
 
     try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
 
-      logger.info("getSets response code: {}", response.getStatusLine().getStatusCode());
+      logger.info("getSets response code: {}", response.getCode());
 
 
-      if (response.getStatusLine().getStatusCode() == 200) {
+      if (response.getCode() == 200) {
         String json = EntityUtils.toString(response.getEntity());
         setObjects = new ArrayList<Set>(Arrays.asList(OBJECT_MAPPER.readValue(json, Set[].class)));
       }
     } catch (IOException e) {
       logger.error("Error on getIdentifiers", e);
       throw e;
+    } catch (ParseException e) {
+      logger.error("Error on getIdentifiers", e);
+      throw new IOException(e);
     }
 
     return setObjects;
@@ -281,7 +309,7 @@ public class BackendService {
 
         try (CloseableHttpResponse response = HTTP_CLIENT.execute(getHttpGet(url))) {
 
-            int statusCode = response.getStatusLine().getStatusCode();
+            int statusCode = response.getCode();
             logger.info("getSets response code: {}", statusCode);
 
             if (statusCode == 200) {
@@ -293,6 +321,9 @@ public class BackendService {
         } catch (IOException e) {
             logger.error("Error on searchSets", e);
             throw e;
+        } catch (ParseException e) {
+            logger.error("Error on searchSets", e);
+            throw new IOException(e);
         }
 
         return result;
@@ -302,17 +333,17 @@ public class BackendService {
 
   private HttpGet getHttpGet(String url) {
     ConfigurationService configurationService = ConfigurationService.getInstance();
-      
+
     int socketTimeout = configurationService.getHttpSocketTimeout();
     int connectionTimeout = configurationService.getHttpConnectionTimeout();
     logger.debug("Init Http cient");
     logger.debug("Set socket timout " + socketTimeout);
     logger.debug("Set connection timout " + connectionTimeout);
-    
+
     HttpGet httpGet = new HttpGet(url);
     httpGet.setConfig(RequestConfig.custom()
-            .setSocketTimeout(socketTimeout)
-            .setConnectTimeout(connectionTimeout)
+            .setResponseTimeout(socketTimeout, TimeUnit.MILLISECONDS)
+            .setConnectTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
             .build());
     return httpGet;
   }
