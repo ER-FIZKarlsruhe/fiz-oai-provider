@@ -273,6 +273,56 @@ public class OAIHandlerTest {
   }
 
   @Test
+  public void getWriterSkipsGzipWhenItIsExplicitlyExcludedWithAZeroQvalue() throws Throwable {
+    // RFC 7231: a coding listed with qvalue 0 is explicitly not acceptable, even though the
+    // old substring-only check would have matched "gzip" here and used it anyway.
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getHeader("Accept-Encoding")).thenReturn("gzip;q=0, deflate");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(response.getOutputStream()).thenReturn(new NoopServletOutputStream());
+
+    OAIHandler.getWriter(request, response).close();
+
+    verify(response).setHeader("Content-Encoding", "deflate");
+  }
+
+  @Test
+  public void getWriterFallsBackToPlainWhenAllCodingsAreExcludedWithZeroQvalues() throws Throwable {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getHeader("Accept-Encoding")).thenReturn("gzip;q=0, deflate;q=0");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter printWriter = new PrintWriter(new StringWriter());
+    when(response.getWriter()).thenReturn(printWriter);
+
+    OAIHandler.getWriter(request, response);
+
+    verify(response).getWriter();
+  }
+
+  @Test
+  public void getWriterHonorsAWildcardQvalueWhenGzipIsNotListedExplicitly() throws Throwable {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getHeader("Accept-Encoding")).thenReturn("*;q=0.5");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(response.getOutputStream()).thenReturn(new NoopServletOutputStream());
+
+    OAIHandler.getWriter(request, response).close();
+
+    verify(response).setHeader("Content-Encoding", "gzip");
+  }
+
+  @Test
+  public void isEncodingAcceptableTreatsAMissingQvalueAsFullyAcceptable() {
+    assertTrue(OAIHandler.isEncodingAcceptable("gzip, deflate", "gzip"));
+    assertTrue(OAIHandler.isEncodingAcceptable("gzip, deflate", "deflate"));
+  }
+
+  @Test
+  public void isEncodingAcceptableIsFalseWhenTheHeaderIsAbsent() {
+    assertFalse(OAIHandler.isEncodingAcceptable(null, "gzip"));
+  }
+
+  @Test
   public void doGetPassesANonNullTransformerToTheVerbAndSetsHtmlContentTypeWhenRenderHtmlIsTrue() throws Throwable {
     File xslFile = temporaryFolder.newFile("stylesheet.xsl");
     writeIdentityHtmlStylesheet(xslFile);

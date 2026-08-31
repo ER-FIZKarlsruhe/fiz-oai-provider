@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -542,10 +544,10 @@ public class OAIHandler extends HttpServlet {
         String encodings = request.getHeader("Accept-Encoding");
         LOGGER.debug("encodings={}", encodings);
 
-        if (encodings != null && encodings.indexOf("gzip") != -1) {
+        if (isEncodingAcceptable(encodings, "gzip")) {
             response.setHeader("Content-Encoding", "gzip");
             out = new OutputStreamWriter(new GZIPOutputStream(response.getOutputStream()), "UTF-8");
-        } else if (encodings != null && encodings.indexOf("deflate") != -1) {
+        } else if (isEncodingAcceptable(encodings, "deflate")) {
             response.setHeader("Content-Encoding", "deflate");
             out = new OutputStreamWriter(new DeflaterOutputStream(response.getOutputStream()), "UTF-8");
         } else {
@@ -553,7 +555,49 @@ public class OAIHandler extends HttpServlet {
         }
         return out;
     }
-    
+
+    private static final Pattern QVALUE_PATTERN = Pattern.compile("q\\s*=\\s*([0-9.]+)", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Whether the given content-coding is acceptable per the RFC 7231 Accept-Encoding
+     * qvalue rules: present with a non-zero qvalue, or covered by a "*" entry with a
+     * non-zero qvalue and not itself explicitly excluded (qvalue 0).
+     *
+     * @param acceptEncoding the raw Accept-Encoding header value, or null if absent
+     * @param coding the content-coding to test, e.g. "gzip"
+     */
+    protected static boolean isEncodingAcceptable(String acceptEncoding, String coding) {
+        if (acceptEncoding == null) {
+            return false;
+        }
+        Double explicitQ = null;
+        Double wildcardQ = null;
+        for (String token : acceptEncoding.split(",")) {
+            String[] parts = token.trim().split(";", 2);
+            String name = parts[0].trim();
+            double q = 1.0;
+            if (parts.length > 1) {
+                Matcher matcher = QVALUE_PATTERN.matcher(parts[1]);
+                if (matcher.find()) {
+                    try {
+                        q = Double.parseDouble(matcher.group(1));
+                    } catch (NumberFormatException e) {
+                        q = 1.0;
+                    }
+                }
+            }
+            if (name.equalsIgnoreCase(coding)) {
+                explicitQ = q;
+            } else if ("*".equals(name)) {
+                wildcardQ = q;
+            }
+        }
+        if (explicitQ != null) {
+            return explicitQ > 0.0;
+        }
+        return wildcardQ != null && wildcardQ > 0.0;
+    }
+
     /**
      * Peform a POST action. Actually this gets shunted to GET
      *
