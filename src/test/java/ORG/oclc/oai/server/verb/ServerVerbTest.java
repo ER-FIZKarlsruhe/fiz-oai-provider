@@ -20,8 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -32,7 +35,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
+
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 
@@ -166,6 +174,48 @@ public class ServerVerbTest {
         Collections.singletonList("metadataPrefix"), catalog);
 
     assertFalse(bad);
+  }
+
+  @Test
+  public void renderReturnsXmlUnchangedAndSetsTheGivenContentTypeWhenTransformerIsNull() throws Exception {
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    String xml = "<OAI-PMH><foo>bar</foo></OAI-PMH>";
+
+    String result = ServerVerb.render(response, "text/xml; charset=UTF-8", xml, null);
+
+    assertEquals(xml, result);
+    verify(response).setContentType("text/xml; charset=UTF-8");
+  }
+
+  @Test
+  public void renderTransformsXmlToHtmlAndSetsHtmlContentTypeWhenTransformerIsProvided() throws Exception {
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    Transformer transformer = identityHtmlTransformer();
+
+    String result = ServerVerb.render(response, "text/xml; charset=UTF-8", "<root>hello</root>", transformer);
+
+    assertTrue(result.contains("<body>hello</body>"));
+    verify(response).setContentType("text/html; charset=UTF-8");
+    // the caller-supplied content type is only used on the client-rendering (transformer==null) path
+    verify(response, never()).setContentType("text/xml; charset=UTF-8");
+  }
+
+  @Test(expected = javax.xml.transform.TransformerException.class)
+  public void renderPropagatesTransformerExceptionsOnMalformedXml() throws Exception {
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    Transformer transformer = identityHtmlTransformer();
+
+    ServerVerb.render(response, "text/xml; charset=UTF-8", "<root>not closed", transformer);
+  }
+
+  private static Transformer identityHtmlTransformer() throws Exception {
+    String xslt = "<?xml version=\"1.0\"?>\n"
+        + "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+        + "  <xsl:output method=\"html\"/>\n"
+        + "  <xsl:template match=\"/\"><html><body><xsl:value-of select=\"/root/text()\"/></body></html></xsl:template>\n"
+        + "</xsl:stylesheet>\n";
+    TransformerFactory tFactory = TransformerFactory.newInstance();
+    return tFactory.newTransformer(new StreamSource(new StringReader(xslt)));
   }
 
   private static Enumeration enumerationOf(String... values) {

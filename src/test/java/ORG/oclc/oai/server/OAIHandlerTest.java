@@ -18,12 +18,32 @@ package ORG.oclc.oai.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.xml.transform.Transformer;
+
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +51,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import de.fiz_karlsruhe.OaiRuntimeException;
 import de.fiz_karlsruhe.service.ConfigurationService;
 
 public class OAIHandlerTest {
@@ -141,5 +162,223 @@ public class OAIHandlerTest {
     handler.readConfigFromFile(temporaryFolder.getRoot().getPath(), "oaicat.properties");
 
     handler.printConfiguration();
+  }
+
+  @Test
+  public void getTransformerReturnsNullWhenNoStyleSheetIsConfigured() throws Throwable {
+    OAIHandler handler = new OAIHandler();
+
+    Transformer transformer = handler.getTransformer(new Properties(), new HashMap());
+
+    assertNull(transformer);
+  }
+
+  @Test
+  public void getTransformerLoadsStylesheetFromServletContextAndCachesTheCompiledTemplates() throws Throwable {
+    File xslFile = temporaryFolder.newFile("stylesheet.xsl");
+    writeIdentityHtmlStylesheet(xslFile);
+    ServletContext servletContext = mock(ServletContext.class);
+    when(servletContext.getResource("/stylesheet.xsl")).thenReturn(xslFile.toURI().toURL());
+    OAIHandler handler = new OAIHandler();
+    wireServletContext(handler, servletContext);
+    Properties properties = new Properties();
+    properties.setProperty("OAIHandler.styleSheet", "/stylesheet.xsl");
+    Map attributes = new HashMap();
+
+    Transformer first = handler.getTransformer(properties, attributes);
+    Transformer second = handler.getTransformer(properties, attributes);
+
+    assertNotNull(first);
+    assertNotNull(second);
+    // Templates (the compiled stylesheet) is cached in the attributes map, so the second
+    // call must reuse it instead of re-reading and recompiling the stylesheet resource.
+    assertNotSame(first, second);
+    assertNotNull(attributes.get("OAIHandler.templates"));
+    verify(servletContext, times(1)).getResource("/stylesheet.xsl");
+  }
+
+  @Test(expected = FileNotFoundException.class)
+  public void getTransformerThrowsFileNotFoundWhenTheStylesheetResourceIsMissing() throws Throwable {
+    ServletContext servletContext = mock(ServletContext.class);
+    when(servletContext.getResource("/missing.xsl")).thenReturn(null);
+    OAIHandler handler = new OAIHandler();
+    wireServletContext(handler, servletContext);
+    Properties properties = new Properties();
+    properties.setProperty("OAIHandler.styleSheet", "/missing.xsl");
+
+    handler.getTransformer(properties, new HashMap());
+  }
+
+  @Test(expected = OaiRuntimeException.class)
+  public void getTransformerRejectsStylesheetsThatReferenceAnExternalDtd() throws Throwable {
+    File externalDtd = temporaryFolder.newFile("external.dtd");
+    try (FileWriter writer = new FileWriter(externalDtd)) {
+      writer.write("<!ENTITY xxe \"leaked-secret\">");
+    }
+    File xslFile = temporaryFolder.newFile("xxe-stylesheet.xsl");
+    try (FileWriter writer = new FileWriter(xslFile)) {
+      writer.write("<?xml version=\"1.0\"?>\n"
+          + "<!DOCTYPE xsl:stylesheet SYSTEM \"" + externalDtd.toURI() + "\">\n"
+          + "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+          + "  <xsl:template match=\"/\"><html>&xxe;</html></xsl:template>\n"
+          + "</xsl:stylesheet>\n");
+    }
+    ServletContext servletContext = mock(ServletContext.class);
+    when(servletContext.getResource("/xxe-stylesheet.xsl")).thenReturn(xslFile.toURI().toURL());
+    OAIHandler handler = new OAIHandler();
+    wireServletContext(handler, servletContext);
+    Properties properties = new Properties();
+    properties.setProperty("OAIHandler.styleSheet", "/xxe-stylesheet.xsl");
+
+    // getTransformer sets ACCESS_EXTERNAL_DTD="" on the TransformerFactory specifically to
+    // block this; a regression here would silently re-open the XXE hole closed in b649cae.
+    handler.getTransformer(properties, new HashMap());
+  }
+
+  @Test
+  public void getWriterUsesGzipWhenAcceptEncodingIncludesGzip() throws Throwable {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getHeader("Accept-Encoding")).thenReturn("gzip, deflate");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(response.getOutputStream()).thenReturn(new NoopServletOutputStream());
+
+    OAIHandler.getWriter(request, response).close();
+
+    verify(response).setHeader("Content-Encoding", "gzip");
+  }
+
+  @Test
+  public void getWriterUsesDeflateWhenAcceptEncodingIncludesOnlyDeflate() throws Throwable {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getHeader("Accept-Encoding")).thenReturn("deflate");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(response.getOutputStream()).thenReturn(new NoopServletOutputStream());
+
+    OAIHandler.getWriter(request, response).close();
+
+    verify(response).setHeader("Content-Encoding", "deflate");
+  }
+
+  @Test
+  public void getWriterFallsBackToThePlainResponseWriterWhenNoAcceptEncodingIsSent() throws Throwable {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getHeader("Accept-Encoding")).thenReturn(null);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter printWriter = new PrintWriter(new StringWriter());
+    when(response.getWriter()).thenReturn(printWriter);
+
+    OAIHandler.getWriter(request, response);
+
+    verify(response).getWriter();
+  }
+
+  @Test
+  public void doGetPassesANonNullTransformerToTheVerbAndSetsHtmlContentTypeWhenRenderHtmlIsTrue() throws Throwable {
+    File xslFile = temporaryFolder.newFile("stylesheet.xsl");
+    writeIdentityHtmlStylesheet(xslFile);
+    ServletContext servletContext = mock(ServletContext.class);
+    when(servletContext.getResource("/stylesheet.xsl")).thenReturn(xslFile.toURI().toURL());
+    OAIHandler handler = new OAIHandler();
+    wireServletContext(handler, servletContext);
+
+    Properties requestProperties = new Properties();
+    requestProperties.setProperty("OAIHandler.styleSheet", "/stylesheet.xsl");
+    requestProperties.setProperty("ExtensionVerbs.RecordingVerb", RecordingVerb.class.getName());
+    HashMap globalAttributes = new HashMap();
+    globalAttributes.put("OAIHandler.properties", requestProperties);
+    handler.attributesMap.put("global", globalAttributes);
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getPathInfo()).thenReturn("/extension");
+    when(request.getParameter("verb")).thenReturn("RecordingVerb");
+    when(request.getParameter("renderHtml")).thenReturn("true");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
+
+    RecordingVerb.lastTransformer = null;
+    handler.doGet(request, response);
+
+    verify(response).setContentType("text/html; charset=UTF-8");
+    assertNotNull(RecordingVerb.lastTransformer);
+  }
+
+  @Test
+  public void doGetPassesANullTransformerAndSetsXmlContentTypeWhenRenderHtmlIsAbsent() throws Throwable {
+    OAIHandler handler = new OAIHandler();
+
+    Properties requestProperties = new Properties();
+    requestProperties.setProperty("ExtensionVerbs.RecordingVerb", RecordingVerb.class.getName());
+    HashMap globalAttributes = new HashMap();
+    globalAttributes.put("OAIHandler.properties", requestProperties);
+    handler.attributesMap.put("global", globalAttributes);
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getPathInfo()).thenReturn("/extension");
+    when(request.getParameter("verb")).thenReturn("RecordingVerb");
+    when(request.getParameter("renderHtml")).thenReturn(null);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
+
+    RecordingVerb.lastTransformer = "unset";
+    handler.doGet(request, response);
+
+    verify(response).setContentType("text/xml; charset=UTF-8");
+    assertNull(RecordingVerb.lastTransformer);
+  }
+
+  private static void writeIdentityHtmlStylesheet(File file) throws Exception {
+    try (FileWriter writer = new FileWriter(file)) {
+      writer.write("<?xml version=\"1.0\"?>\n"
+          + "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+          + "  <xsl:output method=\"html\"/>\n"
+          + "  <xsl:template match=\"/\"><html><body><xsl:value-of select=\"/root/text()\"/>"
+          + "</body></html></xsl:template>\n"
+          + "</xsl:stylesheet>\n");
+    }
+  }
+
+  private static void wireServletContext(OAIHandler handler, ServletContext servletContext) throws Exception {
+    ServletConfig servletConfig = mock(ServletConfig.class);
+    when(servletConfig.getServletContext()).thenReturn(servletContext);
+    when(servletConfig.getServletName()).thenReturn("oai");
+    Field configField = GenericServlet.class.getDeclaredField("config");
+    configField.setAccessible(true);
+    configField.set(handler, servletConfig);
+  }
+
+  /**
+   * A minimal extension verb, wired up via the {@code ExtensionVerbs.*} property mechanism
+   * ({@link ORG.oclc.oai.server.verb.ServerVerb#getExtensionVerbs}), used to observe what
+   * {@link OAIHandler#doGet} actually hands down to a verb's {@code construct} method.
+   */
+  public static class RecordingVerb {
+    static volatile Object lastTransformer = "unset";
+
+    public static void init(Properties properties) {
+      // no-op: required by the ExtensionVerbs contract
+    }
+
+    public static String construct(HashMap context, HttpServletRequest request, HttpServletResponse response,
+        Transformer transformer) {
+      lastTransformer = transformer;
+      return "<root>hello</root>";
+    }
+  }
+
+  private static class NoopServletOutputStream extends jakarta.servlet.ServletOutputStream {
+    @Override
+    public void write(int b) {
+      // discarded: only used to satisfy the getWriter() gzip/deflate wrapping under test
+    }
+
+    @Override
+    public boolean isReady() {
+      return true;
+    }
+
+    @Override
+    public void setWriteListener(jakarta.servlet.WriteListener writeListener) {
+      // not needed for this test
+    }
   }
 }
