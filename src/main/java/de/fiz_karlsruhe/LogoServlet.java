@@ -16,12 +16,10 @@
 
 package de.fiz_karlsruhe;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,21 +28,49 @@ import de.fiz_karlsruhe.service.ConfigurationService;
 
 public class LogoServlet extends HttpServlet {
 
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * The logo is a server-configured, rarely-changing branding asset, so browsers
+   * can safely cache it for a day and only revalidate (via Last-Modified/ETag)
+   * afterwards instead of re-downloading it on every page view.
+   */
+  private static final long MAX_AGE_SECONDS = 86400L;
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("image/jpeg");
-    
     ConfigurationService configurationService = ConfigurationService.getInstance();
-    
-    try(ServletOutputStream out = response.getOutputStream(); 
-        FileInputStream fin = new FileInputStream(configurationService.getBrandingLogo(request.getServletContext()));
-        BufferedInputStream bin = new BufferedInputStream(fin); 
-        BufferedOutputStream bout = new BufferedOutputStream(out);) {
-    int ch = 0;
-    
-    while ((ch = bin.read()) != -1) {
-      bout.write(ch);
+    File logoFile = new File(configurationService.getBrandingLogo(request.getServletContext()));
+
+    if (!logoFile.isFile()) {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND);
+      return;
     }
+
+    long lastModified = logoFile.lastModified();
+    String eTag = "\"" + logoFile.length() + "-" + lastModified + "\"";
+
+    response.setHeader("Cache-Control", "public, max-age=" + MAX_AGE_SECONDS);
+    response.setDateHeader("Last-Modified", lastModified);
+    response.setHeader("ETag", eTag);
+
+    if (isNotModified(request, lastModified, eTag)) {
+      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      return;
+    }
+
+    response.setContentType("image/jpeg");
+    response.setContentLengthLong(logoFile.length());
+    Files.copy(logoFile.toPath(), response.getOutputStream());
   }
+
+  private boolean isNotModified(HttpServletRequest request, long lastModified, String eTag) {
+    if (eTag.equals(request.getHeader("If-None-Match"))) {
+      return true;
+    }
+
+    long ifModifiedSince = request.getDateHeader("If-Modified-Since");
+    // HTTP dates only carry second precision, so truncate before comparing.
+    return ifModifiedSince >= 0 && ifModifiedSince >= (lastModified / 1000) * 1000;
   }
 }
