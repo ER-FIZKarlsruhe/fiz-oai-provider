@@ -1,4 +1,0 @@
-# Accept the risk
-# Reviewed: 2026-08-14. Re-check whether an upstream fix is available and this
-# exception is still warranted at the next dependency/scanner update.
-CVE-2024-52316
