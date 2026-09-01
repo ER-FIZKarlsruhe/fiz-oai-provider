@@ -5,7 +5,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <project_version>develop-SNAPSHOT</project_version>
+    <project_version>1.7.0</project_version>
 
     <log4j.version>2.26.1</log4j.version>
     <mockserver.version>7.5.0</mockserver.version>
