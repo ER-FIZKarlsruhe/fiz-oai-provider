@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2] – 2026-10-22
+
+### Changed
+
+* Bumped Jackson to 2.22.4.
+
+
 ## [1.7.0] – 2026-09-01
 
 This release focuses on OAI-PMH spec compliance, hardening against resource leaks and abuse, dependency/security upgrades, and Kubernetes operability. No breaking changes for existing consumers.
