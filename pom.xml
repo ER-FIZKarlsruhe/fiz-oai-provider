@@ -5,13 +5,14 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <project_version>1.7.0</project_version>
+    <project_version>1.7.2</project_version>
 
     <log4j.version>2.26.1</log4j.version>
     <mockserver.version>7.5.0</mockserver.version>
 
     <sonar.host.url>https://dev.fiz-karlsruhe.de/sonar</sonar.host.url>
-    <sonar.projectKey>de.fiz_karlsruhe.oai-provider</sonar.projectKey>
+    <sonar.projectKey>fiz-oai-provider</sonar.projectKey>
+    <sonar.projectName>fiz-oai-provider</sonar.projectName>
 
   </properties>
   
@@ -90,7 +91,7 @@
     <dependency>
       <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>3.2.2</version>
+      <version>3.2.4</version>
     </dependency>
 
     <dependency>
